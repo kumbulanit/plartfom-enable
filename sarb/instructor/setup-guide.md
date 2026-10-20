@@ -13,7 +13,7 @@ takes weeks, so start with Part 1 early:
 | Infrastructure | The server |
 | Network | An address, a DNS record and firewall openings |
 | Desktop support | Trust for the lab certificate on the thin clients |
-| Cloud provider | If the server is a cloud virtual machine: the machine, its address, firewall and disk. See [Is the server in the cloud?](#is-the-server-in-the-cloud-read-this-first) |
+| Nobody, on a cloud machine | If the server is a cloud machine you work on from inside, you need none of the three: see [Is the server in the cloud?](#is-the-server-in-the-cloud-read-this-first) |
 
 **How long it takes.**
 - Allow a full day for the first build and its checks.
@@ -39,70 +39,72 @@ Kubernetes. You only need to log in to a Linux server with SSH and copy commands
 
 ## Is the server in the cloud? Read this first
 
-If the lab server is a virtual machine at a cloud provider instead of a server
-in the bank, three things change: you do most of Part 1 yourself at the
-provider, the server is reachable from the internet, and delegates connect from
-their own Windows or Mac laptops. The build itself is the same.
+If the lab server is a cloud virtual machine that you work on from inside (a
+terminal or a remote desktop on the machine itself, as on a laptop), the build
+is the same as on a server in the bank, but the preparation is much shorter:
+no network team, no DNS record, no certificate request, no firewall request.
+The lab provides its own names and certificate, on the machine.
 
-**At the provider, create** (this replaces Part 1, items 1 to 7, and Part 2,
-steps 1 to 7):
+**Working on the machine itself.**
 
-| # | Create | Details |
-| --- | --- | --- |
-| 1 | The virtual machine | Ubuntu Server 24.04 LTS image; 32 vCPU, 96 to 128 GB RAM, 200 GB system disk. For example AWS `m7i.8xlarge`, Azure `Standard_D32s_v5`, Google `n2-standard-32`. Nested virtualisation is not needed. |
-| 2 | A second disk | An empty 1 TB block volume (SSD) attached to the machine. Part 2, step 9 tells you its name. On Azure it is usually `/dev/sdc`: `/dev/sdb` is the temporary disk, never use it. |
-| 3 | A fixed public address | A static (elastic) IP, so the address survives a restart. |
-| 4 | A wildcard DNS record | At a domain you control (the bank's, or one bought for the course for a few dollars): `*.pelab.example.com  A  <public address>`. Create it a day before the build. Without your own domain there is no trusted certificate, and every browser warns on every page. |
-| 5 | A certificate | A free Let's Encrypt wildcard certificate: Part 5, item 5 has the commands. Browsers trust it, so nothing is installed on the delegates' laptops. |
-| 6 | The firewall (security group) | Inbound: TCP 443 and 22 from the venue's public address and from yours; TCP 6443 from yours only; nothing else. Outbound: open. |
-| 7 | The admin account | Cloud images log you in as `ubuntu` (AWS, Google) or the name you chose (Azure), with your SSH key and no password. Either put that name in `ansible.cfg` as `remote_user`, or create `labadmin` as the lab expects: `sudo adduser --disabled-password --gecos '' labadmin && sudo usermod -aG sudo labadmin && sudo mkdir -p /home/labadmin/.ssh && sudo cp ~/.ssh/authorized_keys /home/labadmin/.ssh/ && sudo chown -R labadmin: /home/labadmin/.ssh`. Then continue with Part 2, step 8. |
+1. **Create the machine** at the provider: Ubuntu Server 24.04 LTS; 32 vCPU, 96
+   to 128 GB RAM, 200 GB system disk; optionally an empty 1 TB data disk for
+   the workspaces (without it the lab uses a 600 GB file on the system disk,
+   which must then be large enough). On Azure the data disk is usually
+   `/dev/sdc`; `/dev/sdb` is the temporary disk, never use it. Nested
+   virtualisation is not needed.
+2. **Get the project onto it:** clone the course repository there (Part 3,
+   step 2). The machine is also the control machine: install Ansible on it
+   (Part 3, step 1) and add `ansible_connection: local` under `pelab01` in
+   `inventory/hosts.yml`. For sudo, add `-K` to every `ansible-playbook`
+   command, or allow your user sudo without a password (Part 3, step 4).
+3. **Addresses and names.** In `inventory/hosts.yml`, `ansible_host` is the
+   machine's own private address (`hostname -I | awk '{print $1}'`). Keep the
+   default lab domain or pick any name. No DNS record is needed: on the
+   machine, every `<name>.<lab domain>` already resolves to the lab itself,
+   for the browser, the workspaces, the runners and the cluster alike. Leave
+   `pelab_training_subnets` and `pelab_admin_subnets` empty: the machine's own
+   browser is always allowed.
+4. **Certificate:** set `pelab_tls_generate_selfsigned: true` (Part 5, item 5)
+   and trust `files/tls/ca.crt` in the browser you use on the machine.
+   Firefox: Settings → Privacy & Security → Certificates → View Certificates →
+   Authorities → Import. Chrome or Chromium: `certutil -d sql:$HOME/.pki/nssdb
+   -A -t "C,," -n pelab-ca -i files/tls/ca.crt` (package `libnss3-tools`),
+   then restart the browser.
+5. **Keep the passwords and backups off the machine too.** `credentials/` and
+   `backups/` are written next to the project and are never pushed to the
+   repository (git ignores them on purpose). Copy both somewhere else every
+   evening: object storage, or your laptop.
+6. **Time servers:** leave `pelab_ntp_servers` at the default.
+7. **After the course,** stop the machine (a stopped machine costs only its
+   disks) and delete it once the final backup is safe (Part 11).
 
-**The server is on the internet. Do these as well.**
+Then continue with Part 2, step 8 (update and reboot) and Part 3.
 
-- **Open it to the venue only.** Delegates at the venue share one public
-  address (ask the venue, or open https://ifconfig.me from there). Put it, as
-  `/32`, in the provider's firewall and in `pelab_training_subnets` (Part 5),
-  and your own address in `pelab_admin_subnets`. Do not open 443 to the whole
-  internet: inside the lab, Argo CD, Grafana and the portal can be read without
-  a login, which is fine on a bank network and not on the open internet. If
-  delegates join from home or from several offices, add each address; if that
-  is impossible, ask for logins to be added to those three tools before the
-  course.
-- **Keys, not passwords, for SSH.** Cloud images already refuse password
-  logins over SSH. Check on the server: `sudo sshd -T | grep -i
-  passwordauthentication` prints `no`. The build makes the delegates' SSH keys
-  (Part 7); the browser workspace needs no SSH at all.
-- **Delegates have write access, and pipelines run their code.** That is by
-  design, and it is contained: a pipeline runs in a runner container with a
-  Harbor account for its own team's project and, for environment requests, a
-  read-only cluster credential. No pipeline can reach the cluster's admin
-  credentials or another team's namespace. Keep it so: never put an admin
-  password or kubeconfig in a Gitea secret, and never give a delegate the
-  `labadmin` key.
-- **Passwords.** The build generates a strong one per delegate and per admin
-  account, and registration is closed in Gitea and Harbor. Keep them as made.
-- **Backups off the server.** The nightly backup lands on the control
-  machine. If the control machine is itself a cloud VM, copy `backups/` to
-  object storage every evening.
-- **After the course,** stop the machine (a stopped machine costs only its
-  disks), and delete it with its disks once the final backup is safe (Part 11).
-
-**Delegates' laptops (Windows or Mac).** Nothing to install:
-- A current browser (Edge, Chrome, Firefox or Safari). The whole course runs
-  in the browser: the workspace with its editor and terminal, Gitea, Argo CD,
-  Harbor, Grafana and the portal.
-- SSH is optional. Windows 10 and 11 have OpenSSH built in (open PowerShell and
-  type `ssh`); Macs have it in Terminal. The access sheet gives the lines to
-  paste.
-- Only if you used the lab's own CA instead of Let's Encrypt: each laptop must
-  trust `files/tls/ca.crt` first. Windows: double-click it → Install
-  Certificate → Local Machine → place it in "Trusted Root Certification
-  Authorities". Mac: double-click it, find it in Keychain Access, open it →
-  Trust → "Always Trust". Firefox keeps its own list: Settings → Privacy &
-  Security → Certificates → View Certificates → Authorities → Import.
-
-**Time servers.** Leave `pelab_ntp_servers` at the default: cloud machines
-reach it.
+**Only if delegates connect from their own laptops** rather than working on
+the machine, the laptops must reach it and resolve its names, and the requests
+of Part 1 come back in a cloud form:
+- **A route and a firewall opening:** a private network or VPN between the
+  laptops and the machine, or the provider's firewall opened on TCP 443 (and
+  22 for SSH) to the venue's public address only. Put the laptops' address
+  range in `pelab_training_subnets`. Never open the lab to the whole internet:
+  Argo CD, Grafana and the portal can be read without a login.
+- **A wildcard DNS record** `*.<lab domain>` pointing at the address the laptops
+  use: the provider's private DNS, the bank's DNS, or a public domain you
+  control.
+- **A certificate the laptops trust:** install `files/tls/ca.crt` on each
+  laptop (Windows: double-click → Install Certificate → Local Machine →
+  "Trusted Root Certification Authorities"; Mac: double-click → Keychain Access
+  → open it → Trust → "Always Trust"; Firefox imports it under Authorities),
+  or, with a public domain, use a free Let's Encrypt certificate (Part 5,
+  item 5).
+- **SSH by key only.** Cloud images already refuse passwords (check with
+  `sudo sshd -T | grep -i passwordauthentication`); never give a delegate the
+  admin key. Delegates have write access to their repositories and their
+  pipelines run their code: that is by design, and it is contained to their
+  team's Harbor project and a read-only cluster credential.
+- **The laptops need only a browser** (Edge, Chrome, Firefox or Safari). SSH is
+  optional; Windows 10/11 and macOS have it built in.
 
 ---
 
@@ -111,8 +113,9 @@ reach it.
 Send these requests early. Each one is a single sentence to the right team, but
 some take weeks.
 
-For a cloud server, items 1 to 7 are yours to do at the provider: the section
-above maps each one. Item 8 still applies to the delegates' machines.
+On a cloud machine you work on from inside, none of these is needed (see the
+section above); items 2 to 8 come back only if delegates connect from their
+own laptops.
 
 | # | Ask for | From | Exactly what to ask |
 | --- | --- | --- | --- |
@@ -194,7 +197,9 @@ over SSH. It keeps the lab's passwords and backups, so keep them **off** the
 server. Any of these works:
 - an Ubuntu laptop or VM;
 - Windows with WSL (Ubuntu);
-- a Mac.
+- a Mac;
+- the lab server itself, when it is a cloud machine you work on from inside
+  (see the note at the end of this part).
 
 1. **Install Ansible.**
 
@@ -210,15 +215,18 @@ server. Any of these works:
 
    *You should see:* `ansible --version` prints `ansible [core 2.17]` or later.
 
-2. **Copy the project** to the control machine: the `pe-lab-ansible` folder (and
-   `sarb`, if you want the slides and this guide there too). Then:
+2. **Get the project** from the course repository. It is private: sign in once
+   with `gh auth login` (GitHub CLI), or paste a fine-grained personal access
+   token with read access when git asks for a password.
 
    ```bash
-   cd pe-lab-ansible
+   git clone <repository URL> pe-lab
+   cd pe-lab/pe-lab-ansible
    ansible-galaxy collection install -r requirements.yml
    ```
 
    *You should see:* the four collections installed, or "already installed".
+   Later, `git pull` in that folder brings the latest lab and material.
 
 3. **Create an SSH key** if you do not have one, and give it to the server:
 
@@ -245,12 +253,15 @@ server. Any of these works:
        'echo "labadmin ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/labadmin && sudo chmod 440 /etc/sudoers.d/labadmin'
      ```
 
-> **No second machine?** You can run Ansible on the lab server itself:
-> - Install Ansible there as in step 1.
-> - In `inventory/hosts.yml`, add `ansible_connection: local` under `pelab01`.
+> **No second machine?** This is the usual case on a cloud machine you work on
+> from inside. Run Ansible on the lab server itself:
+> - Install Ansible there as in step 1, and clone the repository there (step 2).
+> - In `inventory/hosts.yml`, add `ansible_connection: local` under `pelab01`,
+>   and keep `ansible_host` as the machine's own private address.
+> - Step 3 (the SSH key) is not needed; step 4 (sudo) still is.
 >
 > Two limits:
-> - This way has not been rehearsed.
+> - This way has not been rehearsed on a real server yet.
 > - The passwords (`credentials/`) and the evening backups then sit on the server
 >   they protect. Copy both to another machine every evening.
 

@@ -1,0 +1,17 @@
+{
+  "name": "pe-course-slides",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Builds the six course decks (src/build.js) and the handbook (src/handbook.js)",
+  "scripts": {
+    "decks": "cd src && node build.js",
+    "handbook": "cd src && node handbook.js"
+  },
+  "dependencies": {
+    "pptxgenjs": "4.0.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-icons": "5.7.0",
+    "sharp": "0.35.5"
+  }
+}

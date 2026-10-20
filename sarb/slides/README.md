@@ -21,9 +21,16 @@ course.
 
 ## Rebuild
 
-Needs Node 20 and the npm packages `pptxgenjs`, `react`, `react-dom`, `react-icons`
-and `sharp` on `NODE_PATH`, plus the `apply_theme.js` script from the Claude pptx
-skill (set `PPTX_SKILL_DIR` to that skill's folder).
+Needs Node 20. Install the packages once (they are listed in `package.json` and
+land in `node_modules/`, which git ignores):
+
+```bash
+npm install
+```
+
+The decks also use the `apply_theme.js` script from the Claude pptx skill: the build
+finds the copy the Claude desktop app keeps, or set `PPTX_SKILL_DIR` to that
+skill's folder.
 
 ```bash
 cd src && node build.js        # all days

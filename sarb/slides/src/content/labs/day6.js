@@ -29,7 +29,7 @@ module.exports = {
       {
         title: 'Watch staging update',
         where: 'Browser: Argo CD',
-        say: 'Open teamNN-hello-staging in Argo CD.',
+        say: 'Open teamNN-hello-staging in Argo CD (sign in as delegate if it asks).',
         see: 'Syncing, then Synced and Healthy with 1 pod.',
         tip: 'If the safety net is on: the merge commit\'s safety-net/staging says "Deployed to teamNN-staging: <tag>, 1 replica", and kubectl -n $TEAM-staging get pods shows the pod.',
       },
@@ -57,7 +57,7 @@ module.exports = {
       {
         title: 'Open the dashboard',
         where: 'Browser: Grafana',
-        say: 'Open https://grafana.<lab domain> (no sign-in needed) → Dashboards → PE Lab → Golden path. At the top, pick your team and the app hello.',
+        say: 'Open https://grafana.<lab domain> and sign in as delegate with the password on your access sheet (the same shared read-only login as Argo CD). Then Dashboards → PE Lab → Golden path. At the top, pick your team and the app hello.',
         see: 'A table of running versions per environment: dev, staging and prod, each with its tag.',
       },
       {

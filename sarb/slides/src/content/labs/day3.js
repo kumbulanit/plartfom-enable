@@ -62,7 +62,7 @@ module.exports = {
 
   'Lab 2: request staging and prod from the template': {
     goal: 'Get your team\'s staging and prod environments the platform way: fill in the environment template, open a pull request, read the plan, and let the platform team approve and apply it.',
-    start: 'One member of each team drives; the others watch the plan with them. The platform team (the instructor) approves.',
+    start: 'One member of each team drives; the others watch the plan with them. The platform team approves: the instructor, or one of you playing the platform team as platform-approver.',
     steps: [
       {
         title: 'Copy the environments repository and make a branch',
@@ -93,7 +93,10 @@ module.exports = {
       {
         title: 'The platform team approves, and you merge',
         where: 'Gitea',
-        say: 'Ask the instructor to review. A teammate\'s approval does not count here: only the platform team may approve environment changes. Once approved, merge.',
+        say: [
+          'Ask the platform team to review. A teammate\'s approval as studentNN does not count here: only the platform team may approve environment changes.',
+          'The platform team is the instructor, or one of you playing it: open a private window (Ctrl+Shift+N; on a Mac Cmd+Shift+N), sign in to Gitea as platform-approver (its login is on your access sheet), open the pull request, read Files Changed and the plan, then Review → Approve. Close the window and merge as yourself.',
+        ],
         see: 'Within two minutes the merge commit gets a green tick: platform/apply "Applied: 16 added, 0 changed, 0 destroyed". The platform applied main itself; nobody ran a command on the cluster.',
       },
       {
@@ -106,7 +109,7 @@ module.exports = {
       {
         title: 'See your service find its new homes',
         where: 'Browser: Argo CD',
-        say: 'Argo CD had been trying to deploy hello to staging and prod since Day 1, and kept retrying because they did not exist. Open teamNN-hello-staging and teamNN-hello-prod.',
+        say: 'Argo CD had been trying to deploy hello to staging and prod since Day 1, and kept retrying because they did not exist. Open teamNN-hello-staging and teamNN-hello-prod (sign in as delegate again if Argo CD asks).',
         see: 'They stop retrying and show Synced, with 0 replicas: nothing is released there until Day 6.',
         tip: 'If the safety net is on: kubectl -n $TEAM-staging get deployments shows hello with 0/0, and the latest hello commit in Gitea shows safety-net/staging "Deployed to teamNN-staging: not-released-yet, 0 replicas".',
       },
@@ -148,7 +151,7 @@ module.exports = {
       {
         title: 'Remove it, then bring it back',
         where: 'Gitea, then the workspace terminal',
-        say: 'The instructor approves; merge it. Check staging is gone. Then put it back the same way, with a second pull request.',
+        say: 'The platform team approves (the instructor, or platform-approver in a private window); merge it. Check staging is gone. Then put it back the same way, with a second pull request.',
         run: 'kubectl get namespace $TEAM-staging\ngit switch main && git pull\ngit switch -c $TEAM-add-staging\nsed -i \'s/\\["prod"\\]/["staging", "prod"]/\' $TEAM.tf\ngit commit -am "Add staging back for $TEAM"\ngit push -u origin $TEAM-add-staging',
         see: 'First "NotFound" (staging is gone). After the second pull request is approved and merged, staging is back within two minutes, identical to before: same budget, same rules, same access. Nothing was done by hand.',
       },

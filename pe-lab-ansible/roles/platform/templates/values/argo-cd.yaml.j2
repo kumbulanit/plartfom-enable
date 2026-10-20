@@ -1,6 +1,7 @@
-# Argo CD behind Traefik (TLS terminates at Traefik). Delegates browse it without
-# logging in (read-only); changes reach the cluster only through Git. The admin
-# password is in the argocd-initial-admin-secret secret.
+# Argo CD behind Traefik (TLS terminates at Traefik). Nobody gets in without a
+# login: delegates share the read-only local account "delegate" (its password is
+# on every access sheet), and changes reach the cluster only through Git. The
+# admin password is in the argocd-initial-admin-secret secret.
 global:
   domain: {{ pelab_hosts.argocd }}
 configs:
@@ -8,9 +9,18 @@ configs:
     server.insecure: true
   cm:
     timeout.reconciliation: 60s
-    users.anonymous.enabled: "true"
+    users.anonymous.enabled: "false"
+    # The delegates' account may only sign in (no API keys).
+    accounts.{{ pelab_viewer_user }}: login
   rbac:
-    policy.default: role:readonly
+    # Nothing by default; the delegates' account gets the built-in read-only role.
+    policy.default: ""
+    policy.csv: |
+      g, {{ pelab_viewer_user }}, role:readonly
+  secret:
+    # The account's password hash lands in argocd-secret next to the admin's.
+    extra:
+      accounts.{{ pelab_viewer_user }}.password: {{ pelab_viewer_password_bcrypt | to_json }}
   # Trust the lab CA when talking to Gitea and Harbor (OCI Helm charts).
   tls:
     certificates:

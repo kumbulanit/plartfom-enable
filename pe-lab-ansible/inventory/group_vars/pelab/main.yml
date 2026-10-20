@@ -24,6 +24,15 @@ pelab_runner_count: 5
 # Spare workspaces belong to no team until assigned, for example {student26: team03}.
 pelab_spare_team_assignments: {}
 
+# Team logins. true: every delegate's access sheet, and /etc/pelab/logins.md in
+# every workspace, list the logins of the whole team and of the shared
+# platform-approver account, so a delegate can sign in as a teammate (to review
+# when working alone) or as the platform team (to approve environment and
+# exception requests without waiting for the instructor). Role-play only: at work,
+# accounts are personal. false: each sheet lists only its own login, and only the
+# instructor (pelab-admin) approves platform requests.
+pelab_shared_logins: true
+
 # Derived names. Delegates are split into teams in order: student01-05 -> team01, ...
 pelab_workspace_names: >-
   {{ query('ansible.builtin.sequence',

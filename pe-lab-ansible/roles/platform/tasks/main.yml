@@ -18,6 +18,16 @@
   loop_control:
     label: "{{ item.name }} ({{ pelab_charts[item.chart].chart }} {{ pelab_charts[item.chart].version }})"
 
+- name: Create the delegates' shared read-only Grafana login
+  ansible.builtin.import_tasks: grafana.yml
+  module_defaults:
+    ansible.builtin.uri:
+      user: admin
+      password: "{{ pelab_grafana_admin_password }}"
+      force_basic_auth: true
+      ca_path: "{{ pelab_tls_dir }}/ca.crt"
+      body_format: json
+
 - name: Publish the API gateway through Traefik
   kubernetes.core.k8s:
     state: present

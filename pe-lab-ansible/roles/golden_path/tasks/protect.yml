@@ -1,0 +1,39 @@
+---
+# Protects main on each repository in golden_path_protect_repos ("owner/name")
+# with the rule golden_path_protect_rule. A missing rule is created; an existing
+# one is brought in line with the rule, so a changed setting (the approvals list,
+# the required pipeline check) also reaches a lab that is already built.
+- name: Read the branch protection on main
+  ansible.builtin.uri:
+    url: "{{ golden_path_gitea_api }}/repos/{{ item }}/branch_protections/main"
+    status_code: [200, 404]
+  loop: "{{ golden_path_protect_repos }}"
+  register: golden_path_protect_current
+
+- name: Protect main where it has no rule yet
+  ansible.builtin.uri:
+    url: "{{ golden_path_gitea_api }}/repos/{{ item.item }}/branch_protections"
+    method: POST
+    body: "{{ golden_path_protect_rule }}"
+    status_code: [201]
+  loop: "{{ golden_path_protect_current.results | selectattr('status', 'equalto', 404) | list }}"
+  loop_control:
+    label: "{{ item.item }}"
+  changed_when: true
+
+# Changed only when Gitea's rule before and after differ in the settings the lab
+# sets (Gitea drops an approver who cannot read the repository, which then shows
+# as a change on every run).
+- name: Bring existing rules in line
+  ansible.builtin.uri:
+    url: "{{ golden_path_gitea_api }}/repos/{{ item.item }}/branch_protections/main"
+    method: PATCH
+    body: "{{ golden_path_protect_rule | dict2items | rejectattr('key', 'equalto', 'rule_name') | items2dict }}"
+    status_code: [200]
+  loop: "{{ golden_path_protect_current.results | selectattr('status', 'equalto', 200) | list }}"
+  loop_control:
+    label: "{{ item.item }}"
+  register: golden_path_protect_patched
+  changed_when: >-
+    (item.json | dict2items | selectattr('key', 'in', golden_path_protect_rule.keys() | list) | items2dict)
+    != (golden_path_protect_patched.json | dict2items | selectattr('key', 'in', golden_path_protect_rule.keys() | list) | items2dict)

@@ -12,7 +12,9 @@
   ansible.builtin.uri:
     url: "{{ golden_path_gitea_api }}/users/{{ item }}"
     status_code: [200, 404]
-  loop: "{{ [golden_path_bot_user, golden_path_applier_user] + pelab_workspace_names }}"
+  loop: >-
+    {{ [golden_path_bot_user, golden_path_applier_user] + pelab_workspace_names
+       + ([pelab_platform_approver_user] if pelab_shared_logins | bool else []) }}
   register: golden_path_accounts
 
 - name: Create the missing accounts (delegates sign in with their workspace password)
@@ -23,7 +25,8 @@
       username: "{{ item }}"
       email: "{{ item }}@{{ pelab_domain }}"
       password: >-
-        {{ {golden_path_bot_user: pelab_gitea_bot_password, golden_path_applier_user: pelab_gitea_applier_password}.get(item)
+        {{ {golden_path_bot_user: pelab_gitea_bot_password, golden_path_applier_user: pelab_gitea_applier_password,
+            pelab_platform_approver_user: pelab_platform_approver_password}.get(item)
            or pelab_delegate_passwords[item] }}
       must_change_password: false
       visibility: limited
@@ -356,20 +359,11 @@
   changed_when: true
 
 # New services copy this rule when "Protected branches" is ticked on "Create from template".
-- name: Check the branch protection on the template
-  ansible.builtin.uri:
-    url: "{{ golden_path_gitea_api }}/repos/{{ golden_path_platform_org }}/{{ golden_path_template_repo }}/branch_protections/main"
-    status_code: [200, 404]
-  register: golden_path_template_protection
-
-- name: Protect main on the template (pull requests only, one approval)
-  ansible.builtin.uri:
-    url: "{{ golden_path_gitea_api }}/repos/{{ golden_path_platform_org }}/{{ golden_path_template_repo }}/branch_protections"
-    method: POST
-    body: "{{ golden_path_branch_protection }}"
-    status_code: [201]
-  when: golden_path_template_protection.status == 404
-  changed_when: true
+- name: Protect main on the template (pull requests only, one approval, a green pipeline)
+  ansible.builtin.include_tasks: protect.yml
+  vars:
+    golden_path_protect_repos: ["{{ golden_path_platform_org }}/{{ golden_path_template_repo }}"]
+    golden_path_protect_rule: "{{ golden_path_branch_protection }}"
 
 # ------------------------------------- request repositories (environments, policies)
 - name: List the platform organisation's teams
@@ -379,6 +373,8 @@
 
 # requesters: every delegate may branch and open pull requests (not approve them).
 # automation: the platform applier, which reads main and posts commit statuses.
+# approvers: the shared platform-approver account; it reads and reviews only, and
+# main's approvals list makes its approval count.
 - name: Create the platform teams for the request repositories
   ansible.builtin.uri:
     url: "{{ golden_path_gitea_api }}/orgs/{{ golden_path_platform_org }}/teams"
@@ -386,7 +382,7 @@
     body:
       name: "{{ item.name }}"
       description: "{{ item.description }}"
-      permission: write
+      permission: "{{ item.permission | default('write') }}"
       includes_all_repositories: false
       can_create_org_repo: false
       units: [repo.code, repo.pulls, repo.actions]
@@ -394,6 +390,7 @@
   loop:
     - {name: requesters, description: "Delegates: pull requests to the request repositories"}
     - {name: automation, description: The platform applier}
+    - {name: approvers, description: "The platform team's role for delegates: reviews only", permission: read}
   when: item.name not in golden_path_platform_teams.json | map(attribute='name')
   changed_when: true
 
@@ -402,45 +399,35 @@
     url: "{{ golden_path_gitea_api }}/orgs/{{ golden_path_platform_org }}/teams"
   register: golden_path_platform_teams
 
-- name: Give both teams the request repositories
+- name: Give the three teams the request repositories
   ansible.builtin.uri:
     url: >-
       {{ golden_path_gitea_api }}/teams/{{ golden_path_platform_teams.json | selectattr('name', 'equalto', item.0) | map(attribute='id') | first
       }}/repos/{{ golden_path_platform_org }}/{{ item.1 }}
     method: PUT
     status_code: [204]
-  loop: "{{ ['requesters', 'automation'] | product(golden_path_request_repos) | list }}"
+  loop: "{{ ['requesters', 'automation', 'approvers'] | product(golden_path_request_repos) | list }}"
   changed_when: false
 
-- name: Add the delegates to requesters and the applier to automation
+- name: Add the delegates to requesters, the applier to automation and the shared approver to approvers
   ansible.builtin.uri:
     url: >-
       {{ golden_path_gitea_api }}/teams/{{ golden_path_platform_teams.json | selectattr('name', 'equalto', item.0) | map(attribute='id') | first
       }}/members/{{ item.1 }}
     method: PUT
     status_code: [204]
-  loop: "{{ (['requesters'] | product(pelab_workspace_names) | list) + [['automation', golden_path_applier_user]] }}"
+  loop: >-
+    {{ (['requesters'] | product(pelab_workspace_names) | list) + [['automation', golden_path_applier_user]]
+       + ([['approvers', pelab_platform_approver_user]] if pelab_shared_logins | bool else []) }}
   loop_control:
     label: "{{ item.1 }} -> {{ item.0 }}"
   changed_when: false
 
-- name: Check the branch protection on the request repositories
-  ansible.builtin.uri:
-    url: "{{ golden_path_gitea_api }}/repos/{{ golden_path_platform_org }}/{{ item }}/branch_protections/main"
-    status_code: [200, 404]
-  loop: "{{ golden_path_request_repos }}"
-  register: golden_path_request_protection_check
-
 - name: Protect main on the request repositories (pull requests only, approved by the platform team)
-  ansible.builtin.uri:
-    url: "{{ golden_path_gitea_api }}/repos/{{ golden_path_platform_org }}/{{ item.item }}/branch_protections"
-    method: POST
-    body: "{{ golden_path_request_protection }}"
-    status_code: [201]
-  loop: "{{ golden_path_request_protection_check.results | selectattr('status', 'equalto', 404) | list }}"
-  loop_control:
-    label: "{{ item.item }}"
-  changed_when: true
+  ansible.builtin.include_tasks: protect.yml
+  vars:
+    golden_path_protect_repos: "{{ golden_path_request_repos | map('regex_replace', '^', golden_path_platform_org ~ '/') | list }}"
+    golden_path_protect_rule: "{{ golden_path_request_protection }}"
 
 - name: Read the plan pipeline's read-only token
   kubernetes.core.k8s_info:
@@ -494,23 +481,11 @@
   register: golden_path_starters_created
   changed_when: true
 
-- name: Check the branch protection on main
-  ansible.builtin.uri:
-    url: "{{ golden_path_gitea_api }}/repos/{{ item }}/{{ golden_path_starter_repo }}/branch_protections/main"
-    status_code: [200, 404]
-  loop: "{{ pelab_team_names }}"
-  register: golden_path_protection
-
-- name: Protect main (pull requests only, one approval)
-  ansible.builtin.uri:
-    url: "{{ golden_path_gitea_api }}/repos/{{ item.item }}/{{ golden_path_starter_repo }}/branch_protections"
-    method: POST
-    body: "{{ golden_path_branch_protection }}"
-    status_code: [201]
-  loop: "{{ golden_path_protection.results | selectattr('status', 'equalto', 404) | list }}"
-  loop_control:
-    label: "{{ item.item }}/{{ golden_path_starter_repo }}"
-  changed_when: true
+- name: Protect main on each starter service (pull requests only, one approval, a green pipeline)
+  ansible.builtin.include_tasks: protect.yml
+  vars:
+    golden_path_protect_repos: "{{ pelab_team_names | map('regex_replace', '$', '/' ~ golden_path_starter_repo) | list }}"
+    golden_path_protect_rule: "{{ golden_path_branch_protection }}"
 
 - name: Run the pipeline once on each new starter service
   ansible.builtin.uri:

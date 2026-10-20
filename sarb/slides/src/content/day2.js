@@ -122,7 +122,7 @@ module.exports = [
       { do: 'Ask a teammate to open it, read the Files changed tab and leave one comment.', expect: 'A comment on a line of the change.' },
       { do: 'The teammate clicks Review, then Approve.', expect: 'One green approval and a green pipeline; the Merge button becomes available.' },
       { do: 'Merge it (squash). Then in the workspace: git switch main && git pull', expect: 'Your change is now in main, as one commit.' },
-      { do: `Open Argo CD at https://argocd.${DOMAIN} and find teamNN-hello-dev. Watch it sync.`, expect: 'Within a few minutes the application shows Synced and Healthy with the new commit.' },
+      { do: `Open Argo CD at https://argocd.${DOMAIN} (sign in as delegate: the password is on your access sheet) and find teamNN-hello-dev. Watch it sync.`, expect: 'Within a few minutes the application shows Synced and Healthy with the new commit.' },
       { do: `Open https://hello-teamNN-dev.${DOMAIN}/`, expect: '"environment": "dev" and your new greeting.' },
     ],
     notes: 'The wait between merge and live is the pipeline building the image (Day 5) and Argo CD noticing (Day 6). Use the wait to explain the next slide. If two delegates in a team merge within minutes of each other, the second one simply replaces the first in dev; that is correct behaviour.',
@@ -155,7 +155,7 @@ module.exports = [
       { do: 'Ask a teammate to approve, then push one more commit to the same branch.', expect: 'The approval is dismissed as stale; a fresh review is needed.' },
       { do: 'Write down the three messages you saw. They are evidence that the controls work.', expect: 'Three lines in your team notes for the Day 6 evidence pack.' },
     ],
-    notes: 'This is the brief\'s "compromised inputs are blocked" at the simplest level. Delegates who see the refusals trust the control more than those who only hear about it.',
+    notes: 'This is the brief\'s "compromised inputs are blocked" at the simplest level. Delegates who see the refusals trust the control more than those who only hear about it. Then make the honest point: their access sheet lists the team\'s logins so they can play each other\'s roles, and signing in as a teammate would get an approval through. The tool checks accounts, not people; that is why at work accounts are personal, protected by two-factor sign-in, and never shared.',
   },
   {
     type: 'steps', section: 'Lab 4: a merge conflict', time: '25 min · in pairs',

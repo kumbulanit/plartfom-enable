@@ -124,7 +124,7 @@ module.exports = {
       {
         title: 'Watch it deploy',
         where: 'Browser: Argo CD',
-        say: 'Open https://argocd.<lab domain>. Argo CD looks for new repositories every minute.',
+        say: 'Open https://argocd.<lab domain> (sign in as delegate if it asks). Argo CD looks for new repositories every minute.',
         see: 'teamNN-rates-dev appears, then Synced and Healthy.',
         tip: 'If the safety net is on: the latest commit of teamNN/rates in Gitea shows safety-net/dev "Deployed to teamNN-dev" once the first pipeline has passed.',
       },

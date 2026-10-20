@@ -86,9 +86,17 @@ the machine, the laptops must reach it and resolve its names, and the requests
 of Part 1 come back in a cloud form:
 - **A route and a firewall opening:** a private network or VPN between the
   laptops and the machine, or the provider's firewall opened on TCP 443 (and
-  22 for SSH) to the venue's public address only. Put the laptops' address
-  range in `pelab_training_subnets`. Never open the lab to the whole internet:
-  Argo CD, Grafana and the portal can be read without a login.
+  22 for SSH). Every tool the delegates work in asks for a login (their own
+  password for the workspace, Gitea and Harbor; the shared read-only account
+  `delegate`, printed on every access sheet, for Argo CD and Grafana), so 443
+  may be open to the whole internet when delegates join from home or from
+  several offices. Two things stay readable without a login then: the portal
+  (its guest sign-in has no password; it shows the catalog of teams and
+  services, and anyone can use "Register existing component" to add a catalog
+  file by URL), and Prometheus and Alertmanager. If that is not acceptable,
+  open 443 to the venue's public address only. Either way, put the laptops'
+  address range in `pelab_training_subnets` (`0.0.0.0/0` for the whole
+  internet) and keep 22 to your own address.
 - **A wildcard DNS record** `*.<lab domain>` pointing at the address the laptops
   use: the provider's private DNS, the bank's DNS, or a public domain you
   control.
@@ -208,10 +216,13 @@ server. Any of these works:
    ```bash
    sudo apt update && sudo apt install -y pipx git rsync openssh-client
    pipx install --include-deps ansible
+   pipx inject ansible passlib bcrypt
    pipx ensurepath
    ```
 
-   Close and reopen the terminal. On a Mac with Homebrew: `brew install ansible`.
+   Close and reopen the terminal. On a Mac with Homebrew: `brew install ansible`
+   (it already includes passlib and bcrypt, which hash the delegates' Argo CD
+   password).
 
    *You should see:* `ansible --version` prints `ansible [core 2.17]` or later.
 
@@ -320,6 +331,15 @@ All paths are inside `pe-lab-ansible/`. Every value you must change is marked
    pelab_spare_team_assignments:
      student27: team01
    ```
+
+   **Team logins** are shared by default (`pelab_shared_logins: true`): every
+   access sheet, and `/etc/pelab/logins.md` in every workspace, lists the logins
+   of the delegate's whole team and of `platform-approver`, the platform team's
+   login for delegates. Delegates then sign in as a teammate, in a private
+   window, to approve when the teammate is away, and teams can approve their own
+   environment and exception requests as the platform team. Set it to `false`
+   if each delegate must see only their own login and only you may approve
+   platform requests.
 
 4. **The second disk.** Add this line at the end of
    `inventory/group_vars/pelab/main.yml` (use your disk's name):
@@ -443,9 +463,11 @@ The build wrote these on the control machine, in `pe-lab-ansible/credentials/`.
 | File | What it is | What you do with it |
 | --- | --- | --- |
 | `platform.md` | Every address, and the instructor logins | Open it now and keep it handy |
-| `access/student01.md` … `student27.md` | One page per delegate: user name, team, password, addresses, SSH set-up | Print them, one per delegate. Keep the spares' pages aside |
-| `gitea-admin.txt` | Password of `pelab-admin`, the only account that approves environment and exception requests | You use it on Days 3 and 5 |
+| `access/student01.md` … `student27.md` | One page per delegate: user name, team, password, the team's logins (with `platform-approver`), addresses, SSH set-up | Print them, one per delegate. Keep the spares' pages aside |
+| `access/all-logins.md` | Every delegate's login, by team, and the shared logins | Keep it with you: for a lost sheet or a team change |
+| `gitea-admin.txt` | Password of `pelab-admin`, which approves environment and exception requests (with `platform-approver`) | You use it on Days 3 and 5 |
 | `harbor-admin.txt`, `grafana-admin.txt` | Admin passwords | Rarely needed |
+| `delegate-viewer.txt`, `delegate-viewer-salt.txt` | The shared read-only login `delegate` for Argo CD and Grafana: its random part, and the salt of the hash Argo CD stores | Nothing: the full password is on every access sheet and in `platform.md` |
 | `ssh/` | SSH keys made for the delegates | Only if delegates use SSH (optional; the browser workspace covers the whole course) |
 
 ---
@@ -493,12 +515,13 @@ Use `student01`'s access sheet. Tick each step off.
    open project `team01`.
    *You should see:* `hello` with an image tagged with a 40-character commit id,
    scanned, with an SBOM.
-9. **Deployments.** Open `https://argocd.<lab domain>`.
+9. **Deployments.** Open `https://argocd.<lab domain>` and sign in as
+   `delegate` with the shared password on the access sheet.
    *You should see:* `team01-hello-dev` **Synced** and **Healthy**. The
    staging and prod applications say "Retrying": that is expected until the
    teams request their environments on Day 3.
-10. **Dashboards.** Open `https://grafana.<lab domain>` → Dashboards → PE Lab →
-    Golden path. Pick team01.
+10. **Dashboards.** Open `https://grafana.<lab domain>`, sign in as `delegate`
+    (the same password) → Dashboards → PE Lab → Golden path. Pick team01.
     *You should see:* the version table shows dev with its tag.
 
 **Then on the lab server** (`ssh labadmin@<server address>`):

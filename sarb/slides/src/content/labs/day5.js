@@ -213,7 +213,7 @@ module.exports = {
       {
         title: 'Propose it; the platform team approves',
         where: 'Workspace terminal, then Gitea',
-        say: 'Commit only your exception file, push, and open a pull request. The instructor reads the reason with you and approves; merge.',
+        say: 'Commit only your exception file, push, and open a pull request. The platform team reads the reason and approves: the instructor, or one of you as platform-approver in a private window (read Files Changed: who asks, why, until when). Then merge as yourself.',
         run: 'git add exceptions/$TEAM-status-page.yaml\ngit commit -m "Exception: status page for $TEAM"\ngit push -u origin $TEAM-status-page',
         see: 'The test pipeline is green. Within two minutes of the merge, the merge commit shows platform/apply "3 policies, 1 exceptions in force" (more if other teams were faster).',
       },
@@ -227,7 +227,7 @@ module.exports = {
         title: 'End the exception, and watch what happens',
         where: 'Workspace terminal, Gitea, then the terminal again',
         say: [
-          'End it early, the proper way: change its end date to yesterday in a pull request. The check reports it as ended. The instructor approves; merge.',
+          'End it early, the proper way: change its end date to yesterday in a pull request. The check reports it as ended. The platform team approves (the instructor, or platform-approver); merge.',
           'Two minutes after the merge (the commit shows platform/apply "expired, not applied: teamNN-status-page"), restart your status page and look:',
         ],
         run: 'cd ~/policies\ngit switch main && git pull\ngit switch -c $TEAM-status-page-end\nsed -i "s/pelab.io\\/expires: .*/pelab.io\\/expires: \\"$(date -d yesterday +%F)\\"/" exceptions/$TEAM-status-page.yaml\npython3 tests/check-exceptions.py\ngit commit -am "End the status page exception for $TEAM"\ngit push -u origin $TEAM-status-page-end',

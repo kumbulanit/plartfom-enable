@@ -115,7 +115,7 @@ git push -u origin release-staging-$ME
 
 *Where: Browser: Argo CD*
 
-Open teamNN-hello-staging in Argo CD.
+Open teamNN-hello-staging in Argo CD (sign in as delegate if it asks).
 
 **You should see:** Syncing, then Synced and Healthy with 1 pod.
 
@@ -188,7 +188,7 @@ Observability is what lets a team say "it works" with evidence, and lets an inci
 
 *Where: Browser: Grafana*
 
-Open https://grafana.<lab domain> (no sign-in needed) → Dashboards → PE Lab → Golden path. At the top, pick your team and the app hello.
+Open https://grafana.<lab domain> and sign in as delegate with the password on your access sheet (the same shared read-only login as Argo CD). Then Dashboards → PE Lab → Golden path. At the top, pick your team and the app hello.
 
 **You should see:** A table of running versions per environment: dev, staging and prod, each with its tag.
 
@@ -236,6 +236,7 @@ Write three lines: the promise (99% of requests succeed), today's measured succe
 
 **If you are stuck**
 
+- Grafana asks for a login: delegate, with the shared password on your access sheet (the same as Argo CD). It is read-only: you can look at everything and change nothing.
 - Empty panels: pick your team and app at the top of the dashboard, and look at the last 15 minutes.
 
 ## Performance engineering

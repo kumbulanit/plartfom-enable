@@ -10,10 +10,11 @@ command starts with `sudo`.
 
 | What | Where | Credentials |
 | --- | --- | --- |
-| Gitea admin; the only account that can approve environment and exception requests | https://gitea.&lt;lab domain&gt; | `pelab-admin`; password in `credentials/gitea-admin.txt` |
+| Gitea admin; approves environment and exception requests (so does `platform-approver`, the platform team's login for delegates, when `pelab_shared_logins` is true) | https://gitea.&lt;lab domain&gt; | `pelab-admin`; password in `credentials/gitea-admin.txt` |
 | Harbor admin | https://harbor.&lt;lab domain&gt; | `admin`; `credentials/harbor-admin.txt` |
-| Grafana admin (delegates read without a login) | https://grafana.&lt;lab domain&gt; | `credentials/grafana-admin.txt` |
-| Argo CD admin (delegates read without a login) | https://argocd.&lt;lab domain&gt; | `sudo k3s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' \| base64 -d` on the host |
+| Grafana admin | https://grafana.&lt;lab domain&gt; | `admin`; `credentials/grafana-admin.txt` |
+| Argo CD admin | https://argocd.&lt;lab domain&gt; | `admin`; `sudo k3s kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' \| base64 -d` on the host |
+| The delegates' shared read-only login for Argo CD and Grafana | https://argocd.&lt;lab domain&gt;, https://grafana.&lt;lab domain&gt; | `delegate`; the password is on every access sheet and in `credentials/platform.md` |
 | Every service and link, in one page | `credentials/platform.md` | written by the build |
 | Delegate access sheets | `credentials/access/` | one page per delegate, to print |
 
@@ -38,7 +39,7 @@ From a delegate thin client on the SARB network:
 3. In that terminal: `git clone https://gitea.<lab domain>/team01/hello` with student01's password.
 4. Open https://hello-team01-dev.&lt;lab domain&gt;/: `"environment": "dev"`.
 5. Open Harbor as student01: the team01 project shows a scanned `hello` image with an SBOM.
-6. Open Grafana: folder PE Lab, dashboard Golden path, team01: the version table is filled.
+6. Open Grafana as `delegate` (the shared password on the access sheet): folder PE Lab, dashboard Golden path, team01: the version table is filled.
 
 On the lab host:
 
@@ -71,7 +72,10 @@ The applier's last lines should read `environments ...: Up to date` and
 | Merges stop reaching dev, or Argo CD is down, and the fixes above do not help within 15 minutes | Argo CD | Switch on the safety net: `ansible-playbook safety-net.yml -e safety_net=on`. See [safety-net.md](safety-net.md) |
 | A merge is blocked although it was approved | The approval went stale after a new commit (`dismiss_stale_approvals`), or the required check `pipeline` is not green: the run is still going, or it failed | Approve again; wait for the run; if it is red, the team fixes the branch |
 | Merge blocked, approved, and the run is green but the pull request says the check `pipeline` is missing | The run was cancelled or the runner stopped before the last step | Re-run the pipeline (Actions → the run → Re-run all jobs); check the runners with `sudo lxc list` |
-| A delegate needs to approve an environment or exception request | Only `pelab-admin` may | Approve it yourself after reading the plan or the reason with the team |
+| A delegate needs to approve an environment or exception request | Only `pelab-admin` and `platform-approver` count | Approve it yourself, or let a team member sign in as `platform-approver` (on every access sheet) in a private window; read the plan or the reason with them either way |
+| A teammate is away and a pull request needs their approval | One approval from another account is needed | Any team member signs in as a teammate in a private window ("Your team's logins" on the access sheet) and approves |
+| A delegate lost their access sheet | | Their password, and every other login, is in `credentials/access/all-logins.md`; once in, `cat /etc/pelab/logins.md` in the workspace shows the team's logins |
+| Argo CD or Grafana rejects a delegate's password | Those two take the shared read-only account, not `studentNN` | `delegate` with the password on the access sheet. If that fails too, the account is missing or changed: `ansible-playbook site.yml --tags platform` puts it back |
 
 ## Reset
 

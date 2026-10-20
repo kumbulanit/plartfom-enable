@@ -340,7 +340,7 @@ Open https://harbor.<lab domain>, sign in as studentNN with your lab password, o
 
 *Where: Browser: Argo CD*
 
-Open https://argocd.<lab domain>. Argo CD looks for new repositories every minute.
+Open https://argocd.<lab domain> (sign in as delegate if it asks). Argo CD looks for new repositories every minute.
 
 **You should see:** teamNN-rates-dev appears, then Synced and Healthy.
 

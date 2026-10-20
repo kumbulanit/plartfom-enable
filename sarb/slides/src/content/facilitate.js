@@ -15,7 +15,7 @@ module.exports = {
       'Print the access sheets (credentials/access/student01.md to student25.md), one per delegate, in team order. Keep student26 aside as the spare; student27 is your demo workspace (setup guide, Part 5).',
       'One A3 sheet and markers per team for Lab 1.',
       'Know who sits in which team: student01-05 are team01, student06-10 team02, and so on.',
-      'Open the portal, Gitea and Argo CD on the presenter screen, signed in as pelab-admin in a private window (you approve on Days 3 and 5).',
+      'Open the portal, Gitea and Argo CD on the presenter screen in a private window: Gitea as pelab-admin (you approve on Days 3 and 5), Argo CD as delegate with the shared password from any access sheet.',
     ],
     timetable: [
       ['09:00', 'Welcome; hand out the access sheets', '1-3', 'Everyone opens the portal and their workspace before you go on. Count the workspaces that loaded.'],
@@ -50,6 +50,7 @@ module.exports = {
       CHECKS,
       'Check every team\'s dev address answers: https://hello-team01-dev.<lab domain>/ to team05.',
       'Check the five runners are up: Gitea → Site Administration → Actions → Runners shows five runners, idle.',
+      'Before Lab 2, point at "Your team\'s logins" on the access sheet: anyone may sign in as a teammate in a private window to play that role (for example to approve when the teammate is away). Say plainly that at work accounts are personal.',
     ],
     timetable: [
       ['09:00', 'Opening: yesterday in one minute, today\'s goal', '1-2', ''],
@@ -77,6 +78,7 @@ module.exports = {
     watch: [
       ['Merge stays grey', 'No approval yet, the approval went stale after a new commit (approve again), or the pipeline check is not green yet. Your own approval never counts.'],
       ['A pull request is red and someone wants to merge', 'Gitea will not let them: "Some required checks failed", and the button only offers to merge when checks succeed. Read the failing step together; Day 5 is about exactly this.'],
+      ['Argo CD asks for a login', 'The shared read-only account: delegate, with the password printed on every access sheet. studentNN does not work there. The same login opens Grafana on Day 6.'],
       ['Argo CD shows the old commit for a long time', 'The pipeline on main must finish first (Actions tab). Argo CD notices within about three minutes. If merges stop reaching dev for every team, see the safety net (safety-net.md).'],
     ],
     after: ['Backup copied.', 'Check-off sheet updated.', 'Charters kept.'],
@@ -85,7 +87,7 @@ module.exports = {
   3: {
     before: [
       CHECKS,
-      'Sign in to Gitea as pelab-admin (credentials/gitea-admin.txt) in a private window. Today only you may approve environment requests.',
+      'Sign in to Gitea as pelab-admin (credentials/gitea-admin.txt) in a private window. Today the platform team approves environment requests: you, or a delegate playing the platform team as platform-approver (its login is on every access sheet). Decide which before Lab 2 and tell the room; either way, read each plan with the team.',
       'On the lab server, the applier says "Up to date": sudo journalctl -u pelab-platform-apply.service -n 5 --no-pager',
       'No team has staging or prod yet: Argo CD shows teamNN-hello-staging and -prod retrying. That is expected.',
     ],
@@ -95,17 +97,17 @@ module.exports = {
       ['10:00', 'Lab 1: plan, apply, change, destroy', '6-7', 'Type the file live on slide 6 first.'],
       ['10:40', 'Break', '', ''],
       ['10:55', 'Environments from a template; how a request becomes an environment', '8-9', ''],
-      ['11:30', 'Lab 2: request staging and prod from the template', '10', 'One driver per team. You approve five pull requests.'],
+      ['11:30', 'Lab 2: request staging and prod from the template', '10', 'One driver per team. You, or each team as platform-approver, approve five pull requests.'],
       ['12:30', 'Lunch', '', ''],
       ['13:15', 'What happened when you merged', '11', ''],
-      ['13:30', 'Lab 3: drift, and destroy and recreate', '12', 'You pause the repairs and change the quotas (actions below). You approve ten pull requests.'],
+      ['13:30', 'Lab 3: drift, and destroy and recreate', '12', 'You pause the repairs and change the quotas (actions below). You, or the teams as platform-approver, approve ten pull requests.'],
       ['14:15', 'Break', '', ''],
       ['14:30', 'Budgets: FinOps starts in the template', '13-14', ''],
       ['15:00', 'Close: quiz and recap', '15-16', ''],
       ['15:30', 'Check-off and questions', '', ''],
     ],
     actions: [
-      { when: 'Lab 2, step 4: approve each team\'s request', what: 'In platform/environments → Pull Requests, open each one. Files Changed must show one new file, teamNN.tf, with the team\'s own name in both places, environments ["staging", "prod"] and size "small". Open its plan run: "Plan: 16 to add, 0 to change, 0 to destroy". Then Review → Approve. If anything else changes, or the plan destroys something, choose Request Changes and say why.', where: 'Gitea, as pelab-admin' },
+      { when: 'Lab 2, step 4: approve each team\'s request', what: 'In platform/environments → Pull Requests, open each one. Files Changed must show one new file, teamNN.tf, with the team\'s own name in both places, environments ["staging", "prod"] and size "small". Open its plan run: "Plan: 16 to add, 0 to change, 0 to destroy". Then Review → Approve. If anything else changes, or the plan destroys something, choose Request Changes and say why. If the teams approve as platform-approver, walk one team through these checks first.', where: 'Gitea, as pelab-admin or platform-approver' },
       { when: 'Lab 2, after the merges', what: 'Each merge commit gets a green platform/apply within two minutes. If one does not after five minutes, read the applier\'s log, fix the cause, and run it again.', where: 'Lab server', run: 'sudo journalctl -u pelab-platform-apply.service -n 50 --no-pager\nsudo systemctl start pelab-platform-apply.service' },
       { when: 'Lab 3, step 1: cause the drift', what: 'Pause the platform\'s repairs first, or it may put the quotas back before the teams run their plan. Then raise every team\'s staging CPU budget by hand.', where: 'Lab server', run: 'sudo systemctl stop pelab-platform-apply.timer\nfor t in team01 team02 team03 team04 team05; do\n  sudo k3s kubectl -n $t-staging patch resourcequota team-quota --type merge -p \'{"spec":{"hard":{"requests.cpu":"5"}}}\'\ndone' },
       { when: 'Lab 3, after step 2 (every team has seen "1 to change")', what: 'Switch the repairs back on. The quotas return to the code\'s value within two minutes.', where: 'Lab server', run: 'sudo systemctl start pelab-platform-apply.timer pelab-platform-apply.service' },
@@ -115,7 +117,7 @@ module.exports = {
     watch: [
       ['The plan pipeline fails with an access error', 'Its read-only credentials are stale (for example after a cluster rebuild): ansible-playbook site.yml --tags golden_path'],
       ['"Invalid value for variable" in the plan', 'The team name, environment list or size is wrong. The message says which.'],
-      ['A team approved its own request', 'It does not count: only pelab-admin may approve here. Merge stays grey until you approve.'],
+      ['A team approved its own request as studentNN', 'It does not count: only pelab-admin or platform-approver may approve here. Approve it yourself, or let a team member sign in as platform-approver in a private window.'],
     ],
     after: ['Every team has teamNN-staging and teamNN-prod (Argo CD: staging and prod Synced, 0 replicas).', 'The applier timer is running again: systemctl list-timers pelab-platform-apply.timer', 'Backup copied.', 'Check-off sheet updated.'],
   },
@@ -159,7 +161,7 @@ module.exports = {
     before: [
       CHECKS,
       'Kyverno is running: sudo k3s kubectl -n kyverno get pods (lab server).',
-      'Sign in to Gitea as pelab-admin in a private window: today you approve the exception requests.',
+      'Sign in to Gitea as pelab-admin in a private window: today the platform team approves the exception requests, you or the teams as platform-approver, as on Day 3.',
       'The latest commit of platform/policies shows a green platform/apply "3 policies, 0 exceptions in force".',
     ],
     timetable: [
@@ -174,7 +176,7 @@ module.exports = {
       ['13:40', 'Lab 4: test a policy like code', '14', ''],
       ['14:05', 'Scenarios; exceptions as code', '15-17', ''],
       ['14:30', 'Break', '', ''],
-      ['14:45', 'Lab 5: ask for an exception, and watch it expire', '18', 'You approve two pull requests per team.'],
+      ['14:45', 'Lab 5: ask for an exception, and watch it expire', '18', 'Two approvals per team, by you or the team as platform-approver.'],
       ['15:25', 'Close: quiz and recap', '19-20', ''],
       ['15:45', 'Check-off and questions', '', ''],
     ],

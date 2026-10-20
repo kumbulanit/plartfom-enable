@@ -118,7 +118,7 @@ replicas:
     type: 'steps', section: 'Observability', time: '30 min',
     title: 'Lab 2: read the dashboard',
     steps: [
-      { do: `Open Grafana at https://grafana.${DOMAIN} (no sign-in needed), folder PE Lab, dashboard Golden path. Pick your team and the app hello.`, expect: 'A table of running versions per environment: dev, staging and prod with their tags.' },
+      { do: `Open Grafana at https://grafana.${DOMAIN} (sign in as delegate: the password is on your access sheet), folder PE Lab, dashboard Golden path. Pick your team and the app hello.`, expect: 'A table of running versions per environment: dev, staging and prod with their tags.' },
       { do: 'In your workspace, generate traffic: for i in $(seq 1 300); do curl -s https://hello-teamNN-staging.<domain>/ > /dev/null; sleep 0.2; done', expect: 'The requests-per-second panel rises for staging within a minute.' },
       { do: 'Request a page that does not exist 50 times: curl -s .../missing', expect: 'The failed-share panel shows a small percentage of 404s.' },
       { do: 'Open the logs panel and filter for "missing".', expect: 'One JSON log line per failed request, with the path and status.' },

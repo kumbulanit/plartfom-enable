@@ -1,0 +1,26 @@
+{# The logins a delegate may use: their team's accounts and the shared roles.
+   Included in the access sheet and written to /etc/pelab/logins.md. #}
+{% set team = pelab_workspace_teams[item] | default('') %}
+{% set teammates = (pelab_workspace_teams | dict2items | selectattr('value', 'equalto', team) | map(attribute='key') | sort) if team else [item] %}
+## Your team's logins{{ (' (' ~ team ~ ')') if team else '' }}
+
+In this lab you may sign in as a teammate, or as the platform team, to play that
+role: for example to review your own change as a teammate when you work alone,
+or to approve your team's environment request as the platform team. At work you
+never would: accounts are personal, and a shared login defeats every control you
+see this week.
+
+| Who | User | Password | For |
+| --- | --- | --- | --- |
+{% for name in teammates %}
+| {{ 'You' if name == item else 'Teammate' }} | `{{ name }}` | `{{ pelab_delegate_passwords[name] }}` | Workspace https://{{ name }}.{{ pelab_domain }}, Gitea, Harbor |
+{% endfor %}
+| The platform team | `{{ pelab_platform_approver_user }}` | `{{ pelab_platform_approver_password }}` | Gitea only: approves pull requests to platform/environments (Day 3) and platform/policies (Day 5) |
+| Everyone (read-only) | `{{ pelab_viewer_user }}` | `{{ pelab_viewer_password }}` | Argo CD and Grafana |
+
+**Switching user, the easy way:** keep your own login in your normal browser
+window, and open a **private window** for the other user (Edge and Chrome:
+Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a Mac Cmd+Shift+P).
+Sign in there as the teammate or as `{{ pelab_platform_approver_user }}`, do the review, and
+close the private window. To be a third person, sign out in the private window
+(top-right menu → Sign Out) and sign in again.

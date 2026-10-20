@@ -68,10 +68,11 @@ grafana:
   grafana.ini:
     server:
       root_url: https://{{ pelab_hosts.grafana }}
-    # Delegates read the dashboards without an account; changing them needs the admin login.
+    # Nobody reads the dashboards without a login. Delegates share the read-only
+    # account "delegate" (a Viewer, created by tasks/grafana.yml once the chart is
+    # up); changing a dashboard still needs the admin login.
     auth.anonymous:
-      enabled: true
-      org_role: Viewer
+      enabled: false
   persistence:
     enabled: true
     size: 5Gi

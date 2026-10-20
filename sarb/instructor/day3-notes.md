@@ -5,7 +5,7 @@ Deck: `Day3-Infrastructure-as-Code.pptx`. Delegates follow the handbook (Gitea `
 ## Before the day
 
 - [ ] The morning checks in the run-book (portal, a workspace, a dev address, Argo CD, Grafana, and the lab server lines). 30 minutes before the start.
-- [ ] Sign in to Gitea as pelab-admin (credentials/gitea-admin.txt) in a private window. Today only you may approve environment requests.
+- [ ] Sign in to Gitea as pelab-admin (credentials/gitea-admin.txt) in a private window. Today the platform team approves environment requests: you, or a delegate playing the platform team as platform-approver (its login is on every access sheet). Decide which before Lab 2 and tell the room; either way, read each plan with the team.
 - [ ] On the lab server, the applier says "Up to date": sudo journalctl -u pelab-platform-apply.service -n 5 --no-pager
 - [ ] No team has staging or prod yet: Argo CD shows teamNN-hello-staging and -prod retrying. That is expected.
 
@@ -18,10 +18,10 @@ Deck: `Day3-Infrastructure-as-Code.pptx`. Delegates follow the handbook (Gitea `
 | 10:00 | Lab 1: plan, apply, change, destroy | 6-7 | Type the file live on slide 6 first. |
 | 10:40 | Break |  |  |
 | 10:55 | Environments from a template; how a request becomes an environment | 8-9 |  |
-| 11:30 | Lab 2: request staging and prod from the template | 10 | One driver per team. You approve five pull requests. |
+| 11:30 | Lab 2: request staging and prod from the template | 10 | One driver per team. You, or each team as platform-approver, approve five pull requests. |
 | 12:30 | Lunch |  |  |
 | 13:15 | What happened when you merged | 11 |  |
-| 13:30 | Lab 3: drift, and destroy and recreate | 12 | You pause the repairs and change the quotas (actions below). You approve ten pull requests. |
+| 13:30 | Lab 3: drift, and destroy and recreate | 12 | You pause the repairs and change the quotas (actions below). You, or the teams as platform-approver, approve ten pull requests. |
 | 14:15 | Break |  |  |
 | 14:30 | Budgets: FinOps starts in the template | 13-14 |  |
 | 15:00 | Close: quiz and recap | 15-16 |  |
@@ -31,7 +31,7 @@ Deck: `Day3-Infrastructure-as-Code.pptx`. Delegates follow the handbook (Gitea `
 
 Commands for the lab server run there over SSH (`ssh labadmin@<server>`); the others on the control machine, in `pe-lab-ansible/`.
 
-**Lab 2, step 4: approve each team's request.** In platform/environments → Pull Requests, open each one. Files Changed must show one new file, teamNN.tf, with the team's own name in both places, environments ["staging", "prod"] and size "small". Open its plan run: "Plan: 16 to add, 0 to change, 0 to destroy". Then Review → Approve. If anything else changes, or the plan destroys something, choose Request Changes and say why. *(Gitea, as pelab-admin)*
+**Lab 2, step 4: approve each team's request.** In platform/environments → Pull Requests, open each one. Files Changed must show one new file, teamNN.tf, with the team's own name in both places, environments ["staging", "prod"] and size "small". Open its plan run: "Plan: 16 to add, 0 to change, 0 to destroy". Then Review → Approve. If anything else changes, or the plan destroys something, choose Request Changes and say why. If the teams approve as platform-approver, walk one team through these checks first. *(Gitea, as pelab-admin or platform-approver)*
 
 **Lab 2, after the merges.** Each merge commit gets a green platform/apply within two minutes. If one does not after five minutes, read the applier's log, fix the cause, and run it again. *(Lab server)*
 
@@ -69,7 +69,7 @@ ansible-playbook backup.yml
 | --- | --- |
 | The plan pipeline fails with an access error | Its read-only credentials are stale (for example after a cluster rebuild): ansible-playbook site.yml --tags golden_path |
 | "Invalid value for variable" in the plan | The team name, environment list or size is wrong. The message says which. |
-| A team approved its own request | It does not count: only pelab-admin may approve here. Merge stays grey until you approve. |
+| A team approved its own request as studentNN | It does not count: only pelab-admin or platform-approver may approve here. Approve it yourself, or let a team member sign in as platform-approver in a private window. |
 
 ## End of the day
 
@@ -128,7 +128,7 @@ This is "architecting a golden path" for infrastructure: the hard, risky part (w
 
 ### 10. Lab 2: request staging and prod from the template
 
-One pull request per team, driven by one delegate with the others reading the plan. The plan is the evidence the brief asks for in Lab 3: a design record of exactly what will be created. A teammate cannot approve: only the platform team can (Gitea approval whitelist), which is the separation of duties the brief requires for infrastructure. Keep the pull request link and the platform/apply status for the evidence pack. If the plan fails with "Invalid value for variable", the message says exactly what to fix (team name, environments or size).
+One pull request per team, driven by one delegate with the others reading the plan. The plan is the evidence the brief asks for in Lab 3: a design record of exactly what will be created. A teammate cannot approve: only the platform team can (Gitea approval whitelist: pelab-admin and, for role-play, platform-approver), which is the separation of duties the brief requires for infrastructure. Keep the pull request link and the platform/apply status for the evidence pack. If the plan fails with "Invalid value for variable", the message says exactly what to fix (team name, environments or size).
 
 ### 11. Who may change the cluster
 

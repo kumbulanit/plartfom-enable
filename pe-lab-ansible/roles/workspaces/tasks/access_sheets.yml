@@ -20,6 +20,16 @@
   become: false
   no_log: true
 
+- name: Write the list of every login (instructor only)
+  ansible.builtin.template:
+    src: all-logins.md.j2
+    dest: "{{ pelab_credentials_dir }}/access/all-logins.md"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  no_log: true
+
 - name: Write the workspace roster
   ansible.builtin.template:
     src: workspaces.csv.j2

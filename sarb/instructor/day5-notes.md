@@ -6,7 +6,7 @@ Deck: `Day5-CICD-testing-and-security.pptx`. Delegates follow the handbook (Gite
 
 - [ ] The morning checks in the run-book (portal, a workspace, a dev address, Argo CD, Grafana, and the lab server lines). 30 minutes before the start.
 - [ ] Kyverno is running: sudo k3s kubectl -n kyverno get pods (lab server).
-- [ ] Sign in to Gitea as pelab-admin in a private window: today you approve the exception requests.
+- [ ] Sign in to Gitea as pelab-admin in a private window: today the platform team approves the exception requests, you or the teams as platform-approver, as on Day 3.
 - [ ] The latest commit of platform/policies shows a green platform/apply "3 policies, 0 exceptions in force".
 
 ## The day, hour by hour
@@ -24,7 +24,7 @@ Deck: `Day5-CICD-testing-and-security.pptx`. Delegates follow the handbook (Gite
 | 13:40 | Lab 4: test a policy like code | 14 |  |
 | 14:05 | Scenarios; exceptions as code | 15-17 |  |
 | 14:30 | Break |  |  |
-| 14:45 | Lab 5: ask for an exception, and watch it expire | 18 | You approve two pull requests per team. |
+| 14:45 | Lab 5: ask for an exception, and watch it expire | 18 | Two approvals per team, by you or the team as platform-approver. |
 | 15:25 | Close: quiz and recap | 19-20 |  |
 | 15:45 | Check-off and questions |  |  |
 
@@ -142,7 +142,7 @@ This closes the policy-as-code story. Governance people in the room will recogni
 
 ### 18. Lab 5: ask for an exception, and watch it expire
 
-Every step here was rehearsed on Kyverno 1.19. In step 6 the team opens the pull request that ends its exception and you approve it: Gitea does not let anyone approve their own pull request, and only you may approve here. The check accepts a date in the past (it reports the exception as ended). The point of the last step: an expired exception does not switch anything off, it stops anything new from starting, so the team must fix the root cause before its next release. The platform applier removes expired exceptions on its own; the commit status names them ("expired, not applied: ..."). Exceptions only count in the pelab-exceptions namespace, which only the platform writes to, so a delegate cannot grant themselves one with kubectl.
+Every step here was rehearsed on Kyverno 1.19. In step 6 the team opens the pull request that ends its exception and you approve it: Gitea does not let anyone approve their own pull request, and only the platform team (you, or a delegate as platform-approver) may approve here. The check accepts a date in the past (it reports the exception as ended). The point of the last step: an expired exception does not switch anything off, it stops anything new from starting, so the team must fix the root cause before its next release. The platform applier removes expired exceptions on its own; the commit status names them ("expired, not applied: ..."). Exceptions only count in the pelab-exceptions namespace, which only the platform writes to, so a delegate cannot grant themselves one with kubectl.
 
 ### 19. Check your understanding
 

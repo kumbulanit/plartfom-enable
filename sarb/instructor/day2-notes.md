@@ -7,6 +7,7 @@ Deck: `Day2-Git-and-working-together.pptx`. Delegates follow the handbook (Gitea
 - [ ] The morning checks in the run-book (portal, a workspace, a dev address, Argo CD, Grafana, and the lab server lines). 30 minutes before the start.
 - [ ] Check every team's dev address answers: https://hello-team01-dev.<lab domain>/ to team05.
 - [ ] Check the five runners are up: Gitea → Site Administration → Actions → Runners shows five runners, idle.
+- [ ] Before Lab 2, point at "Your team's logins" on the access sheet: anyone may sign in as a teammate in a private window to play that role (for example to approve when the teammate is away). Say plainly that at work accounts are personal.
 
 ## The day, hour by hour
 
@@ -59,6 +60,7 @@ ansible-playbook backup.yml
 | --- | --- |
 | Merge stays grey | No approval yet, the approval went stale after a new commit (approve again), or the pipeline check is not green yet. Your own approval never counts. |
 | A pull request is red and someone wants to merge | Gitea will not let them: "Some required checks failed", and the button only offers to merge when checks succeed. Read the failing step together; Day 5 is about exactly this. |
+| Argo CD asks for a login | The shared read-only account: delegate, with the password printed on every access sheet. studentNN does not work there. The same login opens Grafana on Day 6. |
 | Argo CD shows the old commit for a long time | The pipeline on main must finish first (Actions tab). Argo CD notices within about three minutes. If merges stop reaching dev for every team, see the safety net (safety-net.md). |
 
 ## End of the day
@@ -123,7 +125,7 @@ Keep this to five minutes; Day 6 goes deeper. The idea to land: in a regulated e
 
 ### 11. Lab 3: try to break the rules
 
-This is the brief's "compromised inputs are blocked" at the simplest level. Delegates who see the refusals trust the control more than those who only hear about it.
+This is the brief's "compromised inputs are blocked" at the simplest level. Delegates who see the refusals trust the control more than those who only hear about it. Then make the honest point: their access sheet lists the team's logins so they can play each other's roles, and signing in as a teammate would get an approval through. The tool checks accounts, not people; that is why at work accounts are personal, protected by two-factor sign-in, and never shared.
 
 ### 12. Lab 4: resolve a merge conflict
 

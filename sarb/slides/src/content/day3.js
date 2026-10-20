@@ -151,7 +151,7 @@ resource "local_file" "note" {
       { do: 'kubectl -n teamNN-staging get resourcequota,limitrange', expect: 'team-quota with requests.cpu 0/1 and requests.memory 0/2Gi, and team-defaults.' },
       { do: 'Open Argo CD: teamNN-hello-staging and teamNN-hello-prod.', expect: 'They stop retrying and show Synced, with 0 replicas until Day 6\'s promotion.' },
     ],
-    notes: 'One pull request per team, driven by one delegate with the others reading the plan. The plan is the evidence the brief asks for in Lab 3: a design record of exactly what will be created. A teammate cannot approve: only the platform team can (Gitea approval whitelist), which is the separation of duties the brief requires for infrastructure. Keep the pull request link and the platform/apply status for the evidence pack. If the plan fails with "Invalid value for variable", the message says exactly what to fix (team name, environments or size).',
+    notes: 'One pull request per team, driven by one delegate with the others reading the plan. The plan is the evidence the brief asks for in Lab 3: a design record of exactly what will be created. A teammate cannot approve: only the platform team can (Gitea approval whitelist: pelab-admin and, for role-play, platform-approver), which is the separation of duties the brief requires for infrastructure. Keep the pull request link and the platform/apply status for the evidence pack. If the plan fails with "Invalid value for variable", the message says exactly what to fix (team name, environments or size).',
   },
   {
     type: 'rows', section: 'Lab 2: request staging and prod',

@@ -22,7 +22,8 @@ module.exports = {
     'rejected (non-fast-forward): someone pushed first. Run git pull --rebase, then push again.',
   ],
   'Lab 2: review, approve, merge, and watch it go live': [
-    'Merge stays grey: it needs one approval from a teammate. Your own approval does not count.',
+    'Argo CD asks for a user name and password: delegate, with the shared password on your access sheet. Your studentNN password does not work there.',
+    'Merge stays grey: it needs one approval from a teammate. Your own approval does not count. Teammate not here? Approve as them in a private window, with the logins on your access sheet.',
     '"Some checks are pending" or "Some required checks failed" although approved: the required check called pipeline is not green yet. Wait for the run to finish; if it is red, fix it on the branch and push again (Day 5 shows how to read the failure). The "When checks succeed" button only queues the merge: nothing merges while the check is red.',
     'Argo CD still shows the old commit: the pipeline must finish first (Actions tab). Argo CD then notices within about three minutes.',
   ],
@@ -43,7 +44,7 @@ module.exports = {
   'Lab 2: request staging and prod from the template': [
     'The plan says "Invalid value for variable": the message says what to fix (the team name, the environments or the size).',
     'The plan pipeline fails before the plan with an access error: tell the instructor (the read-only credentials).',
-    'Merge stays grey: only the platform team (the instructor) can approve this repository.',
+    'Merge stays grey: only the platform team can approve this repository, as pelab-admin (the instructor) or platform-approver (its login is on your access sheet). An approval as studentNN does not count.',
     'No platform/apply status after five minutes: tell the instructor (the platform applier on the lab host).',
   ],
   'Lab 3: drift, and destroy and recreate': [
@@ -90,6 +91,7 @@ module.exports = {
     'Argo CD shows the image cannot be pulled: the tag is wrong. Fix it in a new pull request.',
   ],
   'Lab 2: read the dashboard': [
+    'Grafana asks for a login: delegate, with the shared password on your access sheet (the same as Argo CD). It is read-only: you can look at everything and change nothing.',
     'Empty panels: pick your team and app at the top of the dashboard, and look at the last 15 minutes.',
   ],
   'Lab 3: load-test staging and watch the dashboard': [

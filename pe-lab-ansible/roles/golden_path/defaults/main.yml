@@ -57,7 +57,8 @@ golden_path_build_starters: true
 golden_path_request_repos: "{{ golden_path_platform_repos | selectattr('requests', 'defined') | map(attribute='name') | list }}"
 # Delegates may open pull requests in the request repositories; only these
 # accounts may approve them (the platform team: the instructors).
-golden_path_request_approvers: ["{{ pelab_gitea_admin_user }}"]
+golden_path_request_approvers: >-
+  {{ [pelab_gitea_admin_user] + ([pelab_platform_approver_user] if pelab_shared_logins | bool else []) }}
 # The last step of every pipeline posts its verdict on the commit as this
 # status, and main requires it to be green: a red pull request cannot be merged.
 # (Gitea 1.27.0 cannot require the statuses its own jobs write: see the README.)

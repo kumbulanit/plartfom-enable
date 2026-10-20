@@ -1,0 +1,75 @@
+---
+# One read-only Grafana login that every delegate shares. Grafana cannot
+# provision users from files, so the account is made through the API once the
+# chart is up. Reruns change nothing: the password is reset only when it no
+# longer works, and the role only when it is not Viewer.
+- name: Wait for Grafana
+  ansible.builtin.uri:
+    url: "{{ platform_grafana_url }}/api/health"
+  register: platform_grafana_health
+  retries: 30
+  delay: 10
+  until: platform_grafana_health.status == 200
+
+- name: Look for the delegates' account
+  ansible.builtin.uri:
+    url: "{{ platform_grafana_url }}/api/users/lookup?loginOrEmail={{ pelab_viewer_user }}"
+    status_code: [200, 404]
+  register: platform_grafana_viewer_lookup
+  no_log: true
+
+- name: Create the delegates' account
+  ansible.builtin.uri:
+    url: "{{ platform_grafana_url }}/api/admin/users"
+    method: POST
+    body:
+      login: "{{ pelab_viewer_user }}"
+      name: Delegate (read-only)
+      password: "{{ pelab_viewer_password }}"
+  register: platform_grafana_viewer_created
+  changed_when: true
+  no_log: true
+  when: platform_grafana_viewer_lookup.status == 404
+
+- name: Remember the account's id
+  ansible.builtin.set_fact:
+    platform_grafana_viewer_id: >-
+      {{ platform_grafana_viewer_lookup.json.id if platform_grafana_viewer_lookup.status == 200
+         else platform_grafana_viewer_created.json.id }}
+
+- name: Check the delegates' password works
+  ansible.builtin.uri:
+    url: "{{ platform_grafana_url }}/api/user"
+    user: "{{ pelab_viewer_user }}"
+    password: "{{ pelab_viewer_password }}"
+    status_code: [200, 401]
+  register: platform_grafana_viewer_login
+  no_log: true
+
+- name: Set the delegates' password
+  ansible.builtin.uri:
+    url: "{{ platform_grafana_url }}/api/admin/users/{{ platform_grafana_viewer_id }}/password"
+    method: PUT
+    body:
+      password: "{{ pelab_viewer_password }}"
+  changed_when: true
+  no_log: true
+  when: platform_grafana_viewer_login.status == 401
+
+- name: Read the account's role in each organisation
+  ansible.builtin.uri:
+    url: "{{ platform_grafana_url }}/api/users/{{ platform_grafana_viewer_id }}/orgs"
+  register: platform_grafana_viewer_orgs
+  no_log: true
+
+- name: Keep the account a Viewer
+  ansible.builtin.uri:
+    url: "{{ platform_grafana_url }}/api/orgs/{{ item.orgId }}/users/{{ platform_grafana_viewer_id }}"
+    method: PATCH
+    body:
+      role: Viewer
+  loop: "{{ platform_grafana_viewer_orgs.json | rejectattr('role', 'equalto', 'Viewer') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  changed_when: true
+  no_log: true

@@ -7,6 +7,15 @@ Team: {{ pelab_workspace_teams[item] | default('unassigned (spare)') }}
 Your user name is `{{ item }}`. One password opens your workspace, Gitea and Harbor:
 {{ pelab_delegate_passwords[item] }}
 
+Argo CD and Grafana use one read-only login that every delegate shares. User `{{ pelab_viewer_user }}`, password:
+{{ pelab_viewer_password }}
+
+{% if pelab_shared_logins | bool %}
+{% include 'team-logins.md.j2' %}
+
+The same table is in your workspace: `cat /etc/pelab/logins.md` in the terminal.
+
+{% endif %}
 ## Start here
 
 1. **Developer portal:** https://{{ pelab_hosts.backstage }}. Sign in as guest. It lists the platform's services, the golden path and every team's services.
@@ -26,8 +35,8 @@ asks for the same username and password. `kubectl get pods` shows your team's de
 | Portal (catalog, templates) | https://{{ pelab_hosts.backstage }} | Guest |
 | Git, pull requests, pipelines | https://{{ pelab_hosts.gitea }} | `{{ item }}` and your password |
 | Images, scan reports, SBOMs | https://{{ pelab_hosts.harbor }} | `{{ item }}` and your password |
-| Deployments (read-only) | https://{{ pelab_hosts.argocd }} | No sign-in needed |
-| Dashboards and logs (read-only) | https://{{ pelab_hosts.grafana }} | No sign-in needed |
+| Deployments (read-only) | https://{{ pelab_hosts.argocd }} | `{{ pelab_viewer_user }}` and the shared password |
+| Dashboards and logs (read-only) | https://{{ pelab_hosts.grafana }} | `{{ pelab_viewer_user }}` and the shared password |
 | Environment requests | https://{{ pelab_hosts.gitea }}/{{ golden_path_platform_org | default('platform') }}/{{ golden_path_environments_repo | default('environments') }} | Day 3 |
 | Guardrails and exceptions | https://{{ pelab_hosts.gitea }}/{{ golden_path_platform_org | default('platform') }}/{{ golden_path_policies_repo | default('policies') }} | Day 5 |
 

@@ -261,7 +261,7 @@ module "team01" {
 
 **What you do:** Get your team's staging and prod environments the platform way: fill in the environment template, open a pull request, read the plan, and let the platform team approve and apply it.
 
-**Before you start:** One member of each team drives; the others watch the plan with them. The platform team (the instructor) approves.
+**Before you start:** One member of each team drives; the others watch the plan with them. The platform team approves: the instructor, or one of you playing the platform team as platform-approver.
 
 #### Step 1. Copy the environments repository and make a branch
 
@@ -327,7 +327,9 @@ git push -u origin $TEAM-environments
 
 *Where: Gitea*
 
-Ask the instructor to review. A teammate's approval does not count here: only the platform team may approve environment changes. Once approved, merge.
+Ask the platform team to review. A teammate's approval as studentNN does not count here: only the platform team may approve environment changes.
+
+The platform team is the instructor, or one of you playing it: open a private window (Ctrl+Shift+N; on a Mac Cmd+Shift+N), sign in to Gitea as platform-approver (its login is on your access sheet), open the pull request, read Files Changed and the plan, then Review → Approve. Close the window and merge as yourself.
 
 **You should see:** Within two minutes the merge commit gets a green tick: platform/apply "Applied: 16 added, 0 changed, 0 destroyed". The platform applied main itself; nobody ran a command on the cluster.
 
@@ -348,7 +350,7 @@ kubectl get namespaces | grep $TEAM
 
 *Where: Browser: Argo CD*
 
-Argo CD had been trying to deploy hello to staging and prod since Day 1, and kept retrying because they did not exist. Open teamNN-hello-staging and teamNN-hello-prod.
+Argo CD had been trying to deploy hello to staging and prod since Day 1, and kept retrying because they did not exist. Open teamNN-hello-staging and teamNN-hello-prod (sign in as delegate again if Argo CD asks).
 
 **You should see:** They stop retrying and show Synced, with 0 replicas: nothing is released there until Day 6.
 
@@ -360,7 +362,7 @@ Argo CD had been trying to deploy hello to staging and prod since Day 1, and kep
 
 - The plan says "Invalid value for variable": the message says what to fix (the team name, the environments or the size).
 - The plan pipeline fails before the plan with an access error: tell the instructor (the read-only credentials).
-- Merge stays grey: only the platform team (the instructor) can approve this repository.
+- Merge stays grey: only the platform team can approve this repository, as pelab-admin (the instructor) or platform-approver (its login is on your access sheet). An approval as studentNN does not count.
 - No platform/apply status after five minutes: tell the instructor (the platform applier on the lab host).
 
 ### Who may change the cluster
@@ -437,7 +439,7 @@ git push -u origin $TEAM-remove-staging
 
 *Where: Gitea, then the workspace terminal*
 
-The instructor approves; merge it. Check staging is gone. Then put it back the same way, with a second pull request.
+The platform team approves (the instructor, or platform-approver in a private window); merge it. Check staging is gone. Then put it back the same way, with a second pull request.
 
 ```bash
 kubectl get namespace $TEAM-staging

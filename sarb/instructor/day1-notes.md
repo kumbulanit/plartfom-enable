@@ -8,7 +8,7 @@ Deck: `Day1-Platform-engineering-and-Linux-basics.pptx`. Delegates follow the ha
 - [ ] Print the access sheets (credentials/access/student01.md to student25.md), one per delegate, in team order. Keep student26 aside as the spare; student27 is your demo workspace (setup guide, Part 5).
 - [ ] One A3 sheet and markers per team for Lab 1.
 - [ ] Know who sits in which team: student01-05 are team01, student06-10 team02, and so on.
-- [ ] Open the portal, Gitea and Argo CD on the presenter screen, signed in as pelab-admin in a private window (you approve on Days 3 and 5).
+- [ ] Open the portal, Gitea and Argo CD on the presenter screen in a private window: Gitea as pelab-admin (you approve on Days 3 and 5), Argo CD as delegate with the shared password from any access sheet.
 
 ## The day, hour by hour
 

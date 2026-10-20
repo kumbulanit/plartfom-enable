@@ -35,6 +35,10 @@ platform_namespaces: >-
   {{ platform_enabled_releases | map(attribute='namespace') | unique
      | union(['backstage', pelab_workspaces_namespace]) | list }}
 
+# Grafana's API, reached through Traefik with the lab CA, exactly as clients see it
+# (tasks/grafana.yml creates the delegates' shared read-only login there).
+platform_grafana_url: "https://{{ pelab_hosts.grafana }}"
+
 # Admin credentials handed to the charts as Kubernetes secrets.
 platform_admin_secrets:
   - name: grafana-admin

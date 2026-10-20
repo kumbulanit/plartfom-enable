@@ -38,12 +38,12 @@
       loop: "{{ pelab_team_names }}"
       changed_when: true
 
-    - name: Delete the delegate accounts
+    - name: Delete the delegate accounts and the shared approver
       ansible.builtin.uri:
         url: "{{ golden_path_gitea_api }}/admin/users/{{ item }}?purge=true"
         method: DELETE
         status_code: [204, 404]
-      loop: "{{ pelab_workspace_names }}"
+      loop: "{{ pelab_workspace_names + [pelab_platform_approver_user] }}"
       changed_when: true
 
     - name: Delete the request repositories (they are seeded again, empty)

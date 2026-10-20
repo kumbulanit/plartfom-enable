@@ -59,6 +59,26 @@ pelab_extras: [opencost, argo-rollouts]
 | `apisix` | APISIX gateway | Governed APIs (Lab 9) |
 | `opencost` | OpenCost | FinOps and unit cost (Lab 10) |
 
+### Who signs in where
+
+| Tool | Delegates | Instructors |
+|---|---|---|
+| Workspace, Gitea, Harbor | `studentNN` with the password on their access sheet | `pelab-admin` (Gitea), `admin` (Harbor) |
+| Argo CD, Grafana | `delegate`: one read-only login shared by everyone, with the second password on every access sheet | `admin` |
+| Backstage | guest sign-in, no password | the same |
+| Prometheus, Alertmanager | no login | no login |
+
+Argo CD and Grafana let nobody in without a login (anonymous access is off in
+both), so the lab can face the internet without an address allowlist. Two things
+stay readable by anyone who reaches them: the portal, because the upstream
+Backstage image offers only the guest sign-in, which has no password, and
+Prometheus and Alertmanager. The setup guide's cloud section says what that
+means and how to keep the firewall allowlist instead. The shared password is
+generated into `credentials/delegate-viewer.txt` like the others. `delegate` is
+a local Argo CD account with the built-in `role:readonly` (its bcrypt hash goes
+into `argocd-secret` through the chart), and a Grafana Viewer that the
+`platform` role creates through Grafana's API once the chart is up.
+
 ### Optional: image signing
 
 For the supply-chain lab (Lab 5), the golden path can also sign images. It is off
@@ -100,8 +120,24 @@ Two things to know:
 
 Each delegate gets an access sheet (`credentials/access/studentNN.md`) with one
 password, in the form `Lab-abcd-efgh-1234`. It signs in to the browser IDE, Gitea
-and Harbor. The portal, Argo CD and Grafana open read-only without a login. Every
-lab is written out step by step in the handbook, `platform/handbook` in Gitea.
+and Harbor. Argo CD and Grafana take the shared read-only login `delegate`, whose
+password is on the same sheet; the portal signs everyone in as guest. Every lab is
+written out step by step in the handbook, `platform/handbook` in Gitea.
+
+**Team logins.** With `pelab_shared_logins: true` (the default), each sheet also
+lists the logins of the delegate's whole team and of `platform-approver`, and
+every workspace has the same table in `/etc/pelab/logins.md`. Delegates sign in
+as a teammate in a private window to play that role (an approval when the
+teammate is away), and as `platform-approver` to approve their team's
+environment and exception requests as the platform team. `platform-approver`
+is in the Gitea team `approvers` of the platform organisation: read access to
+the request repositories, where its approval counts; it cannot push or merge.
+Like any signed-in account it can read the team repositories, but approvals there
+count only from the team's own members. The course says plainly that this is
+role-play: at work accounts are personal. `false` lists only the delegate's own
+login and leaves approvals to `pelab-admin`. Changing the setting on a built lab
+takes effect on the next `site.yml` run (the branch rules are brought in line);
+an approval counts if its author was on the list when they approved.
 
 1. **Open the portal** at `https://backstage.<domain>`. It shows the platform
    services, the golden path, the teams and their services.
@@ -173,7 +209,8 @@ status, and the newest one counts.
 
 Two platform repositories are how teams ask for things. Every delegate may branch
 and open pull requests there (Gitea team `requesters`); only the platform team may
-approve (`golden_path_request_approvers`, by default `pelab-admin`).
+approve (`golden_path_request_approvers`: `pelab-admin`, and `platform-approver`
+when `pelab_shared_logins` is true).
 
 | Repository | What teams ask for | What the pull request runs |
 | --- | --- | --- |
@@ -272,8 +309,11 @@ delegates, 2 spares and 5 runners: 32 vCPU, 96–128 GB RAM and 1 TB NVMe. A
 second disk for the ZFS pool helps. The build needs internet access for packages,
 release downloads, Helm charts and container images.
 
-**Control node.** ansible-core 2.17 or later, and the collections from
-`requirements.yml`.
+**Control node.** ansible-core 2.17 or later, the collections from
+`requirements.yml`, and the Python packages `passlib` and `bcrypt` next to
+Ansible: they hash the delegates' Argo CD password. Homebrew's `ansible` has
+both; otherwise `pip install passlib bcrypt` into Ansible's Python. passlib 1.7.4
+prints a harmless "error reading bcrypt version" warning with bcrypt 5.
 
 **Without internet during the course.** The build needs the internet; the course
 can run without it if the build has warmed the caches. The Python base image is
@@ -324,7 +364,7 @@ Each role can also be run on its own with a tag of the same name, for example
 | `host_base` | Patching, chrony, sysctls and file limits, lab TLS and CA trust, ufw |
 | `lxd` | LXD with a ZFS pool and a bridge; builds the `workspace` image with all course tools |
 | `k3s` | k3s with Traefik and in-cluster DNS for the lab domain, plus Helm |
-| `platform` | The core Helm releases and any extras; the Harbor Docker Hub cache |
+| `platform` | The core Helm releases and any extras; the delegates' Grafana login; the Harbor Docker Hub cache |
 | `workspaces` | `student01..27`: containers, browser IDE, SSH jump access, `clean` snapshot |
 | `runners` | `runner01..05`: Gitea Actions runners with the same tools as the workspaces |
 | `teams` | Each team's `dev` namespace with RBAC, quota, defaults and network policy; delegate identities and kubeconfigs (with contexts for dev, staging and prod) |
@@ -447,11 +487,13 @@ Role defaults have comments; the ones most often changed:
 |---|---|
 | `pelab_extras` | `[]` |
 | `pelab_spare_team_assignments` | `{}`, for example `{student26: team03}` |
+| `pelab_shared_logins` | `true` (team logins and `platform-approver` on every sheet and in every workspace) |
 | `golden_path_starter_repo` | `hello` |
 | `golden_path_branch_protection` | pull requests only, 1 approval, the `pipeline` status green |
 | `golden_path_pipeline_context` | `pipeline` (the status every pipeline's last step posts) |
 | `golden_path_build_starters` | `true` (run the pipeline once on each starter repo) |
 | `golden_path_signing` | `false` (see [Optional: image signing](#optional-image-signing)) |
+| `pelab_viewer_user` | `delegate`: the shared read-only Argo CD and Grafana login (its password is generated) |
 | `pelab_team_member_roles` | dev and staging `edit`, prod `view` |
 | `pelab_team_sizes` | `small`: 1 CPU and 2 Gi requested per namespace (dev, and the default for staging and prod); `medium`: double |
 | `golden_path_request_approvers` | `[pelab-admin]`: who may approve environment and exception requests |
@@ -464,10 +506,13 @@ Role defaults have comments; the ones most often changed:
 | File | Contents |
 |---|---|
 | `credentials/platform.md` | URLs, instructor logins, each team's repository and environments |
-| `credentials/access/studentNN.md` | The delegate's access sheet |
+| `credentials/access/studentNN.md` | The delegate's access sheet, with the team's logins |
+| `credentials/access/all-logins.md` | Every delegate login by team, and the shared logins |
+| `credentials/passwords/platform-approver.txt` | The random part of the `platform-approver` password (rotated with the delegates' for a new cohort) |
 | `credentials/workspaces.csv` | Roster |
 | `credentials/passwords/`, `credentials/ssh/` | Generated passwords and key pairs |
 | `credentials/*.txt`, `credentials/gitea-bot-token.txt`, `credentials/gitea-applier-token.txt` | Generated passwords and tokens |
+| `credentials/delegate-viewer.txt`, `credentials/delegate-viewer-salt.txt` | The random part of the shared `delegate` password, and the salt of its bcrypt hash (so `argocd-secret` is stable between runs) |
 | `credentials/cosign.key`, `credentials/cosign.pub` | The image signing key pair (only with `golden_path_signing`) |
 
 **Supply chain of the lab itself.** Every downloaded binary is checked against its
@@ -485,8 +530,11 @@ version only. The Docker apt key is checked against Docker's fingerprint.
 
 - Traffic to Traefik bypasses ufw (k3s ServiceLB uses DNAT), so the same source
   ranges are enforced on the Traefik service.
-- Prometheus and Alertmanager have no login. Argo CD and Grafana can be viewed
-  without a login but not changed. Delegates' Harbor logins have no project roles:
+- Argo CD and Grafana need a login: delegates share the read-only `delegate`
+  account (Argo CD's built-in `role:readonly`; Grafana's Viewer), and anonymous
+  access is off in both. The portal signs everyone in as guest, and Prometheus
+  and Alertmanager have no login (see [Not included](#not-included-follow-ups)).
+  Delegates' Harbor logins have no project roles:
   the team projects are public, and only the pipeline's robot can push.
 - No pipeline holds credentials that can change the cluster: the plan pipeline
   reads, and the platform applier on the host applies only the approved `main`.
@@ -586,6 +634,16 @@ Checked locally:
   and reach Gitea over HTTPS with the lab CA. The full GitOps test (Argo CD
   deploying the teams' services) did not fit on the 8 GB test machine: see below.
 
+- **Team logins and `platform-approver` (2026-10-20).** The golden_path Gitea
+  tasks ran against Gitea 1.27.0 and a k3d cluster: 0 failures, and a second run
+  changed nothing. On `platform/environments`, a teammate's approval left the
+  merge refused ("Does not have enough approvals"); `platform-approver`'s let it
+  merge. `platform-approver` could not push to main (403) or merge ("User not
+  allowed to merge PR"), and its approval, like another team's, did not count on
+  `team01/hello`. With `pelab_shared_logins=false` the next run removed it from the
+  rule (1 change) and its approval no longer counted; `true` put it back. The
+  access sheet, the workspace's `logins.md` and `all-logins.md` rendered for a
+  team member and for spares with and without a team.
 - **The merge gate (2026-10-20).** Tested on Gitea 1.27.0 with one runner, on a
   `hello` made from the golden path with the branch rule as the role sends it: a
   pull request with no `pipeline` status yet, and one with a red status, were
@@ -631,7 +689,24 @@ Checked locally:
   - Ending an exception early needs a pull request the instructor did not open,
     with a past date the check accepts.
 
+- **The delegate login (2026-10-20).** The Argo CD and Grafana values rendered
+  with the real `group_vars` and went through `helm template` (argo-cd 10.10.5,
+  kube-prometheus-stack 92.10.1): `argocd-cm` has `users.anonymous.enabled:
+  "false"` and `accounts.delegate: login`, `argocd-rbac-cm` has `g, delegate,
+  role:readonly` with an empty default policy, `argocd-secret` carries the
+  bcrypt hash, and Grafana's `grafana.ini` has `[auth.anonymous] enabled =
+  false`. The hash came out identical on a second run (fixed salt) and verifies
+  with the `bcrypt` library. The Grafana tasks ran twice against a stand-in for
+  the six Grafana API calls they make: on an empty instance (one change, then
+  none) and on one where the account existed with a wrong password and the
+  Editor role (two changes, then none). The access sheet and `platform.md`
+  rendered with the login.
+
 **Not verified** (needs the real host):
+
+- The delegate login on the real Argo CD and Grafana: the chart's
+  `configs.secret.extra` landing in `argocd-secret` next to the admin password
+  on an upgrade, and Grafana's API answering through Traefik with the lab CA.
 
 - **The GitOps path:** Argo CD's ApplicationSets finding the team repositories
   through Gitea's API, dev deploying each merge, staging and prod retrying until
@@ -666,6 +741,16 @@ The policies still work. Migrating them is a good Lab 6 exercise.
   and Harbor produces the SBOMs.
 - A Backstage software template (scaffolder). Today, Gitea's template repositories
   are the self-service path.
+- **A password for the portal.** The upstream Backstage image signs everyone in
+  as guest, and the guest provider has no password. A real login needs an
+  identity provider (Keycloak, or Gitea as an OpenID Connect provider) wired into
+  the portal's frontend, which the upstream image does not offer. Until then the
+  portal, including "Register existing component", is open to anyone who reaches
+  it.
+- **A login for Prometheus and Alertmanager.** Both are published without one;
+  Alertmanager accepts silences from anyone. A Traefik basic-auth middleware with
+  the same `delegate` login on their two Ingresses would close this; the labs
+  never open either directly.
 - **Requiring Gitea's own job statuses.** Gitea 1.27.0 stores the first status a
   job creates ("Waiting to run") under a different key from its later updates,
   so a required check on a job's status stays pending for ever (seen on a test

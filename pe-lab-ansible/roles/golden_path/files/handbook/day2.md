@@ -222,6 +222,8 @@ Your teammate clicks Review (top right of Files Changed), chooses Approve and su
 
 **You should see:** "All checks were successful", one green approval, and a plain Create squash commit button. A red pipeline says "Some required checks failed" instead, and nothing merges until the branch is fixed and pushed again.
 
+> **Tip:** Working alone, or your teammate is busy? Play their role: open a private window (Ctrl+Shift+N; on a Mac Cmd+Shift+N; Firefox Ctrl+Shift+P), sign in to Gitea there with a login from "Your team's logins" on your access sheet (or cat /etc/pelab/logins.md in your workspace), and approve as that teammate. It counts because it is another account. Then close the private window and merge as yourself.
+
 #### Step 4. Merge it, and update your copy
 
 *Where: Browser: Gitea, then the workspace terminal*
@@ -242,7 +244,7 @@ git log --oneline -3
 
 The pipeline now runs again on main and builds the image (Gitea → Actions shows it). Then Argo CD notices that main changed.
 
-Open https://argocd.<lab domain> (no sign-in needed) and click the application teamNN-hello-dev.
+Open https://argocd.<lab domain> and sign in as delegate with the password on your access sheet: one read-only login that every delegate shares (not your studentNN password). Then click the application teamNN-hello-dev.
 
 **You should see:** Within a few minutes: Synced and Healthy, with your commit id next to "Sync OK to".
 
@@ -264,7 +266,8 @@ curl -s https://hello-$TEAM-dev.$DOMAIN/
 
 **If you are stuck**
 
-- Merge stays grey: it needs one approval from a teammate. Your own approval does not count.
+- Argo CD asks for a user name and password: delegate, with the shared password on your access sheet. Your studentNN password does not work there.
+- Merge stays grey: it needs one approval from a teammate. Your own approval does not count. Teammate not here? Approve as them in a private window, with the logins on your access sheet.
 - "Some checks are pending" or "Some required checks failed" although approved: the required check called pipeline is not green yet. Wait for the run to finish; if it is red, fix it on the branch and push again (Day 5 shows how to read the failure). The "When checks succeed" button only queues the merge: nothing merges while the check is red.
 - Argo CD still shows the old commit: the pipeline must finish first (Actions tab). Argo CD then notices within about three minutes.
 
@@ -345,11 +348,13 @@ git push -u origin self-approve-$ME
 
 **You should see:** Gitea does not let you approve your own pull request, and Merge stays unavailable.
 
+> **Tip:** Signing in as a teammate would get an approval through: the tool checks accounts, not people. That is why at work every account is personal and never shared. In this lab you share logins only to play roles.
+
 #### Step 4. Change it after a teammate approved
 
 *Where: Gitea, then the workspace terminal*
 
-Ask a teammate to approve the pull request. Then push one more commit to the same branch.
+Ask a teammate to approve the pull request (or approve it as a teammate in a private window, as in Lab 2). Then push one more commit to the same branch.
 
 ```bash
 echo "One more line" >> README.md

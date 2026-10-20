@@ -78,6 +78,7 @@ module.exports = {
         where: 'Browser: Gitea (your teammate)',
         say: 'Your teammate clicks Review (top right of Files Changed), chooses Approve and submits. Then wait for the pipeline: the yellow dot turns into a green tick. Until then the box says "Some checks are pending" and the merge button only offers to merge "When checks succeed": main requires the check called pipeline, which the pipeline posts as its last step.',
         see: '"All checks were successful", one green approval, and a plain Create squash commit button. A red pipeline says "Some required checks failed" instead, and nothing merges until the branch is fixed and pushed again.',
+        tip: 'Working alone, or your teammate is busy? Play their role: open a private window (Ctrl+Shift+N; on a Mac Cmd+Shift+N; Firefox Ctrl+Shift+P), sign in to Gitea there with a login from "Your team\'s logins" on your access sheet (or cat /etc/pelab/logins.md in your workspace), and approve as that teammate. It counts because it is another account. Then close the private window and merge as yourself.',
       },
       {
         title: 'Merge it, and update your copy',
@@ -91,7 +92,7 @@ module.exports = {
         where: 'Browser: Argo CD',
         say: [
           'The pipeline now runs again on main and builds the image (Gitea → Actions shows it). Then Argo CD notices that main changed.',
-          'Open https://argocd.<lab domain> (no sign-in needed) and click the application teamNN-hello-dev.',
+          'Open https://argocd.<lab domain> and sign in as delegate with the password on your access sheet: one read-only login that every delegate shares (not your studentNN password). Then click the application teamNN-hello-dev.',
         ],
         see: 'Within a few minutes: Synced and Healthy, with your commit id next to "Sync OK to".',
         tip: 'If your instructor has switched on the safety net, Argo CD is paused. Look at your merge commit in Gitea instead (Commits → the tick next to it): safety-net/dev says "Deployed to teamNN-dev" with your commit.',
@@ -132,11 +133,12 @@ module.exports = {
         say: 'Make a small change on a new branch and open a pull request, as in Lab 2. Then try to approve it yourself (Files Changed → Review → Approve).',
         run: 'git switch -c self-approve-$ME\necho "Self review" >> README.md\ngit commit -am "Try to approve my own change"\ngit push -u origin self-approve-$ME',
         see: 'Gitea does not let you approve your own pull request, and Merge stays unavailable.',
+        tip: 'Signing in as a teammate would get an approval through: the tool checks accounts, not people. That is why at work every account is personal and never shared. In this lab you share logins only to play roles.',
       },
       {
         title: 'Change it after a teammate approved',
         where: 'Gitea, then the workspace terminal',
-        say: 'Ask a teammate to approve the pull request. Then push one more commit to the same branch.',
+        say: 'Ask a teammate to approve the pull request (or approve it as a teammate in a private window, as in Lab 2). Then push one more commit to the same branch.',
         run: 'echo "One more line" >> README.md\ngit commit -am "Change after approval"\ngit push',
         see: 'The approval is marked stale (dismissed): what was approved is no longer what would be merged, so it needs a fresh review.',
         tip: 'Close this pull request without merging when you are done (Close Pull Request at the bottom), and delete the branch.',

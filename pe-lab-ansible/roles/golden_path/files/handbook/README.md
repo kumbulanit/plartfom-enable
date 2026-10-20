@@ -4,18 +4,18 @@ Every lab of the Platform Engineering Capability Development Programme, step by 
 
 ## Your accounts
 
-Your access sheet has your user name (`studentNN`), your team and your password. One password opens your workspace, Gitea and Harbor. The portal, Argo CD and Grafana open without signing in, read-only.
+Your access sheet has your user name (`studentNN`), your team and two passwords. Your own password opens your workspace, Gitea and Harbor. Argo CD and Grafana take one read-only login that every delegate shares: user `delegate`, with the second password on your sheet. The portal needs no password: sign in as guest.
 
-| What | Address |
-| --- | --- |
-| Your workspace (editor and terminal) | https://studentNN.<lab domain> |
-| Portal: catalog and templates | https://backstage.<lab domain> |
-| Git, pull requests, pipelines | https://gitea.<lab domain> |
-| Images, scan reports, SBOMs | https://harbor.<lab domain> |
-| Deployments | https://argocd.<lab domain> |
-| Dashboards and logs | https://grafana.<lab domain> |
-| Environment requests (Day 3) | https://gitea.<lab domain>/platform/environments |
-| Guardrails and exceptions (Day 5) | https://gitea.<lab domain>/platform/policies |
+| What | Address | Sign in as |
+| --- | --- | --- |
+| Your workspace (editor and terminal) | https://studentNN.<lab domain> | studentNN |
+| Portal: catalog and templates | https://backstage.<lab domain> | guest |
+| Git, pull requests, pipelines | https://gitea.<lab domain> | studentNN |
+| Images, scan reports, SBOMs | https://harbor.<lab domain> | studentNN |
+| Deployments (read-only) | https://argocd.<lab domain> | delegate (shared) |
+| Dashboards and logs (read-only) | https://grafana.<lab domain> | delegate (shared) |
+| Environment requests (Day 3) | https://gitea.<lab domain>/platform/environments | studentNN |
+| Guardrails and exceptions (Day 5) | https://gitea.<lab domain>/platform/policies | studentNN |
 
 ## The days
 
@@ -36,6 +36,7 @@ Each day runs 09:00 to 16:00: concepts and a live demo, then hands-on labs, then
 - Open a terminal in your workspace with the menu (☰) → Terminal → New Terminal. Paste with Ctrl+V or right-click → Paste. A second terminal: the + button at the top right of the terminal panel.
 - Your workspace knows who you are. `$ME` is your user name, `$TEAM` your team and `$DOMAIN` the lab's domain, so the commands work as pasted. Try `echo "$ME $TEAM $DOMAIN"`.
 - In addresses you type into the browser, replace `teamNN` with your team and `studentNN` with your user name, for example `team03` and `student12`.
+- **Working as a team.** When a step needs someone else (a teammate who approves, or the platform team), that person does it. If they are not there, play their role: open a private window (Ctrl+Shift+N; on a Mac Cmd+Shift+N; Firefox Ctrl+Shift+P), sign in to Gitea as them with a login from "Your team's logins" on your access sheet, or from `cat /etc/pelab/logins.md` in your workspace, do the step, and close the window. `platform-approver` is the platform team's login: it approves environment and exception requests. At work you never share a login; here it is role-play, so every step can be done.
 - If your instructor says the safety net is on, Argo CD is paused and the platform deploys for it. Work exactly as written; where a step says to look at Argo CD, look at the commit in Gitea instead: click the tick next to it and read `safety-net/dev`, `safety-net/staging` or `safety-net/prod`.
 
 ## Working on the platform, in five verbs

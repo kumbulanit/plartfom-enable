@@ -1,0 +1,13 @@
+# Argo Rollouts controller and its dashboard. The dashboard has no login, so it is read-only.
+dashboard:
+  enabled: true
+  readonly: true
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts: ["{{ pelab_hosts.rollouts }}"]
+    paths: ["/"]
+    pathType: Prefix
+    tls:
+      - secretName: {{ pelab_tls_secret_name }}
+        hosts: ["{{ pelab_hosts.rollouts }}"]

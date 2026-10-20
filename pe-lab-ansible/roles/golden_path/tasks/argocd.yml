@@ -1,0 +1,36 @@
+---
+# Argo CD reads the team organisations through the read-only platform-bot token.
+# For each team, one ApplicationSet deploys every repository that has deploy/dev
+# (on every commit to main), and another deploys deploy/staging and deploy/prod
+# exactly as they are in Git.
+- name: Give Argo CD read access to the team repositories
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: gitea-repo-creds
+          namespace: argocd
+          labels:
+            argocd.argoproj.io/secret-type: repo-creds
+        stringData:
+          type: git
+          url: "https://{{ pelab_hosts.gitea }}/"
+          username: "{{ golden_path_bot_user }}"
+          password: "{{ golden_path_bot_token }}"
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: gitea-scm-token
+          namespace: argocd
+        stringData:
+          token: "{{ golden_path_bot_token }}"
+  no_log: true
+
+- name: Create an Argo CD project and ApplicationSets per team
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition: "{{ lookup('ansible.builtin.template', 'manifests/argocd-teams.yaml.j2') | ansible.builtin.from_yaml_all | list }}"

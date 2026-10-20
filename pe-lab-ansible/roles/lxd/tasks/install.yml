@@ -1,0 +1,31 @@
+---
+- name: Install the LXD snap
+  community.general.snap:
+    name: lxd
+    channel: "{{ lxd_snap_channel }}"
+    state: present
+
+- name: Hold automatic LXD snap refreshes
+  ansible.builtin.command:
+    argv: [snap, refresh, --hold=forever, lxd]
+  changed_when: false
+  when: lxd_hold_refresh | bool
+
+- name: Wait for the LXD daemon
+  ansible.builtin.command:
+    argv: [lxd, waitready, --timeout=300]
+  changed_when: false
+
+- name: Check whether LXD has been initialised
+  ansible.builtin.command:
+    argv: [lxc, storage, show, "{{ lxd_storage_pool }}"]
+  register: lxd_pool_check
+  changed_when: false
+  failed_when: false
+
+- name: Initialise LXD (storage pool, bridge, default profile)
+  ansible.builtin.command:
+    argv: [lxd, init, --preseed]
+    stdin: "{{ lxd_preseed | to_nice_yaml }}"
+  when: lxd_pool_check.rc != 0
+  changed_when: true

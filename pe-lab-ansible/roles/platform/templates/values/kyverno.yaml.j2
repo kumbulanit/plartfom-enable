@@ -1,0 +1,45 @@
+# Kyverno policy engine, one replica per controller. Policies are course content
+# and are not installed here.
+#
+# The admission and reports controllers trust the lab CA, so image verification
+# (verifyImages, used with golden_path_signing) can read signatures from Harbor.
+# SSL_CERT_DIR adds the CA to the image's own trust store; SSL_CERT_FILE would
+# replace it.
+admissionController:
+  replicas: 1
+  container:
+    extraEnvVars:
+      - name: SSL_CERT_DIR
+        value: /etc/pelab-ca
+  extraVolumes:
+    - name: pelab-ca
+      configMap:
+        name: pelab-ca
+  extraVolumeMounts:
+    - name: pelab-ca
+      mountPath: /etc/pelab-ca
+      readOnly: true
+backgroundController:
+  replicas: 1
+cleanupController:
+  replicas: 1
+# Background scans verify images again, so this controller needs the CA too.
+reportsController:
+  replicas: 1
+  extraEnvVars:
+    - name: SSL_CERT_DIR
+      value: /etc/pelab-ca
+  extraVolumes:
+    - name: pelab-ca
+      configMap:
+        name: pelab-ca
+  extraVolumeMounts:
+    - name: pelab-ca
+      mountPath: /etc/pelab-ca
+      readOnly: true
+# Policy exceptions (the Day 5 waiver lab) count only in one namespace, which
+# only the platform applier writes to; an exception anywhere else is ignored.
+features:
+  policyExceptions:
+    enabled: true
+    namespace: {{ pelab_exception_namespace }}

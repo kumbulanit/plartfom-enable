@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+# containerd pulls these registries through Harbor's proxy-cache projects and
+# falls back to the upstream registry when Harbor does not answer.
+mirrors:
+{% for cache in platform_harbor_proxy_caches if cache.mirror is defined %}
+  "{{ cache.mirror }}":
+    endpoint:
+      - "https://{{ pelab_hosts.harbor }}"
+    rewrite:
+      "^(.*)$": "{{ cache.name }}/$1"
+{% endfor %}
+configs:
+  "{{ pelab_hosts.harbor }}":
+    tls:
+      ca_file: {{ pelab_tls_dir }}/ca.crt

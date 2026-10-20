@@ -1,0 +1,13 @@
+# Backstage reads this file; everything else is listed from here.
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: pelab
+  description: Everything the PE Lab developer portal knows about
+spec:
+  targets:
+    - ./platform.yaml
+    - ./teams.yaml
+{% for team in pelab_team_names %}
+    - https://{{ pelab_hosts.gitea }}/{{ team }}/{{ golden_path_starter_repo }}/src/branch/main/catalog-info.yaml
+{% endfor %}

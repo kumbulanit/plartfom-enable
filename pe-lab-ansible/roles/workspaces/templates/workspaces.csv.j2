@@ -1,0 +1,4 @@
+workspace,team,container_ip,code_server_url,code_server_password,ssh_key
+{% for name in pelab_workspace_names %}
+{{ name }},{{ pelab_workspace_teams[name] | default('spare') }},{{ pelab_lxd_subnet_prefix }}.{{ workspaces_ip_offset + loop.index }},https://{{ name }}.{{ pelab_domain }},{{ pelab_delegate_passwords[name] }},{{ 'provided' if workspaces_provided_keys.results[loop.index0].stat.exists else pelab_credentials_dir ~ '/ssh/' ~ name }}
+{% endfor %}

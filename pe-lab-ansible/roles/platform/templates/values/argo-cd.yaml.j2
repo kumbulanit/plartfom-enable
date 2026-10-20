@@ -1,0 +1,41 @@
+# Argo CD behind Traefik (TLS terminates at Traefik). Delegates browse it without
+# logging in (read-only); changes reach the cluster only through Git. The admin
+# password is in the argocd-initial-admin-secret secret.
+global:
+  domain: {{ pelab_hosts.argocd }}
+configs:
+  params:
+    server.insecure: true
+  cm:
+    timeout.reconciliation: 60s
+    users.anonymous.enabled: "true"
+  rbac:
+    policy.default: role:readonly
+  # Trust the lab CA when talking to Gitea and Harbor (OCI Helm charts).
+  tls:
+    certificates:
+      {{ pelab_hosts.gitea }}: {{ platform_ca_pem | to_json }}
+      {{ pelab_hosts.harbor }}: {{ platform_ca_pem | to_json }}
+dex:
+  enabled: false
+# The ApplicationSet controller reads team repositories from Gitea's API.
+applicationSet:
+  extraEnv:
+    - name: SSL_CERT_FILE
+      value: /etc/pelab-ca/ca.crt
+  extraVolumes:
+    - name: pelab-ca
+      configMap:
+        name: pelab-ca
+  extraVolumeMounts:
+    - name: pelab-ca
+      mountPath: /etc/pelab-ca
+      readOnly: true
+server:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    tls: false
+    extraTls:
+      - secretName: {{ pelab_tls_secret_name }}
+        hosts: ["{{ pelab_hosts.argocd }}"]

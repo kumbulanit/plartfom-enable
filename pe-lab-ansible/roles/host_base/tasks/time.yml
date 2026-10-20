@@ -1,0 +1,19 @@
+---
+- name: Set the timezone
+  community.general.timezone:
+    name: "{{ pelab_timezone }}"
+
+- name: Configure chrony time sources
+  ansible.builtin.template:
+    src: chrony.conf.j2
+    dest: /etc/chrony/chrony.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart chrony
+
+- name: Enable chrony
+  ansible.builtin.systemd_service:
+    name: chrony
+    enabled: true
+    state: started

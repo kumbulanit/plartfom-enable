@@ -1,0 +1,48 @@
+---
+- name: Give each team a Harbor project and the pipelines a push account
+  ansible.builtin.import_tasks: harbor.yml
+  module_defaults:
+    ansible.builtin.uri:
+      user: admin
+      password: "{{ pelab_harbor_admin_password }}"
+      force_basic_auth: true
+      ca_path: "{{ pelab_tls_dir }}/ca.crt"
+      body_format: json
+
+- name: Create the image signing key (golden_path_signing)
+  ansible.builtin.import_tasks: signing.yml
+  when: golden_path_signing | bool
+
+- name: Prepare the cluster for the request repositories (environments, policies)
+  ansible.builtin.import_tasks: requests.yml
+
+- name: Set up Gitea accounts, team organisations, the platform repositories and starter services
+  ansible.builtin.import_tasks: gitea.yml
+  module_defaults:
+    ansible.builtin.uri:
+      user: "{{ pelab_gitea_admin_user }}"
+      password: "{{ pelab_gitea_admin_password }}"
+      force_basic_auth: true
+      ca_path: "{{ pelab_tls_dir }}/ca.crt"
+      body_format: json
+
+- name: Let Argo CD deploy every team repository it finds
+  ansible.builtin.import_tasks: argocd.yml
+
+- name: Apply the platform guardrails and the golden-path dashboard
+  ansible.builtin.import_tasks: guardrails.yml
+
+- name: Publish the developer portal
+  ansible.builtin.import_tasks: portal.yml
+
+- name: Start the platform applier (applies the approved request repositories)
+  ansible.builtin.import_tasks: applier.yml
+
+- name: Write the platform summary on the control node
+  ansible.builtin.template:
+    src: platform-summary.md.j2
+    dest: "{{ pelab_credentials_dir }}/platform.md"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true

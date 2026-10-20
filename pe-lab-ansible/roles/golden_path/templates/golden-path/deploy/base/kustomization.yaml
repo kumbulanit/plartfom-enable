@@ -1,0 +1,10 @@
+# Shared by every environment. Each overlay (dev, staging, prod) adds its namespace,
+# settings, host name and image tag on top.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - servicemonitor.yaml
+  - prometheusrule.yaml

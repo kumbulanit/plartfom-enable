@@ -1,0 +1,44 @@
+---
+- name: Wait for each workspace to finish booting
+  ansible.builtin.command:
+    argv: [lxc, exec, "{{ item }}", --, systemctl, is-system-running, --wait]
+  loop: "{{ pelab_workspace_names }}"
+  register: workspaces_boot
+  changed_when: false
+  failed_when: workspaces_boot.stdout | trim not in ['running', 'degraded']
+
+- name: Create the delegate account and start code-server
+  ansible.builtin.command:
+    argv: [lxc, exec, "{{ item }}", --, /usr/local/sbin/pelab-workspace-init, "{{ item }}", "{{ pelab_workspace_uid }}"]
+  loop: "{{ pelab_workspace_names }}"
+  register: workspaces_init
+  changed_when: workspaces_init.stdout_lines | last == 'CHANGED'
+
+- name: List workspace snapshots
+  ansible.builtin.command:
+    argv: [lxc, query, "/1.0/instances/{{ item }}/snapshots"]
+  loop: "{{ pelab_workspace_names }}"
+  register: workspaces_snapshots
+  changed_when: false
+
+- name: Delete the old clean snapshot
+  ansible.builtin.command:
+    argv: [lxc, delete, "{{ item.item }}/{{ workspaces_snapshot }}"]
+  loop: "{{ workspaces_snapshots.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - workspaces_resnapshot | bool
+    - ('/1.0/instances/' ~ item.item ~ '/snapshots/' ~ workspaces_snapshot) in (item.stdout | from_json)
+  changed_when: true
+
+- name: Take the clean snapshot
+  ansible.builtin.command:
+    argv: [lxc, snapshot, "{{ item.item }}", "{{ workspaces_snapshot }}"]
+  loop: "{{ workspaces_snapshots.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: >-
+    workspaces_resnapshot | bool
+    or ('/1.0/instances/' ~ item.item ~ '/snapshots/' ~ workspaces_snapshot) not in (item.stdout | from_json)
+  changed_when: true

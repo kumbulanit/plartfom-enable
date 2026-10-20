@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: PE Lab
+  description: Shared platform services on k3s (Helm), with the lab wildcard domain and certificate
+  license: MIT
+  min_ansible_version: "2.17"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+dependencies: []

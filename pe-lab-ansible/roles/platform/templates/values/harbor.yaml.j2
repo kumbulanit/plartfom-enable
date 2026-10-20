@@ -1,0 +1,35 @@
+# Harbor registry with Trivy scanning; proxy-cache projects are added by the API afterwards.
+externalURL: https://{{ pelab_hosts.harbor }}
+expose:
+  type: ingress
+  tls:
+    enabled: true
+    certSource: secret
+    secret:
+      secretName: {{ pelab_tls_secret_name }}
+  ingress:
+    className: traefik
+    hosts:
+      core: {{ pelab_hosts.harbor }}
+existingSecretAdminPassword: harbor-admin
+existingSecretAdminPasswordKey: HARBOR_ADMIN_PASSWORD
+secretKey: "{{ pelab_harbor_secret_key }}"
+# Single node with ReadWriteOnce volumes: replace pods instead of rolling them.
+updateStrategy:
+  type: Recreate
+persistence:
+  enabled: true
+  persistentVolumeClaim:
+    registry:
+      size: 200Gi
+    jobservice:
+      jobLog:
+        size: 1Gi
+    database:
+      size: 5Gi
+    redis:
+      size: 1Gi
+    trivy:
+      size: 10Gi
+trivy:
+  enabled: true

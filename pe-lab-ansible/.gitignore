@@ -1,0 +1,13 @@
+# Generated on the control node by the playbooks: passwords, SSH keys, kubeconfigs.
+credentials/
+# Copies of the lab's backups (backup.yml): the teams' work, keep it private.
+backups/
+
+# TLS material and delegate keys are site-specific.
+files/tls/*
+!files/tls/README.md
+files/ssh-keys/*.pub
+
+collections/
+.ansible/
+*.retry

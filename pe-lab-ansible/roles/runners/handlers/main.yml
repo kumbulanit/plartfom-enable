@@ -1,0 +1,6 @@
+---
+- name: Restart Gitea runners
+  ansible.builtin.command:
+    argv: [lxc, exec, "{{ item }}", --, systemctl, try-restart, pelab-gitea-runner.service]
+  loop: "{{ pelab_runner_names }}"
+  changed_when: true

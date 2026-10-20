@@ -1,0 +1,17 @@
+---
+# Nightly backup of what the course cannot rebuild from Ansible: the teams' work
+# in Gitea and Harbor. Everything else (the platform, the workspaces, the
+# environments and exceptions, which live in Git) is rebuilt by site.yml.
+
+# Where the backups are written on the lab host, one dated folder per run.
+backup_dir: "{{ pelab_state_dir }}/backups"
+# How many backups to keep on the host.
+backup_keep: 7
+# When the timer runs (systemd OnCalendar). Between course days.
+backup_on_calendar: "*-*-* 02:30:00"
+# Harbor's image storage can be large; without it, a restore rebuilds images
+# by re-running the pipelines (see the README's restore procedure).
+backup_harbor_registry: true
+
+# backup.yml copies the latest backup to the control node, here.
+backup_local_dir: "{{ playbook_dir }}/backups"

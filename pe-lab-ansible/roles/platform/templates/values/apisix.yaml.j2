@@ -1,0 +1,34 @@
+# APISIX gateway driven by the APISIX Ingress Controller in API-driven standalone
+# mode (no etcd). Published at https://{{ pelab_hosts.apisix }} via Traefik.
+service:
+  type: ClusterIP
+apisix:
+  deployment:
+    role: traditional
+    role_traditional:
+      config_provider: yaml
+  admin:
+    credentials:
+      secretName: apisix-admin
+etcd:
+  enabled: false
+ingress-controller:
+  enabled: true
+  config:
+    provider:
+      type: apisix-standalone
+  apisix:
+    adminService:
+      namespace: apisix
+  gatewayProxy:
+    createDefault: true
+    provider:
+      controlPlane:
+        auth:
+          type: AdminKey
+          adminKey:
+            value: ""
+            valueFrom:
+              secretKeyRef:
+                name: apisix-admin
+                key: admin

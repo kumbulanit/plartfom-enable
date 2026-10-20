@@ -1,0 +1,24 @@
+# Each overlay replaces the host with <name>-<team>-<env>.{{ pelab_domain }}.
+# No secretName: Traefik serves the lab's wildcard certificate.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ${REPO_NAME}
+  labels:
+    app.kubernetes.io/name: ${REPO_NAME}
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - ${REPO_NAME}-${REPO_OWNER}.{{ pelab_domain }}
+  rules:
+    - host: ${REPO_NAME}-${REPO_OWNER}.{{ pelab_domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ${REPO_NAME}
+                port:
+                  name: http

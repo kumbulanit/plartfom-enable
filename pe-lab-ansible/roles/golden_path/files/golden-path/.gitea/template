@@ -1,0 +1,6 @@
+# When a repository is created from this template, Gitea replaces the repository
+# variables (name, owner, ...) in the files matched below.
+README.md
+catalog-info.yaml
+.gitea/CODEOWNERS
+deploy/**

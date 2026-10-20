@@ -1,0 +1,114 @@
+# What the environment template needs in the cluster:
+#  - {{ golden_path_tfstate_namespace }}: OpenTofu's state (a Secret) and the lock (a Lease),
+#  - environments-reader: a read-only identity for the plan pipeline. It can see
+#    namespaces, budgets, network policies, role bindings, the delegate accounts
+#    and the state, and change nothing. The platform applies with its own admin
+#    credentials on the lab host (pelab-platform-apply.timer).
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ golden_path_tfstate_namespace }}
+  labels:
+    pelab.io/tier: platform
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: environments-reader
+  namespace: {{ golden_path_tfstate_namespace }}
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: environments-reader-token
+  namespace: {{ golden_path_tfstate_namespace }}
+  annotations:
+    kubernetes.io/service-account.name: environments-reader
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pelab-environments-reader
+rules:
+  - apiGroups: [""]
+    resources: [namespaces, resourcequotas, limitranges]
+    verbs: [get, list, watch]
+  - apiGroups: [networking.k8s.io]
+    resources: [networkpolicies]
+    verbs: [get, list, watch]
+  - apiGroups: [rbac.authorization.k8s.io]
+    resources: [rolebindings]
+    verbs: [get, list, watch]
+  # The members lookup (data "kubernetes_resources") resolves kinds through the API's type list.
+  - apiGroups: [apiextensions.k8s.io]
+    resources: [customresourcedefinitions]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pelab-environments-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: pelab-environments-reader
+subjects:
+  - kind: ServiceAccount
+    name: environments-reader
+    namespace: {{ golden_path_tfstate_namespace }}
+---
+# The state Secret. This namespace holds nothing else that is secret.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: read-state
+  namespace: {{ golden_path_tfstate_namespace }}
+rules:
+  - apiGroups: [""]
+    resources: [secrets]
+    verbs: [get, list, watch]
+  # Reading the lock; before the first apply OpenTofu looks it up even with -lock=false.
+  - apiGroups: [coordination.k8s.io]
+    resources: [leases]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: environments-reader
+  namespace: {{ golden_path_tfstate_namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: read-state
+subjects:
+  - kind: ServiceAccount
+    name: environments-reader
+    namespace: {{ golden_path_tfstate_namespace }}
+---
+# The template looks up each team's members (delegate ServiceAccounts).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: list-delegates
+  namespace: {{ pelab_users_namespace }}
+rules:
+  - apiGroups: [""]
+    resources: [serviceaccounts]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: environments-reader
+  namespace: {{ pelab_users_namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: list-delegates
+subjects:
+  - kind: ServiceAccount
+    name: environments-reader
+    namespace: {{ golden_path_tfstate_namespace }}

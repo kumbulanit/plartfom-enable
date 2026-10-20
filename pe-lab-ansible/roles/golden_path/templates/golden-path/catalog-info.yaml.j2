@@ -1,0 +1,33 @@
+# Registers this service in the developer portal (Backstage): who owns it,
+# where it runs and where to look when something goes wrong.
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${REPO_NAME}-${REPO_OWNER}
+  title: ${REPO_NAME} (${REPO_OWNER})
+  description: A service built on the PE Lab golden path.
+  tags: [python, golden-path]
+  annotations:
+    backstage.io/source-location: url:https://{{ pelab_hosts.gitea }}/${REPO_OWNER}/${REPO_NAME}
+  links:
+    - url: https://${REPO_NAME}-${REPO_OWNER}-dev.{{ pelab_domain }}
+      title: Dev
+    - url: https://${REPO_NAME}-${REPO_OWNER}-staging.{{ pelab_domain }}
+      title: Staging
+    - url: https://${REPO_NAME}-${REPO_OWNER}-prod.{{ pelab_domain }}
+      title: Prod
+    - url: https://{{ pelab_hosts.gitea }}/${REPO_OWNER}/${REPO_NAME}/actions
+      title: Pipeline runs
+    - url: https://{{ pelab_hosts.argocd }}/applications?search=${REPO_OWNER}-${REPO_NAME}
+      title: Deployments (Argo CD)
+    - url: https://{{ pelab_hosts.harbor }}/harbor/projects
+      title: Images, scans and SBOMs (Harbor)
+    - url: https://{{ pelab_hosts.grafana }}/d/pelab-golden-path?var-team=${REPO_OWNER}&var-app=${REPO_NAME}
+      title: Dashboard and logs (Grafana)
+    - url: https://{{ pelab_hosts.gitea }}/platform/golden-path/issues
+      title: Get help from the platform team
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:${REPO_OWNER}
+  system: pelab-apps

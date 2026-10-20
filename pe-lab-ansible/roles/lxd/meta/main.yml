@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: PE Lab
+  description: LXD (snap) with storage pool, bridge and the workspace image build
+  license: MIT
+  min_ansible_version: "2.17"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+dependencies: []

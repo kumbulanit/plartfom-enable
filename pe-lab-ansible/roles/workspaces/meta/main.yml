@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: PE Lab
+  description: Delegate workspaces (LXD containers) with SSH jump access, code-server and a clean snapshot
+  license: MIT
+  min_ansible_version: "2.17"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+dependencies: []

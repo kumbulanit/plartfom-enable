@@ -1,0 +1,206 @@
+---
+# Removes the lab from the host: containers, image, k3s and all cluster data,
+# jump accounts and lab state under /opt/pelab. Host settings from host_base
+# (patching, chrony, ufw, sysctls, CA trust) are kept.
+#
+#   ansible-playbook teardown.yml -e pelab_teardown_confirm=<pelab_domain>
+#   ansible-playbook teardown.yml -e pelab_teardown_confirm=<pelab_domain> -e teardown_remove_lxd=true
+
+- name: Tear down the lab
+  hosts: pelab
+  become: true
+  gather_facts: false
+  vars:
+    # Also remove the LXD snap with its storage pool and bridge.
+    teardown_remove_lxd: false
+
+  pre_tasks:
+    - name: Require explicit confirmation
+      ansible.builtin.assert:
+        that: pelab_teardown_confirm | default('') == pelab_domain
+        fail_msg: >-
+          This deletes every workspace, runner and all cluster data on {{ inventory_hostname }}.
+          Re-run with -e pelab_teardown_confirm={{ pelab_domain }}
+
+  tasks:
+    - name: Check whether LXD is installed
+      ansible.builtin.stat:
+        path: /snap/bin/lxc
+      register: teardown_lxc
+
+    - name: Delete workspace, runner and builder containers
+      community.general.lxd_container:
+        name: "{{ item }}"
+        state: absent
+        force_stop: true
+      loop: "{{ pelab_workspace_names + pelab_runner_names + ['pelab-image-builder'] }}"
+      when: teardown_lxc.stat.exists
+
+    - name: Delete the lab LXD profiles
+      community.general.lxd_profile:
+        name: "{{ item }}"
+        state: absent
+      loop: [pelab-workspace, pelab-runner]
+      when: teardown_lxc.stat.exists
+
+    - name: Delete the workspace image
+      ansible.builtin.command:
+        argv: [lxc, image, delete, "{{ pelab_workspace_image }}"]
+      register: teardown_image
+      changed_when: teardown_image.rc == 0
+      failed_when:
+        - teardown_image.rc != 0
+        - "'not found' not in teardown_image.stderr | lower"
+      when: teardown_lxc.stat.exists
+
+    - name: Stop the platform applier
+      ansible.builtin.systemd_service:
+        name: pelab-platform-apply.timer
+        state: stopped
+        enabled: false
+      failed_when: false
+
+    - name: Remove the platform applier
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/systemd/system/pelab-platform-apply.timer
+        - /etc/systemd/system/pelab-platform-apply.service
+        - /usr/local/sbin/pelab-platform-apply
+        - /usr/local/sbin/pelab-safety-net
+        - "{{ pelab_state_dir }}/applier"
+
+    # The backups in {{ pelab_state_dir }}/backups are kept: they are what a rebuild restores.
+    - name: Stop the nightly backup
+      ansible.builtin.systemd_service:
+        name: pelab-backup.timer
+        state: stopped
+        enabled: false
+      failed_when: false
+
+    - name: Remove the backup timer and scripts
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/systemd/system/pelab-backup.timer
+        - /etc/systemd/system/pelab-backup.service
+        - /usr/local/sbin/pelab-backup
+        - /usr/local/sbin/pelab-restore
+
+    - name: Uninstall k3s and delete all cluster data
+      ansible.builtin.command:
+        argv: [/usr/local/bin/k3s-uninstall.sh]
+        removes: /usr/local/bin/k3s-uninstall.sh
+
+    # The tokens belonged to the Gitea that was just deleted; a rebuild creates new ones.
+    - name: Forget the Gitea tokens on the control node
+      ansible.builtin.file:
+        path: "{{ pelab_credentials_dir }}/{{ item }}"
+        state: absent
+      loop: [gitea-bot-token.txt, gitea-applier-token.txt]
+      delegate_to: localhost
+      become: false
+
+    - name: Remove the jump accounts
+      ansible.builtin.user:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ pelab_workspace_names }}"
+
+    - name: Remove the jump account group
+      ansible.builtin.group:
+        name: pelab-jump
+        state: absent
+
+    - name: Remove jump access configuration
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/ssh/sshd_config.d/99-pelab-jump.conf
+        - /etc/ssh/pelab-jump
+      notify: Reload sshd
+
+    - name: Remove lab state on the host
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ pelab_workspaces_host_dir }}"
+        - "{{ pelab_state_dir }}/runners"
+        - "{{ pelab_state_dir }}/image"
+        - "{{ pelab_state_dir }}/k3s"
+        - "{{ pelab_venv }}"
+
+    - name: Remove LXD with its storage pool and bridge
+      when:
+        - teardown_remove_lxd | bool
+        - teardown_lxc.stat.exists
+      block:
+        - name: Stop bridge DNS on the host
+          ansible.builtin.systemd_service:
+            name: pelab-lxd-dns.service
+            state: stopped
+            enabled: false
+          failed_when: false
+
+        - name: Remove the bridge DNS unit
+          ansible.builtin.file:
+            path: /etc/systemd/system/pelab-lxd-dns.service
+            state: absent
+
+        - name: List the remaining LXD images
+          ansible.builtin.command:
+            argv: [lxc, image, list, --format=csv, --columns=f]
+          register: teardown_images
+          changed_when: false
+
+        - name: Delete the remaining LXD images
+          ansible.builtin.command:
+            argv: [lxc, image, delete, "{{ item }}"]
+          loop: "{{ teardown_images.stdout_lines }}"
+          changed_when: true
+
+        - name: Detach the default profile from the pool and bridge
+          ansible.builtin.command:
+            argv: [lxc, profile, device, remove, default, "{{ item }}"]
+          loop: [root, eth0]
+          register: teardown_profile_devices
+          changed_when: teardown_profile_devices.rc == 0
+          failed_when: false
+
+        - name: Delete the storage pool
+          ansible.builtin.command:
+            argv: [lxc, storage, delete, "{{ pelab_lxd_storage_pool }}"]
+          register: teardown_pool
+          changed_when: teardown_pool.rc == 0
+          failed_when:
+            - teardown_pool.rc != 0
+            - "'not found' not in teardown_pool.stderr | lower"
+
+        - name: Delete the bridge
+          ansible.builtin.command:
+            argv: [lxc, network, delete, "{{ pelab_lxd_bridge }}"]
+          register: teardown_bridge
+          changed_when: teardown_bridge.rc == 0
+          failed_when:
+            - teardown_bridge.rc != 0
+            - "'not found' not in teardown_bridge.stderr | lower"
+
+        - name: Remove the LXD snap without keeping a snapshot of its data
+          ansible.builtin.command:
+            argv: [snap, remove, --purge, lxd]
+            removes: /snap/bin/lxc
+
+        - name: Remove the artifact cache
+          ansible.builtin.file:
+            path: "{{ pelab_state_dir }}/cache"
+            state: absent
+
+  handlers:
+    - name: Reload sshd
+      ansible.builtin.systemd_service:
+        name: ssh
+        state: reloaded

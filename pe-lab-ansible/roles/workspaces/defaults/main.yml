@@ -1,0 +1,37 @@
+---
+workspaces_profile: pelab-workspace
+workspaces_profile_config:
+  boot.autostart: "true"
+  limits.cpu: "2"
+  limits.memory: 6GiB
+  # Docker inside the container
+  security.nesting: "true"
+  security.syscalls.intercept.mknod: "true"
+  security.syscalls.intercept.setxattr: "true"
+  linux.kernel_modules: overlay,br_netfilter,nf_nat,nf_tables,ip_tables,ip6_tables,xt_conntrack
+workspaces_root_size: 40GiB
+
+# Workspace N gets <pelab_lxd_subnet_prefix>.<offset + N>.
+workspaces_ip_offset: 100
+workspaces_host_dir: "{{ pelab_workspaces_host_dir }}"
+
+workspaces_snapshot: "{{ pelab_workspace_snapshot }}"
+# Retake the clean snapshot even when it exists (after an image rebuild, for example).
+workspaces_resnapshot: false
+
+# Delegate keys: put files/ssh-keys/<studentNN>.pub next to the playbooks.
+# Missing keys are generated under credentials/ssh/ on the control node.
+workspaces_ssh_keys_dir: "{{ playbook_dir }}/files/ssh-keys"
+workspaces_generate_ssh_keys: true
+# Extra public keys (instructors) accepted by every workspace.
+workspaces_instructor_pubkeys: []
+
+# Delegates reach their container with: ssh -J studentNN@<jump host> studentNN@<container IP>
+workspaces_jump_host: "{{ ansible_host }}"
+workspaces_jump_group: pelab-jump
+workspaces_jump_keys_dir: /etc/ssh/pelab-jump
+
+# Browser access: https://studentNN.<pelab_domain> -> Traefik -> code-server in the container.
+workspaces_manage_ingress: true
+workspaces_ingress_namespace: "{{ pelab_workspaces_namespace }}"
+workspaces_code_server_port: 8080

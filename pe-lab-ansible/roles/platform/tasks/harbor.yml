@@ -1,0 +1,92 @@
+---
+# Harbor's API is reached through Traefik with the lab CA, exactly as clients see it.
+- name: Wait for the Harbor API
+  ansible.builtin.uri:
+    url: "https://{{ pelab_hosts.harbor }}/api/v2.0/ping"
+    ca_path: "{{ pelab_tls_dir }}/ca.crt"
+  register: platform_harbor_ping
+  retries: 30
+  delay: 10
+  until: platform_harbor_ping.status == 200
+
+- name: Read the Harbor registry endpoints
+  ansible.builtin.uri:
+    url: "https://{{ pelab_hosts.harbor }}/api/v2.0/registries?page_size=100"
+    ca_path: "{{ pelab_tls_dir }}/ca.crt"
+    user: admin
+    password: "{{ pelab_harbor_admin_password }}"
+    force_basic_auth: true
+  register: platform_harbor_registries
+  no_log: true
+
+- name: Create the upstream registry endpoints
+  ansible.builtin.uri:
+    url: "https://{{ pelab_hosts.harbor }}/api/v2.0/registries"
+    method: POST
+    ca_path: "{{ pelab_tls_dir }}/ca.crt"
+    user: admin
+    password: "{{ pelab_harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body: >-
+      {{ {'name': item.name, 'type': item.type, 'url': item.url, 'insecure': false}
+         | combine({'credential': {'type': 'basic', 'access_key': item.username, 'access_secret': item.password}}
+                   if item.username | default('') | length > 0 else {}) }}
+    status_code: [201]
+  loop: "{{ platform_harbor_proxy_caches | rejectattr('name', 'in', platform_harbor_registries.json | map(attribute='name') | list) | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  changed_when: true
+  no_log: true
+
+- name: Read the Harbor registry endpoints again
+  ansible.builtin.uri:
+    url: "https://{{ pelab_hosts.harbor }}/api/v2.0/registries?page_size=100"
+    ca_path: "{{ pelab_tls_dir }}/ca.crt"
+    user: admin
+    password: "{{ pelab_harbor_admin_password }}"
+    force_basic_auth: true
+  register: platform_harbor_registries
+  no_log: true
+
+- name: Read the Harbor projects
+  ansible.builtin.uri:
+    url: "https://{{ pelab_hosts.harbor }}/api/v2.0/projects?page_size=100"
+    ca_path: "{{ pelab_tls_dir }}/ca.crt"
+    user: admin
+    password: "{{ pelab_harbor_admin_password }}"
+    force_basic_auth: true
+  register: platform_harbor_projects
+  no_log: true
+
+- name: Create the proxy-cache projects
+  ansible.builtin.uri:
+    url: "https://{{ pelab_hosts.harbor }}/api/v2.0/projects"
+    method: POST
+    ca_path: "{{ pelab_tls_dir }}/ca.crt"
+    user: admin
+    password: "{{ pelab_harbor_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      project_name: "{{ item.name }}"
+      registry_id: "{{ (platform_harbor_registries.json | selectattr('name', 'equalto', item.name) | first).id }}"
+      public: true
+      metadata:
+        public: "true"
+    status_code: [201]
+  loop: "{{ platform_harbor_proxy_caches | rejectattr('name', 'in', platform_harbor_projects.json | map(attribute='name') | list) | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  changed_when: true
+  no_log: true
+
+- name: Pull images through the Harbor proxy caches on the k3s node
+  ansible.builtin.template:
+    src: registries.yaml.j2
+    dest: /etc/rancher/k3s/registries.yaml
+    owner: root
+    group: root
+    mode: "0600"
+  when: platform_k3s_registry_mirrors | bool
+  notify: Restart k3s to load registry mirrors

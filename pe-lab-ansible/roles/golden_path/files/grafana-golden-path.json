@@ -1,0 +1,117 @@
+{
+  "uid": "pelab-golden-path",
+  "title": "Golden path services",
+  "description": "Every service built on the PE Lab golden path: what version runs where, traffic, failures, health and logs.",
+  "tags": ["pelab", "golden-path"],
+  "schemaVersion": 39,
+  "refresh": "30s",
+  "time": {"from": "now-1h", "to": "now"},
+  "templating": {
+    "list": [
+      {
+        "name": "team",
+        "label": "Team",
+        "type": "query",
+        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "query": {"query": "label_values(app_info, namespace)", "refId": "team"},
+        "regex": "/^(team[0-9]+)-.*/",
+        "includeAll": true,
+        "allValue": "team[0-9]+",
+        "multi": false,
+        "refresh": 2,
+        "current": {"text": "All", "value": "$__all"}
+      },
+      {
+        "name": "app",
+        "label": "Service",
+        "type": "query",
+        "datasource": {"type": "prometheus", "uid": "prometheus"},
+        "query": {"query": "label_values(app_info{namespace=~\"$team-.*\"}, app)", "refId": "app"},
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "refresh": 2,
+        "current": {"text": "All", "value": "$__all"}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "table",
+      "title": "What runs where (version = commit SHA)",
+      "description": "After a release pull request is merged, the new SHA appears here for staging or prod.",
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "count by (namespace, app, version) (app_info{namespace=~\"$team-.*\", app=~\"$app\"})",
+          "instant": true,
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {"id": "organize", "options": {"excludeByName": {"Time": true}, "renameByName": {"Value": "pods"}}}
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Healthy pods",
+      "description": "Share of scraped pods that are up, per namespace.",
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0, "max": 1}, "overrides": []},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "avg by (namespace) (up{namespace=~\"$team-.*\", service=~\"$app\"})",
+          "legendFormat": "{{namespace}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Requests per second",
+      "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "reqps"}, "overrides": []},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (namespace) (rate(http_requests_total{namespace=~\"$team-.*\", service=~\"$app\", path!=\"/healthz\", path!=\"/metrics\"}[5m]))",
+          "legendFormat": "{{namespace}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Failed requests (share of 4xx and 5xx)",
+      "description": "A starting point for an availability SLI; Lab 7 turns it into an SLO with an error budget.",
+      "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "percentunit", "min": 0}, "overrides": []},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (namespace) (rate(http_requests_total{namespace=~\"$team-.*\", service=~\"$app\", status=~\"[45]..\"}[5m])) / sum by (namespace) (rate(http_requests_total{namespace=~\"$team-.*\", service=~\"$app\"}[5m]))",
+          "legendFormat": "{{namespace}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "logs",
+      "title": "Logs",
+      "gridPos": {"x": 0, "y": 16, "w": 24, "h": 10},
+      "datasource": {"type": "loki", "uid": "loki"},
+      "options": {"showTime": true, "wrapLogMessage": true, "sortOrder": "Descending"},
+      "targets": [
+        {"refId": "A", "expr": "{namespace=~\"$team-.*\", app=~\"$app\"}"}
+      ]
+    }
+  ]
+}

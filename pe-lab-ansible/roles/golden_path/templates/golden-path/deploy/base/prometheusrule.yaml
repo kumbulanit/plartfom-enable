@@ -1,0 +1,19 @@
+# A first alert. Lab 7 adds SLOs (availability, latency) and their error budgets.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ${REPO_NAME}
+  labels:
+    app.kubernetes.io/name: ${REPO_NAME}
+spec:
+  groups:
+    - name: ${REPO_NAME}
+      rules:
+        - alert: ServiceDown
+          expr: up{service="${REPO_NAME}", namespace=~"${REPO_OWNER}-.*"} == 0
+          for: 5m
+          labels:
+            severity: warning
+            team: ${REPO_OWNER}
+          annotations:
+            summary: ${REPO_NAME} has had no healthy pods for 5 minutes.

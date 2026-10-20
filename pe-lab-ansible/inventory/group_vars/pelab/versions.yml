@@ -1,0 +1,71 @@
+---
+# Every pinned version in the lab. Change versions here only.
+# Checked against upstream release pages on 2026-10-18.
+
+pelab_versions:
+  # Host platform
+  lxd_snap_channel: 5.21/stable # LXD LTS
+  k3s: v1.36.5+k3s1 # k3s "stable" channel; bundles its own Traefik chart
+  helm: 4.3.1
+  python_kubernetes: 37.0.1 # Python client used by kubernetes.core on the host
+
+  # Workspace image (also used by the CI runners)
+  docker: 29.9.1 # docker-ce from download.docker.com (noble)
+  kubectl: 1.36.5 # keep in step with k3s
+  k9s: 0.51.0
+  argocd_cli: 3.5.5 # keep in step with the argo-cd chart appVersion
+  opentofu: 1.13.1
+  opentofu_provider_kubernetes: 3.4.0 # hashicorp/kubernetes, for the environment template
+  opentofu_provider_local: 2.9.1 # hashicorp/local, for the Day 3 warm-up
+  ansible: 14.5.0 # community package (ansible-core 2.21)
+  pytest: 9.1.1
+  ruff: 0.17.1
+  trivy: 0.76.0
+  gitleaks: 8.30.1
+  semgrep: 1.181.0
+  checkov: 3.3.29
+  cosign: 3.1.3
+  kyverno_cli: 1.19.1 # keep in step with the kyverno chart appVersion
+  hadolint: 2.15.1
+  k6: 2.3.0
+  oasdiff: 1.33.0
+  code_server: 4.141.0
+  gitea_runner: 5.1.1 # Gitea Actions runner (formerly act_runner)
+
+  # Container images not pinned by a chart
+  backstage_image: 1.55.2 # ghcr.io/backstage/backstage demo app; replace with your own build
+
+pelab_helm_repos:
+  apisix: https://charts.apiseven.com
+  argo: https://argoproj.github.io/argo-helm
+  backstage: https://backstage.github.io/charts
+  codecentric: https://codecentric.github.io/helm-charts
+  gitea-charts: https://dl.gitea.com/charts/
+  grafana: https://grafana.github.io/helm-charts
+  grafana-community: https://grafana-community.github.io/helm-charts
+  harbor: https://helm.goharbor.io
+  jaegertracing: https://jaegertracing.github.io/helm-charts
+  kyverno: https://kyverno.github.io/kyverno/
+  opencost: https://opencost.github.io/opencost-helm-chart
+  prometheus-community: https://prometheus-community.github.io/helm-charts
+  redpanda: https://charts.redpanda.com
+  sonarqube: https://SonarSource.github.io/helm-chart-sonarqube
+
+# chart: <repo>/<chart>; app: upstream application version, for reference only.
+pelab_charts:
+  alloy: {chart: grafana/alloy, version: 1.13.1, app: v1.20.1}
+  apisix: {chart: apisix/apisix, version: 2.18.2, app: 3.19.0}
+  argo_cd: {chart: argo/argo-cd, version: 10.10.5, app: v3.5.5}
+  argo_rollouts: {chart: argo/argo-rollouts, version: 2.43.8, app: v1.10.1}
+  backstage: {chart: backstage/backstage, version: 2.10.2, app: n/a}
+  gitea: {chart: gitea-charts/gitea, version: 12.7.0, app: 1.27.0}
+  harbor: {chart: harbor/harbor, version: 1.19.4, app: 2.15.4}
+  jaeger: {chart: jaegertracing/jaeger, version: 4.16.1, app: 2.22.0}
+  keycloak: {chart: codecentric/keycloakx, version: 7.4.0, app: 26.8.1}
+  kube_prometheus_stack: {chart: prometheus-community/kube-prometheus-stack, version: 92.10.1, app: v0.94.1}
+  kyverno: {chart: kyverno/kyverno, version: 3.9.1, app: v1.19.1}
+  # The OSS Loki chart moved to grafana-community; grafana/loki 7.x is Enterprise Logs.
+  loki: {chart: grafana-community/loki, version: 18.17.1, app: 3.7.8}
+  opencost: {chart: opencost/opencost, version: 2.5.33, app: 1.121.3}
+  redpanda: {chart: redpanda/redpanda, version: 26.2.4, app: v26.2.3}
+  sonarqube: {chart: sonarqube/sonarqube, version: 2026.5.1002, app: 2026.5.2}

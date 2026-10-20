@@ -1,0 +1,41 @@
+# Written by the lab build from the platform's settings (inventory/group_vars/pelab/main.yml).
+# The platform team owns these values: a change here is reviewed like any other.
+{# Keys are padded so the file is already in `tofu fmt` style (the pipeline checks it). #}
+{% set role_width = pelab_requested_environments | map('length') | max %}
+{% set quota_width = pelab_team_sizes.values() | map('list') | flatten | map('length') | max + 2 %}
+
+locals {
+  users_namespace = "{{ pelab_users_namespace }}"
+
+  member_roles = {
+{% for env in pelab_requested_environments %}
+    {{ env.ljust(role_width) }} = "{{ pelab_team_member_roles[env] }}"
+{% endfor %}
+  }
+
+  sizes = {
+{% for size, quota in pelab_team_sizes.items() %}
+    {{ size }} = {
+{% for key, value in quota.items() %}
+      {{ ('"' ~ key ~ '"').ljust(quota_width) }} = "{{ value }}"
+{% endfor %}
+    }
+{% endfor %}
+  }
+
+  container_defaults = {
+    default         = { cpu = "{{ pelab_team_limit_range.default.cpu }}", memory = "{{ pelab_team_limit_range.default.memory }}" }
+    default_request = { cpu = "{{ pelab_team_limit_range.defaultRequest.cpu }}", memory = "{{ pelab_team_limit_range.defaultRequest.memory }}" }
+    max             = { cpu = "{{ pelab_team_limit_range.max.cpu }}", memory = "{{ pelab_team_limit_range.max.memory }}" }
+  }
+
+  pod_security = {
+    enforce = "{{ pelab_team_pod_security.enforce }}"
+    warn    = "{{ pelab_team_pod_security.warn }}"
+    audit   = "{{ pelab_team_pod_security.audit }}"
+  }
+
+  ingress_from_namespaces = {{ pelab_team_ingress_from_namespaces | to_json }}
+  egress_to_namespaces    = {{ pelab_team_egress_to_namespaces | to_json }}
+  ingress_address         = "{{ pelab_lxd_gateway }}/32"
+}

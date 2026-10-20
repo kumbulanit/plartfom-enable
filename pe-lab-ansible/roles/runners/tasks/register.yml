@@ -1,0 +1,67 @@
+---
+- name: Check which runners are registered
+  ansible.builtin.command:
+    argv: [lxc, exec, "{{ item }}", --, test, -s, /var/lib/gitea-runner/.runner]
+  loop: "{{ pelab_runner_names }}"
+  register: runners_registration
+  changed_when: false
+  failed_when: runners_registration.rc not in [0, 1]
+
+- name: Register the missing runners
+  when: runners_registration.results | selectattr('rc', 'equalto', 1) | list | length > 0
+  block:
+    - name: Create a runner registration token in Gitea
+      ansible.builtin.command:
+        argv:
+          - k3s
+          - kubectl
+          - --namespace={{ runners_gitea_namespace }}
+          - exec
+          - deploy/gitea
+          - --container=gitea
+          - --
+          - gitea
+          - actions
+          - generate-runner-token
+      register: runners_token
+      changed_when: true
+      no_log: true
+
+    - name: Hand the token to the unregistered runners
+      ansible.builtin.copy:
+        dest: "{{ runners_host_dir }}/{{ item.item }}/runner/registration-token"
+        content: "{{ runners_token.stdout_lines | last }}\n"
+        owner: "{{ runners_idmap_base.stdout | int }}"
+        group: "{{ runners_idmap_base.stdout | int }}"
+        mode: "0600"
+      loop: "{{ runners_registration.results | selectattr('rc', 'equalto', 1) | list }}"
+      loop_control:
+        label: "{{ item.item }}"
+      no_log: true
+
+    - name: Register with Gitea
+      ansible.builtin.command:
+        argv:
+          - lxc
+          - exec
+          - "{{ item.item }}"
+          - --cwd=/var/lib/gitea-runner
+          - --
+          - gitea-runner
+          - register
+          - --config=/etc/pelab/runner/config.yaml
+          - --no-interactive
+          - --instance={{ runners_gitea_url }}
+          - --token-file=/etc/pelab/runner/registration-token
+          - --name={{ item.item }}
+      loop: "{{ runners_registration.results | selectattr('rc', 'equalto', 1) | list }}"
+      loop_control:
+        label: "{{ item.item }}"
+      changed_when: true
+
+  always:
+    - name: Remove the registration token files
+      ansible.builtin.file:
+        path: "{{ runners_host_dir }}/{{ item }}/runner/registration-token"
+        state: absent
+      loop: "{{ pelab_runner_names }}"

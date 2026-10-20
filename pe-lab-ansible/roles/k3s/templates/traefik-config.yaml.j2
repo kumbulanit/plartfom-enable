@@ -1,0 +1,28 @@
+# {{ ansible_managed }}
+# Overrides for the Traefik chart that k3s deploys.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    additionalArguments:
+      - "--entryPoints.web.http.redirections.entryPoint.to=:443"
+      - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entryPoints.web.http.redirections.entryPoint.permanent=true"
+    # Served for any host without its own certificate. The secret is created
+    # by the platform role from the lab wildcard certificate.
+    tlsStore:
+      default:
+        defaultCertificate:
+          secretName: {{ pelab_tls_secret_name }}
+    logs:
+      access:
+        enabled: true
+    service:
+      spec:
+        loadBalancerSourceRanges:
+{% for cidr in k3s_ingress_source_ranges %}
+          - "{{ cidr }}"
+{% endfor %}

@@ -1,0 +1,17 @@
+---
+- name: Validate sshd configuration
+  ansible.builtin.command:
+    argv: [sshd, -t]
+  changed_when: false
+
+- name: Reload sshd
+  ansible.builtin.systemd_service:
+    name: ssh
+    state: reloaded
+
+# code-server reads its password at start-up (it changes when credentials are rotated).
+- name: Restart code-server
+  ansible.builtin.command:
+    argv: [lxc, exec, "{{ item }}", --, systemctl, try-restart, "code-server@{{ item }}"]
+  loop: "{{ pelab_workspace_names }}"
+  changed_when: true

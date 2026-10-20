@@ -1,0 +1,97 @@
+---
+- name: Read the Harbor projects
+  ansible.builtin.uri:
+    url: "{{ golden_path_harbor_api }}/projects?page_size=100"
+  register: golden_path_harbor_projects
+
+- name: Create a project per team that scans every image and records its SBOM on push
+  ansible.builtin.uri:
+    url: "{{ golden_path_harbor_api }}/projects"
+    method: POST
+    body:
+      project_name: "{{ item }}"
+      public: true
+      metadata:
+        public: "true"
+        auto_scan: "true"
+        auto_sbom_generation: "true"
+    status_code: [201]
+  loop: "{{ pelab_team_names | difference(golden_path_harbor_projects.json | map(attribute='name')) }}"
+  changed_when: true
+
+- name: Read the robot accounts
+  ansible.builtin.uri:
+    url: "{{ golden_path_harbor_api }}/robots?page_size=100"
+  register: golden_path_harbor_robots
+
+- name: Find the pipeline robot
+  ansible.builtin.set_fact:
+    golden_path_robot: >-
+      {{ golden_path_harbor_robots.json
+         | selectattr('name', 'match', '^robot.' ~ golden_path_robot_name ~ '$') | first | default({}) }}
+
+- name: Remove the pipeline robot when it does not cover every team project
+  ansible.builtin.uri:
+    url: "{{ golden_path_harbor_api }}/robots/{{ golden_path_robot.id }}"
+    method: DELETE
+  when:
+    - golden_path_robot | length > 0
+    - golden_path_robot.permissions | map(attribute='namespace') | sort != pelab_team_names | sort
+  register: golden_path_robot_removed
+  changed_when: true
+
+- name: Create the pipeline robot (push and pull on every team project)
+  ansible.builtin.uri:
+    url: "{{ golden_path_harbor_api }}/robots"
+    method: POST
+    body:
+      name: "{{ golden_path_robot_name }}"
+      description: Pushes images from the golden-path pipelines
+      level: system
+      duration: -1
+      disable: false
+      permissions: >-
+        {{ pelab_team_names | map('community.general.dict_kv', 'namespace')
+           | map('combine', {'kind': 'project', 'access': [{'resource': 'repository', 'action': 'push'},
+                                                         {'resource': 'repository', 'action': 'pull'}]})
+           | list }}
+    status_code: [201]
+  when: golden_path_robot | length == 0 or golden_path_robot_removed is changed
+  register: golden_path_robot_created
+  changed_when: true
+
+- name: Remember the robot's id and name
+  ansible.builtin.set_fact:
+    golden_path_robot: "{{ golden_path_robot_created.json if golden_path_robot_created is changed else golden_path_robot }}"
+
+- name: Set the robot's secret to the one kept on the control node
+  ansible.builtin.uri:
+    url: "{{ golden_path_harbor_api }}/robots/{{ golden_path_robot.id }}"
+    method: PATCH
+    body:
+      secret: "{{ pelab_harbor_robot_secret }}"
+  changed_when: false
+  no_log: true
+
+# Delegates sign in to Harbor with their lab password, to see their images, scan
+# reports and SBOMs. They get no project roles: the team projects are public, and
+# only the pipeline's robot account can push.
+- name: Read the Harbor users
+  ansible.builtin.uri:
+    url: "{{ golden_path_harbor_api }}/users?page_size=100"
+  register: golden_path_harbor_users
+
+- name: Give each delegate a Harbor login
+  ansible.builtin.uri:
+    url: "{{ golden_path_harbor_api }}/users"
+    method: POST
+    body:
+      username: "{{ item }}"
+      email: "{{ item }}@{{ pelab_domain }}"
+      realname: "{{ item }} ({{ pelab_workspace_teams[item] | default('spare') }})"
+      password: "{{ pelab_delegate_passwords[item] }}"
+      comment: PE Lab delegate
+    status_code: [201]
+  loop: "{{ pelab_workspace_names | difference(golden_path_harbor_users.json | map(attribute='username')) }}"
+  changed_when: true
+  no_log: true

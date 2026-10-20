@@ -1,0 +1,11 @@
+# Jaeger v2 all-in-one with in-memory storage (traces are lost on restart).
+# OTLP: jaeger.monitoring.svc:4317 (gRPC) and :4318 (HTTP).
+jaeger:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    pathType: Prefix
+    hosts: ["{{ pelab_hosts.jaeger }}"]
+    tls:
+      - secretName: {{ pelab_tls_secret_name }}
+        hosts: ["{{ pelab_hosts.jaeger }}"]

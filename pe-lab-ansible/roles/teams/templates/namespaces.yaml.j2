@@ -1,0 +1,16 @@
+{% for team in pelab_team_names %}
+{% for env in teams_environments %}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ team }}-{{ env }}
+  labels:
+    pelab.io/tier: team
+    pelab.io/team: {{ team }}
+    pelab.io/env: {{ env }}
+    pod-security.kubernetes.io/enforce: {{ teams_pod_security.enforce }}
+    pod-security.kubernetes.io/warn: {{ teams_pod_security.warn }}
+    pod-security.kubernetes.io/audit: {{ teams_pod_security.audit }}
+{% endfor %}
+{% endfor %}

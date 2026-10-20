@@ -1,0 +1,125 @@
+{% for team in pelab_team_names %}
+---
+# What {{ team }} may deploy, and where: only its own repositories, only into its
+# own namespaces, and never the guardrails the platform owns there.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ team }}
+  namespace: argocd
+spec:
+  description: Services owned by {{ team }}
+  sourceRepos:
+    - https://{{ pelab_hosts.gitea }}/{{ team }}/*
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: {{ team }}-*
+  clusterResourceWhitelist: []
+  namespaceResourceBlacklist:
+{% for blocked in golden_path_blocked_kinds %}
+    - group: "{{ blocked.group }}"
+      kind: {{ blocked.kind }}
+{% endfor %}
+---
+# dev: every repository in {{ team }} with a deploy/dev folder, at the latest commit
+# on main, running the image the pipeline built from that commit.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: {{ team }}-dev
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - scmProvider:
+        cloneProtocol: https
+        requeueAfterSeconds: 60
+        gitea:
+          owner: {{ team }}
+          api: https://{{ pelab_hosts.gitea }}/
+          tokenRef:
+            secretName: gitea-scm-token
+            key: token
+        filters:
+          - pathsExist: [deploy/dev]
+  template:
+    metadata:
+      name: '{% raw %}{{ .organization }}-{{ .repository }}{% endraw %}-dev'
+      labels:
+        pelab.io/team: {{ team }}
+        pelab.io/env: dev
+    spec:
+      project: {{ team }}
+      source:
+        repoURL: '{% raw %}{{ .url }}{% endraw %}'
+        targetRevision: '{% raw %}{{ .branch }}{% endraw %}'
+        path: deploy/dev
+        kustomize:
+          images:
+            - '{{ pelab_hosts.harbor }}/{% raw %}{{ .organization }}/{{ .repository }}:{{ .sha }}{% endraw %}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: {{ team }}-dev
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+---
+# staging and prod: deployed exactly as committed. Releasing means changing the
+# image tag in deploy/<env>/kustomization.yaml through an approved pull request.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: {{ team }}-releases
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - matrix:
+        generators:
+          - scmProvider:
+              cloneProtocol: https
+              requeueAfterSeconds: 60
+              gitea:
+                owner: {{ team }}
+                api: https://{{ pelab_hosts.gitea }}/
+                tokenRef:
+                  secretName: gitea-scm-token
+                  key: token
+              filters:
+                - pathsExist: [deploy/prod]
+          - list:
+              elements:
+                - env: staging
+                - env: prod
+  template:
+    metadata:
+      name: '{% raw %}{{ .organization }}-{{ .repository }}-{{ .env }}{% endraw %}'
+      labels:
+        pelab.io/team: {{ team }}
+        pelab.io/env: '{% raw %}{{ .env }}{% endraw %}'
+    spec:
+      project: {{ team }}
+      source:
+        repoURL: '{% raw %}{{ .url }}{% endraw %}'
+        targetRevision: '{% raw %}{{ .branch }}{% endraw %}'
+        path: '{% raw %}deploy/{{ .env }}{% endraw %}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ team }}-{% raw %}{{ .env }}{% endraw %}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        # Until a team requests its staging and prod environments (Day 3), these
+        # namespaces do not exist and the sync fails. Keep retrying, every few
+        # minutes at most, so the release lands as soon as the environment does.
+        retry:
+          limit: -1
+          backoff:
+            duration: 30s
+            factor: 2
+            maxDuration: 5m
+{% endfor %}

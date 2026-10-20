@@ -1,0 +1,57 @@
+---
+- name: Create the backup folder
+  ansible.builtin.file:
+    path: "{{ backup_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Install the backup and restore scripts
+  ansible.builtin.template:
+    src: "{{ item }}.sh.j2"
+    dest: /usr/local/sbin/{{ item }}
+    owner: root
+    group: root
+    mode: "0750"
+  loop: [pelab-backup, pelab-restore]
+
+- name: Install the backup's systemd service and timer
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/{{ item.name }}"
+    mode: "0644"
+    content: "{{ item.content }}"
+  loop:
+    - name: pelab-backup.service
+      content: |
+        [Unit]
+        Description=PE Lab: back up Gitea and Harbor
+        After=k3s.service
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/local/sbin/pelab-backup
+        TimeoutStartSec=3h
+        Nice=10
+        IOSchedulingClass=idle
+    - name: pelab-backup.timer
+      content: |
+        [Unit]
+        Description=PE Lab: nightly backup of Gitea and Harbor
+
+        [Timer]
+        OnCalendar={{ backup_on_calendar }}
+        Persistent=true
+
+        [Install]
+        WantedBy=timers.target
+  loop_control:
+    label: "{{ item.name }}"
+  register: backup_units
+
+- name: Start the backup timer
+  ansible.builtin.systemd_service:
+    name: pelab-backup.timer
+    state: started
+    enabled: true
+    daemon_reload: "{{ backup_units is changed }}"

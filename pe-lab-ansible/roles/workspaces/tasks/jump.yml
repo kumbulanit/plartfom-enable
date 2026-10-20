@@ -1,0 +1,49 @@
+---
+# Each workspace has a host account of the same name that can do nothing but
+# forward a connection to port 22 of its own container (ProxyJump).
+
+- name: Create the jump account group
+  ansible.builtin.group:
+    name: "{{ workspaces_jump_group }}"
+    state: present
+
+- name: Create jump accounts on the host
+  ansible.builtin.user:
+    name: "{{ item }}"
+    group: "{{ workspaces_jump_group }}"
+    comment: PE Lab jump account
+    shell: /usr/sbin/nologin
+    home: /nonexistent
+    create_home: false
+    password_lock: true
+  loop: "{{ pelab_workspace_names }}"
+
+- name: Create the jump key directory
+  ansible.builtin.file:
+    path: "{{ workspaces_jump_keys_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install jump keys restricted to the delegate's own container
+  ansible.builtin.template:
+    src: jump.keys.j2
+    dest: "{{ workspaces_jump_keys_dir }}/{{ item }}.keys"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ pelab_workspace_names }}"
+  loop_control:
+    index_var: idx
+
+- name: Configure sshd for jump accounts
+  ansible.builtin.template:
+    src: 99-pelab-jump.conf.j2
+    dest: /etc/ssh/sshd_config.d/99-pelab-jump.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Validate sshd configuration
+    - Reload sshd

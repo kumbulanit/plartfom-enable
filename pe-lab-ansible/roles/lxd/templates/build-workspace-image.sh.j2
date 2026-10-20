@@ -1,0 +1,246 @@
+#!/usr/bin/env bash
+# {{ ansible_managed }}
+#
+# Builds the "{{ lxd_image_alias }}" LXD image inside a fresh Ubuntu 24.04 container.
+# Inputs come from read-only mounts: release artifacts in /mnt/pelab-cache,
+# this script and the lab CA in /mnt/pelab-build.
+# Usage: build-workspace-image.sh <build-id>
+set -euo pipefail
+
+BUILD_ID="${1:?build id required}"
+CACHE=/mnt/pelab-cache
+BUILD=/mnt/pelab-build
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+export DEBIAN_FRONTEND=noninteractive
+
+step() { printf '\n==> %s\n' "$*"; }
+
+# Extract an archive and install the named binary from it onto PATH.
+install_from_tar() {
+  local archive="$1" binary="$2" dir="$WORK/$2" found
+  mkdir -p "$dir"
+  tar -xf "$archive" -C "$dir"
+  found="$(find "$dir" -type f -name "$binary" -print -quit)"
+  [ -n "$found" ] || { echo "$binary not found in $archive" >&2; exit 1; }
+  install -m 0755 "$found" "/usr/local/bin/$binary"
+}
+
+step "Base packages"
+apt-get update
+apt-get -y dist-upgrade
+apt-get install -y --no-install-recommends {{ lxd_image_apt_packages | join(' ') }}
+python3 -c 'import sys; assert sys.version_info[:2] == (3, 12), sys.version'
+
+step "Lab CA"
+install -m 0644 "$BUILD/pelab-ca.crt" /usr/local/share/ca-certificates/pelab-lab-ca.crt
+update-ca-certificates
+
+step "Docker Engine {{ pelab_versions.docker }}"
+# Docker's published release-signing key fingerprint.
+gpg --show-keys --with-colons "$CACHE/docker.asc" | awk -F: '$1 == "fpr" {print $10}' \
+  | grep -x 9DC858229FC7DD38854AE2D88D81803C0EBFCD88 >/dev/null
+install -m 0755 -d /etc/apt/keyrings
+install -m 0644 "$CACHE/docker.asc" /etc/apt/keyrings/docker.asc
+cat > /etc/apt/sources.list.d/docker.sources <<'EOF'
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: noble
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+apt-get update
+docker_pkg="5:{{ pelab_versions.docker }}-1~ubuntu.24.04~noble"
+apt-get install -y "docker-ce=$docker_pkg" "docker-ce-cli=$docker_pkg" \
+  containerd.io docker-buildx-plugin docker-compose-plugin
+apt-mark hold docker-ce docker-ce-cli
+install -m 0755 -d /etc/docker
+cat > /etc/docker/daemon.json <<'EOF'
+{
+  "log-driver": "json-file",
+  "log-opts": {"max-size": "10m", "max-file": "3"}
+}
+EOF
+systemctl enable docker.service containerd.service
+
+step "Command-line tools"
+install -m 0755 "$CACHE/kubectl-{{ pelab_versions.kubectl }}" /usr/local/bin/kubectl
+install_from_tar "$CACHE/helm-v{{ pelab_versions.helm }}-linux-amd64.tar.gz" helm
+install_from_tar "$CACHE/k9s-{{ pelab_versions.k9s }}_Linux_amd64.tar.gz" k9s
+install -m 0755 "$CACHE/argocd-{{ pelab_versions.argocd_cli }}-linux-amd64" /usr/local/bin/argocd
+install_from_tar "$CACHE/tofu_{{ pelab_versions.opentofu }}_linux_amd64.tar.gz" tofu
+install_from_tar "$CACHE/gitleaks_{{ pelab_versions.gitleaks }}_linux_x64.tar.gz" gitleaks
+install -m 0755 "$CACHE/cosign-{{ pelab_versions.cosign }}-linux-amd64" /usr/local/bin/cosign
+install_from_tar "$CACHE/kyverno-cli_v{{ pelab_versions.kyverno_cli }}_linux_x86_64.tar.gz" kyverno
+install -m 0755 "$CACHE/hadolint-{{ pelab_versions.hadolint }}-linux-x86_64" /usr/local/bin/hadolint
+install_from_tar "$CACHE/oasdiff_{{ pelab_versions.oasdiff }}_linux_amd64.tar.gz" oasdiff
+apt-get install -y \
+  "$CACHE/trivy_{{ pelab_versions.trivy }}_Linux-64bit.deb" \
+  "$CACHE/k6-v{{ pelab_versions.k6 }}-linux-amd64.deb" \
+  "$CACHE/code-server_{{ pelab_versions.code_server }}_amd64.deb"
+xz -dc "$CACHE/gitea-runner-{{ pelab_versions.gitea_runner }}-linux-amd64.xz" > /usr/local/bin/gitea-runner
+chmod 0755 /usr/local/bin/gitea-runner
+
+step "OpenTofu providers (a local mirror: tofu init works without the internet)"
+mkdir -p "$WORK/providers"
+cat > "$WORK/providers/versions.tf" <<'TF'
+terraform {
+  required_providers {
+    kubernetes = { source = "hashicorp/kubernetes", version = "{{ pelab_versions.opentofu_provider_kubernetes }}" }
+    local      = { source = "hashicorp/local", version = "{{ pelab_versions.opentofu_provider_local }}" }
+  }
+}
+TF
+(cd "$WORK/providers" && tofu providers mirror -platform=linux_amd64 /usr/local/share/opentofu/plugins)
+# OpenTofu has no system-wide config: shells get TF_CLI_CONFIG_FILE from
+# /etc/profile.d/pelab.sh, and the platform's pipelines set it themselves.
+install -d -m 0755 /etc/opentofu
+cat > /etc/opentofu/tofurc <<'TF'
+provider_installation {
+  filesystem_mirror {
+    path    = "/usr/local/share/opentofu/plugins"
+    include = ["registry.opentofu.org/hashicorp/kubernetes", "registry.opentofu.org/hashicorp/local"]
+  }
+  direct {
+    exclude = ["registry.opentofu.org/hashicorp/kubernetes", "registry.opentofu.org/hashicorp/local"]
+  }
+}
+TF
+
+step "Python tooling (pipx: one isolated venv per tool on Python 3.12)"
+export PIPX_HOME=/opt/pipx PIPX_BIN_DIR=/usr/local/bin PIPX_MAN_DIR=/usr/local/share/man
+pipx install --include-deps "ansible=={{ pelab_versions.ansible }}"
+pipx install "pytest=={{ pelab_versions.pytest }}"
+pipx install "ruff=={{ pelab_versions.ruff }}"
+pipx install "semgrep=={{ pelab_versions.semgrep }}"
+pipx install "checkov=={{ pelab_versions.checkov }}"
+
+step "Smoke test"
+for tool in docker kubectl helm k9s argocd tofu ansible pytest ruff trivy gitleaks semgrep \
+            checkov cosign kyverno hadolint k6 oasdiff code-server gitea-runner; do
+  command -v "$tool" >/dev/null || { echo "missing: $tool" >&2; exit 1; }
+done
+kubectl version --client
+tofu version
+trivy --version
+
+step "Shell environment"
+cat > /etc/profile.d/pelab.sh <<'EOF'
+# PE Lab workspace defaults. /etc/pelab is mounted read-only from the lab host.
+# /etc/pelab/env sets ME (studentNN), TEAM (teamNN) and DOMAIN (the lab domain).
+[ -r /etc/pelab/env ] && . /etc/pelab/env
+export KUBECONFIG="$HOME/.kube/config:/etc/pelab/kubeconfig"
+export TF_CLI_CONFIG_FILE=/etc/opentofu/tofurc
+alias k=kubectl
+complete -o default -F __start_kubectl k 2>/dev/null || true
+EOF
+echo '[ -r /etc/profile.d/pelab.sh ] && . /etc/profile.d/pelab.sh' >> /etc/bash.bashrc
+for tool in kubectl helm argocd kyverno k9s cosign; do
+  "$tool" completion bash > "/etc/bash_completion.d/$tool" || echo "warning: no bash completion for $tool"
+done
+
+step "SSH"
+# Each workspace's delegate key is provided by the host at /etc/pelab/ssh/<user>.keys.
+cat > /etc/ssh/sshd_config.d/60-pelab.conf <<'EOF'
+AuthorizedKeysFile .ssh/authorized_keys /etc/pelab/ssh/%u.keys
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin no
+EOF
+cat > /etc/systemd/system/pelab-ssh-hostkeys.service <<'EOF'
+[Unit]
+Description=Generate missing SSH host keys
+Before=ssh.service
+ConditionPathExists=!/etc/ssh/ssh_host_ed25519_key
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/ssh-keygen -A
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl enable pelab-ssh-hostkeys.service
+
+step "code-server"
+# code-server@<user> reads its settings (bind address, password) from the host-provided file.
+install -d -m 0755 /etc/systemd/system/code-server@.service.d
+cat > /etc/systemd/system/code-server@.service.d/pelab.conf <<'EOF'
+[Unit]
+ConditionPathExists=/etc/pelab/code-server.yaml
+
+[Service]
+Environment=CODE_SERVER_CONFIG=/etc/pelab/code-server.yaml
+Restart=always
+RestartSec=5
+EOF
+
+step "Gitea Actions runner unit (enabled only on runner containers)"
+install -d -m 0750 /var/lib/gitea-runner
+cat > /etc/systemd/system/pelab-gitea-runner.service <<'EOF'
+[Unit]
+Description=Gitea Actions runner (PE Lab)
+After=network-online.target docker.service
+Wants=network-online.target docker.service
+ConditionPathExists=/var/lib/gitea-runner/.runner
+
+[Service]
+WorkingDirectory=/var/lib/gitea-runner
+ExecStart=/usr/local/bin/gitea-runner daemon --config /etc/pelab/runner/config.yaml
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+step "Workspace account helper"
+cat > /usr/local/sbin/pelab-workspace-init <<'EOF'
+#!/usr/bin/env bash
+# Creates the delegate account and starts code-server for it. Idempotent.
+# Usage: pelab-workspace-init <user> <uid>. Prints CHANGED when it changed anything.
+set -euo pipefail
+user="${1:?user}"; uid="${2:?uid}"; changed=0
+if ! id -u "$user" >/dev/null 2>&1; then
+  useradd --create-home --uid "$uid" --user-group --shell /bin/bash "$user"
+  changed=1
+fi
+for group in sudo docker; do
+  if [[ " $(id -nG "$user") " != *" $group "* ]]; then
+    usermod -aG "$group" "$user"
+    changed=1
+  fi
+done
+sudoers="/etc/sudoers.d/90-pelab-$user"
+if [ ! -f "$sudoers" ]; then
+  echo "$user ALL=(ALL) NOPASSWD:ALL" > "$sudoers"
+  chmod 0440 "$sudoers"
+  visudo -cqf "$sudoers"
+  changed=1
+fi
+install -d -o "$user" -g "$user" -m 0700 "/home/$user/.kube"
+if ! systemctl is-enabled --quiet "code-server@$user"; then
+  systemctl enable --now "code-server@$user"
+  changed=1
+fi
+if [ "$changed" -eq 1 ]; then echo CHANGED; else echo UNCHANGED; fi
+EOF
+chmod 0755 /usr/local/sbin/pelab-workspace-init
+
+step "Clean up"
+# Background apt jobs in 30+ containers at once would compete for bandwidth during class.
+systemctl disable apt-daily.timer apt-daily-upgrade.timer
+cat > /etc/cloud/cloud.cfg.d/90-pelab.cfg <<'EOF'
+# No default "ubuntu" user; delegate accounts are created by pelab-workspace-init.
+users: []
+ssh_deletekeys: true
+package_update: false
+package_upgrade: false
+EOF
+userdel -r ubuntu 2>/dev/null || true
+apt-get clean
+rm -rf /var/lib/apt/lists/* /root/.cache /tmp/*
+rm -f /etc/ssh/ssh_host_*
+cloud-init clean --logs --machine-id
+echo "$BUILD_ID" > /etc/pelab-image-build
+step "Workspace image build $BUILD_ID complete"

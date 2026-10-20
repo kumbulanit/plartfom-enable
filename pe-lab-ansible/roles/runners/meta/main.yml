@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: PE Lab
+  description: Gitea Actions runners as LXD containers with Docker
+  license: MIT
+  min_ansible_version: "2.17"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+dependencies: []

@@ -1,0 +1,8 @@
+---
+# The namespace and its TLS secret are created by the platform role.
+- name: Route studentNN.<domain> to code-server in each workspace
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition: "{{ lookup('ansible.builtin.template', 'workspace-ingress.yaml.j2') | ansible.builtin.from_yaml_all | list }}"
+  tags: [ingress]

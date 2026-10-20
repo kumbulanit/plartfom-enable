@@ -1,0 +1,62 @@
+---
+# Restores a backup copied to the control node by backup.yml, normally onto a
+# lab freshly built with site.yml (for example on a replacement server).
+#
+#   ansible-playbook restore.yml -e restore_from=backups/pelab01/20261020-023000
+#   ansible-playbook restore.yml -e restore_from=... -e restore_parts=gitea
+#
+# Then run `ansible-playbook site.yml --tags golden_path` once to check
+# everything again (it changes nothing that is already right).
+
+- name: Restore the lab from a backup
+  hosts: pelab
+  become: true
+  gather_facts: false
+  vars:
+    restore_parts: [gitea, harbor]
+  tasks:
+    - name: Load the backup settings
+      ansible.builtin.include_vars: roles/backup/defaults/main.yml
+
+    - name: Require the backup to restore
+      ansible.builtin.assert:
+        that: restore_from is defined
+        fail_msg: "Say which backup: -e restore_from=backups/<host>/<date> (a folder made by backup.yml)"
+
+    - name: Check the backup on the control node
+      ansible.builtin.stat:
+        path: "{{ restore_from }}/SHA256SUMS"
+      register: restore_checksums
+      delegate_to: localhost
+      become: false
+
+    - name: Stop when it is not a backup folder
+      ansible.builtin.assert:
+        that: restore_checksums.stat.exists
+        fail_msg: "{{ restore_from }} has no SHA256SUMS: not a folder made by backup.yml"
+
+    - name: Make the restore folder on the host
+      ansible.builtin.file:
+        path: "{{ pelab_state_dir }}/restore"
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Copy the backup to the host
+      ansible.posix.synchronize:
+        mode: push
+        src: "{{ restore_from | regex_replace('/+$', '') }}"
+        dest: "{{ pelab_state_dir }}/restore/"
+        rsync_path: sudo rsync
+      become: false
+
+    - name: Restore it
+      ansible.builtin.command:
+        argv: "{{ ['/usr/local/sbin/pelab-restore', pelab_state_dir ~ '/restore/' ~ (restore_from | regex_replace('/+$', '') | basename)] + restore_parts }}"
+      changed_when: true
+
+    - name: Start the platform applier again
+      ansible.builtin.systemd_service:
+        name: pelab-platform-apply.timer
+        state: started

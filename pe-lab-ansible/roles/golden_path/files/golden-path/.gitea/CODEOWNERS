@@ -1,0 +1,3 @@
+# Every change needs a review from your team; main only accepts approved pull requests.
+# Gitea matches paths with regular expressions.
+.* @${REPO_OWNER}/developers

@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# {{ ansible_managed }}
+#
+# PE Lab backup: what the course cannot rebuild from Ansible.
+#   gitea.tar.gz          gitea dump: repositories, pull requests, accounts, Actions logs
+#   harbor-db.sql.gz      Harbor's database: projects, users, robots, scan reports, SBOM records
+#   harbor-registry.tar   Harbor's image storage (the images and SBOMs themselves)
+#   cluster.yaml          OpenTofu's state and the approved policy exceptions
+#   SHA256SUMS            checksums of the above
+# Written to {{ backup_dir }}/<UTC date and time>; the last {{ backup_keep }} are kept.
+# Run by pelab-backup.timer; run it now with: systemctl start pelab-backup.service
+set -euo pipefail
+
+KUBECTL=(k3s kubectl)
+STAMP="$(date -u +%Y%m%d-%H%M%S)"
+DEST="{{ backup_dir }}/$STAMP"
+PART="$DEST.partial"
+mkdir -p "$PART"
+cd "$PART"
+log() { printf '%s %s\n' "$(date -u +%H:%M:%S)" "$*"; }
+
+# --------------------------------------------------------------------- Gitea
+log "Gitea: dump"
+"${KUBECTL[@]}" -n gitea exec deploy/gitea -c gitea -- \
+  sh -c 'rm -f /tmp/pelab-backup.tar.gz && gitea dump --type tar.gz --skip-log --file /tmp/pelab-backup.tar.gz >/dev/null'
+"${KUBECTL[@]}" -n gitea exec deploy/gitea -c gitea -- cat /tmp/pelab-backup.tar.gz > gitea.tar.gz
+"${KUBECTL[@]}" -n gitea exec deploy/gitea -c gitea -- rm -f /tmp/pelab-backup.tar.gz
+tar -tzf gitea.tar.gz >/dev/null   # a readable archive, not an error message
+
+# -------------------------------------------------------------------- Harbor
+log "Harbor: database"
+"${KUBECTL[@]}" -n harbor exec harbor-database-0 -c database -- pg_dumpall -U postgres --clean --if-exists \
+  | gzip > harbor-db.sql.gz
+gzip -t harbor-db.sql.gz
+
+{% if backup_harbor_registry | bool %}
+log "Harbor: image storage"
+volume="$("${KUBECTL[@]}" -n harbor get pvc harbor-registry -o jsonpath='{.spec.volumeName}')"
+storage="$("${KUBECTL[@]}" get pv "$volume" -o jsonpath='{.spec.hostPath.path}{.spec.local.path}')"
+[ -d "$storage" ] || { echo "Harbor's image storage $storage is not on this host" >&2; exit 1; }
+tar -C "$storage" -cf harbor-registry.tar .
+{% else %}
+log "Harbor: image storage skipped (backup_harbor_registry is false)"
+{% endif %}
+
+# ----------------------------------------------------- environments, exceptions
+log "Cluster: OpenTofu state and policy exceptions"
+{
+  "${KUBECTL[@]}" -n {{ golden_path_tfstate_namespace | default('pelab-tfstate') }} get secrets -l tfstate=true -o yaml
+  echo "---"
+  "${KUBECTL[@]}" -n {{ pelab_exception_namespace }} get policyexceptions.kyverno.io -o yaml 2>/dev/null || echo "items: []"
+} > cluster.yaml
+
+sha256sum -- * > SHA256SUMS
+mv "$PART" "$DEST"
+log "Written: $DEST ($(du -sh "$DEST" | cut -f1))"
+
+# Keep the newest {{ backup_keep }}; remove unfinished runs older than a day.
+find "{{ backup_dir }}" -mindepth 1 -maxdepth 1 -type d -name '*.partial' -mmin +1440 -exec rm -rf {} +
+mapfile -t old < <(find "{{ backup_dir }}" -mindepth 1 -maxdepth 1 -type d -name '20*' ! -name '*.partial' | sort -r | tail -n +{{ backup_keep | int + 1 }})
+if [ -n "${old[*]-}" ]; then
+  rm -rf -- "${old[@]}"
+  log "Removed old backups: ${old[*]##*/}"
+fi

@@ -1,0 +1,15 @@
+# Prometheus scrapes /metrics; the "PE Lab / Golden path services" dashboard reads it.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ${REPO_NAME}
+  labels:
+    app.kubernetes.io/name: ${REPO_NAME}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ${REPO_NAME}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s

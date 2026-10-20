@@ -1,0 +1,8 @@
+# What the tests need to know about the cluster: the examples run in team01-dev,
+# a team namespace (the guardrails only apply where pelab.io/tier is "team").
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Values
+namespaceSelector:
+  - name: team01-dev
+    labels:
+      pelab.io/tier: team

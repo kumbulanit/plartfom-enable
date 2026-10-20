@@ -1,0 +1,23 @@
+# {{ ansible_managed }}
+# gitea-runner {{ pelab_versions.gitea_runner }} configuration for {{ item }}.
+log:
+  level: info
+
+runner:
+  file: /var/lib/gitea-runner/.runner
+  capacity: {{ runners_capacity }}
+  timeout: {{ runners_job_timeout }}
+  insecure: false
+  labels:
+{% for label in runners_labels %}
+    - "{{ label }}"
+{% endfor %}
+
+cache:
+  enabled: true
+  dir: /var/lib/gitea-runner/cache
+  host: "{{ pelab_lxd_subnet_prefix }}.{{ runners_ip_offset + idx + 1 }}"
+  port: {{ runners_cache_port }}
+
+host:
+  workdir_parent: /var/lib/gitea-runner/host-work

@@ -1,0 +1,14 @@
+---
+profile: production
+offline: true
+exclude_paths:
+  - .cache/
+  - .ansible/
+  - collections/
+  - credentials/
+  # Content of the platform's Gitea repositories (application code, OpenTofu,
+  # Kyverno policies, pipelines, handbook): not Ansible.
+  - roles/golden_path/files/golden-path/
+  - roles/golden_path/files/environments/
+  - roles/golden_path/files/policies/
+  - roles/golden_path/files/handbook/

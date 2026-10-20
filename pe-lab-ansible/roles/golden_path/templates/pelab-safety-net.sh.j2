@@ -1,0 +1,53 @@
+#!/bin/bash
+# {{ ansible_managed }}
+#
+# The delivery safety net, for when Argo CD gives trouble during the course.
+#
+#   pelab-safety-net on       pause Argo CD; the platform applier deploys the teams' services
+#   pelab-safety-net off      give delivery back to Argo CD
+#   pelab-safety-net status   say which of the two is deploying
+#
+# Nothing that is running is removed, either way. Teams work exactly as before
+# (pull requests, approvals, the same pipelines). While the safety net is on, the
+# applier deploys every {{ golden_path_applier_interval }} and posts the result on each commit as
+# "{{ golden_path_safety_net_context }}/dev", "{{ golden_path_safety_net_context }}/staging" and "{{ golden_path_safety_net_context }}/prod".
+# Usually run from the control machine: ansible-playbook safety-net.yml -e safety_net=on
+set -euo pipefail
+
+FLAG="{{ golden_path_safety_net_flag }}"
+CONTROLLERS="{{ golden_path_argocd_controllers }}"
+
+argocd_controllers() {
+  k3s kubectl --namespace=argocd scale statefulset,deployment --selector "$CONTROLLERS" --replicas="$1"
+}
+
+case "${1:-status}" in
+  on)
+    touch "$FLAG"
+    argocd_controllers 0
+    echo "Argo CD is paused. Deploying the teams' services now (a minute or two)..."
+    systemctl start pelab-platform-apply.service || true
+    journalctl --unit=pelab-platform-apply.service --since=-15min --no-pager --output=cat \
+      | grep -E ' (dev|staging|prod) [0-9a-f]{8}: ' | tail -n 60 || true
+    echo
+    echo "The safety net is ON. The platform deploys the teams' services every {{ golden_path_applier_interval }}."
+    echo "Undo with: pelab-safety-net off"
+    ;;
+  off)
+    rm -f "$FLAG"
+    argocd_controllers 1
+    echo "The safety net is OFF. Argo CD deploys the teams' services again (it checks every repository within 3 minutes)."
+    ;;
+  status)
+    if [ -e "$FLAG" ]; then
+      echo "ON: the platform applier deploys the teams' services; Argo CD is paused."
+    else
+      echo "OFF: Argo CD deploys the teams' services."
+    fi
+    k3s kubectl --namespace=argocd get statefulset,deployment --selector "$CONTROLLERS"
+    ;;
+  *)
+    echo "usage: pelab-safety-net on|off|status" >&2
+    exit 2
+    ;;
+esac

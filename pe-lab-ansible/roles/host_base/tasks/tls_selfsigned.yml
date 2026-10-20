@@ -1,0 +1,64 @@
+---
+# Runs on the control node (delegated from tls.yml). Existing files are kept.
+- name: Create the TLS directory on the control node
+  ansible.builtin.file:
+    path: "{{ pelab_tls_cert_path | dirname }}"
+    state: directory
+    mode: "0700"
+
+- name: Create the lab CA private key
+  community.crypto.openssl_privatekey:
+    path: "{{ pelab_tls_ca_key_path }}"
+    type: ECC
+    curve: secp384r1
+    mode: "0600"
+
+- name: Create the lab CA signing request
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: "{{ pelab_tls_ca_key_path }}"
+    common_name: "PE Lab CA ({{ pelab_domain }})"
+    organization_name: PE Lab (training use only)
+    basic_constraints: [CA:TRUE, pathlen:0]
+    basic_constraints_critical: true
+    key_usage: [keyCertSign, cRLSign]
+    key_usage_critical: true
+    use_common_name_for_san: false
+  register: host_base_ca_csr
+  changed_when: false
+
+- name: Self-sign the lab CA certificate
+  community.crypto.x509_certificate:
+    path: "{{ pelab_tls_ca_path }}"
+    csr_content: "{{ host_base_ca_csr.csr }}"
+    privatekey_path: "{{ pelab_tls_ca_key_path }}"
+    provider: selfsigned
+    selfsigned_not_after: +3650d
+    mode: "0644"
+
+- name: Create the wildcard private key
+  community.crypto.openssl_privatekey:
+    path: "{{ pelab_tls_key_path }}"
+    type: RSA
+    size: 2048
+    mode: "0600"
+
+- name: Create the wildcard signing request
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: "{{ pelab_tls_key_path }}"
+    common_name: "*.{{ pelab_domain }}"
+    subject_alt_name:
+      - "DNS:*.{{ pelab_domain }}"
+      - "DNS:{{ pelab_domain }}"
+    extended_key_usage: [serverAuth]
+  register: host_base_wildcard_csr
+  changed_when: false
+
+- name: Sign the wildcard certificate with the lab CA
+  community.crypto.x509_certificate:
+    path: "{{ pelab_tls_cert_path }}"
+    csr_content: "{{ host_base_wildcard_csr.csr }}"
+    provider: ownca
+    ownca_path: "{{ pelab_tls_ca_path }}"
+    ownca_privatekey_path: "{{ pelab_tls_ca_key_path }}"
+    ownca_not_after: +397d
+    mode: "0644"

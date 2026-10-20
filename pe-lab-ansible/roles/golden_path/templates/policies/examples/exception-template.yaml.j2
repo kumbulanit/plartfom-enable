@@ -1,0 +1,27 @@
+# An exception request. Copy this file to exceptions/<team>-<what>.yaml, fill in
+# every value marked CHANGE, and open a pull request. The pipeline checks the
+# request; the platform team approves it; once it is merged the platform applies
+# it within two minutes, and removes it again after the expiry date.
+apiVersion: kyverno.io/v2
+kind: PolicyException
+metadata:
+  name: team01-status-page            # CHANGE: <team>-<what>, lowercase
+  namespace: {{ golden_path_exception_namespace }}       # exceptions only count in this namespace
+  annotations:
+    pelab.io/requested-by: student01  # CHANGE: your user name
+    pelab.io/reason: >-               # CHANGE: why the golden path cannot be used, in one or two sentences
+      We need a status page for the demo this week and there is no
+      golden-path image for it yet.
+    pelab.io/expires: "{{ '%Y-%m-%d' | ansible.builtin.strftime(now().timestamp() | int + 14 * 86400) }}"    # CHANGE: the last day it applies, at most 30 days ahead
+spec:
+  exceptions:
+    # Which rule may be broken. Kyverno checks a Deployment with the
+    # autogen- copy of a Pod rule, so name both.
+    - policyName: pelab-trusted-registry
+      ruleNames: [harbor-only, autogen-harbor-only]
+  match:
+    any:
+      - resources:
+          kinds: [Deployment, Pod]
+          namespaces: [team01-dev]    # CHANGE: your team's namespace
+          names: [status-page*]       # CHANGE: the workload's name (pods add a suffix)

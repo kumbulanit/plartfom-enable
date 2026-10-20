@@ -1,0 +1,23 @@
+# api.{{ pelab_domain }} -> APISIX gateway. Teams publish routes on APISIX
+# (ingressClassName: apisix or ApisixRoute) and reach them through this host.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: apisix-gateway
+  namespace: apisix
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: ["{{ pelab_hosts.apisix }}"]
+      secretName: {{ pelab_tls_secret_name }}
+  rules:
+    - host: {{ pelab_hosts.apisix }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: apisix-gateway
+                port:
+                  number: 80

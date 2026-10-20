@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: PE Lab
+  description: Nightly backup of the teams' work in Gitea and Harbor, and the OpenTofu state
+  license: MIT
+  min_ansible_version: "2.17"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+dependencies: []

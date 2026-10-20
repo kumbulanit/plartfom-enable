@@ -1,0 +1,19 @@
+---
+# The lab build creates only dev. Teams request staging and prod themselves from
+# the environment template (golden_path role, repository platform/environments),
+# which applies the same settings from inventory/group_vars/pelab/main.yml.
+teams_environments: [dev]
+
+# Every delegate's kubeconfig has a context for each of the team's environments,
+# including the ones the team has not requested yet.
+teams_context_environments: "{{ pelab_environments }}"
+
+teams_member_roles: "{{ pelab_team_member_roles }}"
+teams_resource_quota: "{{ pelab_team_sizes.small }}"
+teams_limit_range: "{{ pelab_team_limit_range }}"
+teams_pod_security: "{{ pelab_team_pod_security }}"
+teams_ingress_from_namespaces: "{{ pelab_team_ingress_from_namespaces }}"
+teams_egress_to_namespaces: "{{ pelab_team_egress_to_namespaces }}"
+
+teams_users_namespace: "{{ pelab_users_namespace }}"
+teams_kubeconfig_server: "https://{{ pelab_lxd_gateway }}:6443"

@@ -1,0 +1,159 @@
+---
+# The platform applier on the lab host: OpenTofu with a local provider mirror,
+# the applier script, its Gitea token, and a systemd timer.
+
+- name: Create the OpenTofu directory
+  ansible.builtin.file:
+    path: "{{ pelab_state_dir }}/tofu-{{ pelab_versions.opentofu }}"
+    state: directory
+    mode: "0755"
+
+- name: Unpack OpenTofu for the lab host ({{ pelab_versions.opentofu }})
+  ansible.builtin.unarchive:
+    src: "{{ golden_path_tofu_archive }}"
+    dest: "{{ pelab_state_dir }}/tofu-{{ pelab_versions.opentofu }}"
+    remote_src: true
+    creates: "{{ pelab_state_dir }}/tofu-{{ pelab_versions.opentofu }}/tofu"
+
+- name: Put tofu on the PATH
+  ansible.builtin.file:
+    src: "{{ pelab_state_dir }}/tofu-{{ pelab_versions.opentofu }}/tofu"
+    dest: /usr/local/bin/tofu
+    state: link
+    force: true
+
+- name: Create the OpenTofu configuration folder
+  ansible.builtin.file:
+    path: /etc/opentofu
+    state: directory
+    mode: "0755"
+
+- name: Create the applier's directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  loop:
+    - "{{ golden_path_applier_dir }}"
+    - "{{ golden_path_applier_dir }}/repos"
+    - "{{ golden_path_applier_dir }}/providers"
+
+- name: Describe the providers the environment template needs
+  ansible.builtin.copy:
+    dest: "{{ golden_path_applier_dir }}/providers/versions.tf"
+    mode: "0600"
+    content: |
+      terraform {
+        required_providers {
+          kubernetes = { source = "hashicorp/kubernetes", version = "{{ pelab_versions.opentofu_provider_kubernetes }}" }
+          local      = { source = "hashicorp/local", version = "{{ pelab_versions.opentofu_provider_local }}" }
+        }
+      }
+
+- name: Mirror the providers on the host, so the applier never needs the internet
+  ansible.builtin.command:
+    argv: [tofu, providers, mirror, -platform=linux_amd64, "{{ golden_path_tofu_mirror_dir }}"]
+    chdir: "{{ golden_path_applier_dir }}/providers"
+    creates: >-
+      {{ golden_path_tofu_mirror_dir }}/registry.opentofu.org/hashicorp/kubernetes/terraform-provider-kubernetes_{{
+      pelab_versions.opentofu_provider_kubernetes }}_linux_amd64.zip
+
+- name: Point OpenTofu at the local provider mirror
+  ansible.builtin.copy:
+    dest: /etc/opentofu/tofurc
+    mode: "0644"
+    content: |
+      provider_installation {
+        filesystem_mirror {
+          path    = "{{ golden_path_tofu_mirror_dir }}"
+          include = ["registry.opentofu.org/hashicorp/kubernetes", "registry.opentofu.org/hashicorp/local"]
+        }
+        direct {
+          exclude = ["registry.opentofu.org/hashicorp/kubernetes", "registry.opentofu.org/hashicorp/local"]
+        }
+      }
+
+- name: Install the applier's Gitea token
+  ansible.builtin.copy:
+    content: "{{ lookup('ansible.builtin.file', golden_path_applier_token_file) }}\n"
+    dest: "{{ golden_path_applier_dir }}/token"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Install the applier
+  ansible.builtin.template:
+    src: pelab-platform-apply.py.j2
+    dest: /usr/local/sbin/pelab-platform-apply
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Install the delivery safety net switch (pelab-safety-net on|off|status)
+  ansible.builtin.template:
+    src: pelab-safety-net.sh.j2
+    dest: /usr/local/sbin/pelab-safety-net
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Install the applier's systemd service and timer
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/{{ item.name }}"
+    mode: "0644"
+    content: "{{ item.content }}"
+  loop:
+    - name: pelab-platform-apply.service
+      content: |
+        [Unit]
+        Description=PE Lab: apply the approved state of the platform's request repositories
+        After=k3s.service network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/local/sbin/pelab-platform-apply
+        TimeoutStartSec=15min
+    - name: pelab-platform-apply.timer
+      content: |
+        [Unit]
+        Description=PE Lab: run the platform applier every {{ golden_path_applier_interval }}
+
+        [Timer]
+        OnBootSec=3min
+        OnUnitInactiveSec={{ golden_path_applier_interval }}
+        AccuracySec=15s
+
+        [Install]
+        WantedBy=timers.target
+  loop_control:
+    label: "{{ item.name }}"
+  register: golden_path_applier_units
+
+- name: Start the applier timer
+  ansible.builtin.systemd_service:
+    name: pelab-platform-apply.timer
+    state: started
+    enabled: true
+    daemon_reload: "{{ golden_path_applier_units is changed }}"
+
+- name: Run the applier once now
+  block:
+    - name: Run the applier once now
+      ansible.builtin.systemd_service:
+        name: pelab-platform-apply.service
+        state: started
+      changed_when: false
+  rescue:
+    - name: Read the applier's log
+      ansible.builtin.command:
+        argv: [journalctl, --unit=pelab-platform-apply.service, --lines=30, --no-pager]
+      register: golden_path_applier_log
+      changed_when: false
+
+    - name: Stop with the applier's error
+      ansible.builtin.fail:
+        msg: "The platform applier failed on its first run:\n{{ golden_path_applier_log.stdout }}"

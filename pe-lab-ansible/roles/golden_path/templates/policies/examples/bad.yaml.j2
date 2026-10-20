@@ -1,0 +1,24 @@
+# A shortcut the guardrails refuse three times:
+#   1. the image is not from the lab registry ({{ pelab_hosts.harbor }}),
+#   2. it uses the "latest" tag,
+#   3. it has no name and owner labels.
+# Lab: change team01 to your team, run `kubectl apply -f examples/bad.yaml`,
+# read the three messages, and fix them one by one.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shortcut
+  namespace: team01-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shortcut
+  template:
+    metadata:
+      labels:
+        app: shortcut
+    spec:
+      containers:
+        - name: web
+          image: nginx:latest

@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# {{ ansible_managed }}
+#
+# Restores a PE Lab backup (made by pelab-backup) into the lab on this host,
+# normally a freshly built one. Run it through restore.yml, or by hand:
+#
+#   pelab-restore <backup folder> [gitea] [harbor]     (default: both)
+#
+# Gitea and Harbor are stopped while their data is replaced, then started again.
+# The platform applier is paused; restore.yml starts it again afterwards.
+set -euo pipefail
+
+SRC="$(cd "${1:?backup folder required}" && pwd)"
+shift
+[ "$#" -gt 0 ] || set -- gitea harbor
+PARTS=("$@")
+KUBECTL=(k3s kubectl)
+log() { printf '%s %s\n' "$(date -u +%H:%M:%S)" "$*"; }
+
+# The folder on this host behind a PersistentVolumeClaim (k3s local-path).
+volume_path() {
+  local volume path
+  volume="$("${KUBECTL[@]}" -n "$1" get pvc "$2" -o jsonpath='{.spec.volumeName}')"
+  path="$("${KUBECTL[@]}" get pv "$volume" -o jsonpath='{.spec.hostPath.path}{.spec.local.path}')"
+  [ -d "$path" ] || { echo "$1/$2 is not stored on this host ($path)" >&2; exit 1; }
+  printf '%s' "$path"
+}
+
+# Wait until no pod matches a label selector in a namespace.
+wait_gone() {
+  local _
+  for _ in $(seq 1 60); do
+    [ -z "$("${KUBECTL[@]}" -n "$1" get pods -l "$2" -o name 2>/dev/null)" ] && return 0
+    sleep 5
+  done
+  echo "pods $2 in $1 did not stop" >&2
+  exit 1
+}
+
+log "Checking $SRC"
+(cd "$SRC" && sha256sum --quiet -c SHA256SUMS)
+systemctl stop pelab-platform-apply.timer 2>/dev/null || true
+
+restore_gitea() {
+  log "Gitea: reading its paths"
+  local ini host data root db work rel
+  # shellcheck disable=SC2016  # $GITEA_APP_INI is expanded inside the Gitea container
+  ini="$("${KUBECTL[@]}" -n gitea exec deploy/gitea -c gitea -- sh -c 'cat "$GITEA_APP_INI"')"
+  ini_get() { printf '%s\n' "$ini" | awk -v s="[$1]" -v k="$2" '$0 == s {f = 1; next} /^\[/ {f = 0} f && $1 == k {sub(/^[^=]*=[ ]*/, ""); print; exit}'; }
+  data="$(ini_get server APP_DATA_PATH)"; data="${data:-/data}"
+  root="$(ini_get repository ROOT)"; root="${root:-$data/git/gitea-repositories}"
+  db="$(ini_get database PATH)"; db="${db:-/data/data/gitea.db}"
+  host="$(volume_path gitea gitea-shared-storage)"
+  map() { printf '%s%s' "$host" "${1#/data}"; }   # the pod mounts the volume at /data
+  log "Gitea: data $data, repositories $root, database $db"
+
+  log "Gitea: stopping"
+  "${KUBECTL[@]}" -n gitea scale deploy/gitea --replicas=0
+  wait_gone gitea app.kubernetes.io/name=gitea
+
+  work="$(mktemp -d)"
+  tar -xzf "$SRC/gitea.tar.gz" -C "$work"
+  rel="${root#"$data"/}"
+  log "Gitea: data folder (with app.ini, which keeps the old secret keys)"
+  rsync -a --delete --exclude "/${rel%%/*}/" "$work/data/" "$(map "$data")/"
+  log "Gitea: repositories"
+  mkdir -p "$(map "$root")"
+  rsync -a --delete "$work/repos/" "$(map "$root")/"
+  log "Gitea: database"
+  rm -f "$(map "$db")"
+  sqlite3 "$(map "$db")" < "$work/gitea-db.sql"
+  chown -R 1000:1000 "$host"   # the rootless Gitea image runs as uid 1000
+  rm -rf "$work"
+
+  log "Gitea: starting"
+  "${KUBECTL[@]}" -n gitea scale deploy/gitea --replicas=1
+  "${KUBECTL[@]}" -n gitea rollout status deploy/gitea --timeout=10m
+  "${KUBECTL[@]}" -n gitea exec deploy/gitea -c gitea -- gitea admin regenerate hooks
+}
+
+restore_harbor() {
+  log "Harbor: stopping everything except its database and cache"
+  "${KUBECTL[@]}" -n harbor scale deploy --all --replicas=0
+  "${KUBECTL[@]}" -n harbor scale statefulset harbor-trivy --replicas=0
+  wait_gone harbor 'component in (core,jobservice,portal,registry,trivy)'
+
+  log "Harbor: database"
+  gunzip -c "$SRC/harbor-db.sql.gz" \
+    | "${KUBECTL[@]}" -n harbor exec -i harbor-database-0 -c database -- psql -U postgres -q -d postgres >/dev/null
+
+  if [ -f "$SRC/harbor-registry.tar" ]; then
+    log "Harbor: image storage"
+    local host
+    host="$(volume_path harbor harbor-registry)"
+    find "$host" -mindepth 1 -delete
+    tar -C "$host" -xf "$SRC/harbor-registry.tar"
+  else
+    log "Harbor: no image storage in this backup; rebuild images by running the pipelines"
+  fi
+
+  log "Harbor: starting"
+  "${KUBECTL[@]}" -n harbor scale deploy --all --replicas=1
+  "${KUBECTL[@]}" -n harbor scale statefulset harbor-trivy --replicas=1
+  "${KUBECTL[@]}" -n harbor rollout status deploy/harbor-core --timeout=10m
+}
+
+for part in "${PARTS[@]}"; do
+  case "$part" in
+    gitea) restore_gitea ;;
+    harbor) restore_harbor ;;
+    *) echo "unknown part: $part (use gitea and/or harbor)" >&2; exit 1 ;;
+  esac
+done
+log "Restored ${PARTS[*]} from $SRC"

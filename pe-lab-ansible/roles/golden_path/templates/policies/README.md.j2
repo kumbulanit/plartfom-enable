@@ -1,0 +1,49 @@
+# Platform guardrails (policy-as-code)
+
+The rules that protect every team environment, written as files, tested like
+code, and changed only through an approved pull request.
+
+| Folder | What is in it |
+| --- | --- |
+| `policies/` | The guardrails Kyverno enforces in every team namespace |
+| `tests/` | The tests the pipeline runs on every change (`kyverno test tests/`) |
+| `examples/` | A good deployment, a bad one, the exception lab's status page, and the exception template |
+| `exceptions/` | Approved, time-limited exceptions ([how to ask](exceptions/README.md)) |
+
+## The guardrails
+
+| Policy | Rule in plain words |
+| --- | --- |
+| `pelab-trusted-registry` | Images must come from `{{ pelab_hosts.harbor }}`, where the pipeline put them after the checks and the scan |
+| `pelab-immutable-tags` | Every image has an explicit tag, and never `latest` |
+| `pelab-ownership-labels` | Every Deployment says what it is and which team owns it |
+{% if golden_path_signing | bool %}
+| `pelab-signed-images` | Team images carry the pipeline's signature (reported, not enforced) |
+{% endif %}
+
+Each refusal says which rule refused and how to fix it.
+
+## Try it in your workspace
+
+```bash
+git clone https://{{ pelab_hosts.gitea }}/{{ golden_path_platform_org }}/policies && cd policies
+kyverno apply policies/ --resource examples/good.yaml --values-file tests/values.yaml
+kyverno apply policies/ --resource examples/bad.yaml --values-file tests/values.yaml
+kyverno test tests/
+```
+
+`tests/values.yaml` tells the command line that `team01-dev` is a team namespace;
+on the cluster Kyverno reads that from the namespace's labels.
+
+On the cluster (replace team01 with your team):
+
+```bash
+sed 's/team01/teamNN/g' examples/bad.yaml | kubectl apply -f -
+```
+
+## How a change reaches the cluster
+
+A pull request runs the tests. The platform team approves it. After the merge the
+platform applies `main` within two minutes and shows the result as the
+`platform/apply` status on the commit. No pipeline holds credentials that can
+change the cluster.

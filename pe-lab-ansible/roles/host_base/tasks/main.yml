@@ -1,0 +1,22 @@
+---
+- name: Check the host is Ubuntu 24.04
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution'] == 'Ubuntu'
+      - ansible_facts['distribution_version'] is version('24.04', '>=')
+    fail_msg: "The lab targets Ubuntu Server 24.04 LTS; found {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}."
+
+- name: Patch and install base packages
+  ansible.builtin.import_tasks: packages.yml
+
+- name: Configure time synchronisation
+  ansible.builtin.import_tasks: time.yml
+
+- name: Apply kernel parameters and limits
+  ansible.builtin.import_tasks: kernel.yml
+
+- name: Install the lab TLS certificate and CA
+  ansible.builtin.import_tasks: tls.yml
+
+- name: Configure the host firewall
+  ansible.builtin.import_tasks: firewall.yml

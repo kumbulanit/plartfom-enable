@@ -1,0 +1,71 @@
+# Gitea with Actions enabled. SQLite on a volume and no Valkey: one replica is plenty for a lab.
+strategy:
+  type: Recreate
+gitea:
+  admin:
+    existingSecret: gitea-admin
+    email: {{ pelab_gitea_admin_email }}
+    passwordMode: keepUpdated
+  config:
+    APP_NAME: PE Lab Git
+    server:
+      DOMAIN: {{ pelab_hosts.gitea }}
+      ROOT_URL: https://{{ pelab_hosts.gitea }}/
+      SSH_DOMAIN: {{ pelab_hosts.gitea }}
+      SSH_PORT: 2222
+      SSH_LISTEN_PORT: 2222
+    database:
+      DB_TYPE: sqlite3
+    actions:
+      ENABLED: true
+      # "github" resolves uses: actions/checkout@v4 from github.com. On a fully
+      # isolated network mirror the actions into Gitea and set this to "self".
+      DEFAULT_ACTIONS_URL: github
+    cache:
+      ADAPTER: memory
+    session:
+      PROVIDER: db
+    queue:
+      TYPE: level
+    service:
+      DISABLE_REGISTRATION: true
+      REQUIRE_SIGNIN_VIEW: true
+      DEFAULT_ORG_VISIBILITY: limited
+    repository:
+      DEFAULT_BRANCH: main
+    webhook:
+      ALLOWED_HOST_LIST: private
+    migrations:
+      ALLOW_LOCALNETWORKS: true
+service:
+  ssh:
+    # git over SSH from workspaces and runners: gitea.<domain>:2222
+    type: LoadBalancer
+    clusterIP: ""
+    port: 2222
+    loadBalancerSourceRanges:
+      - {{ pelab_lxd_subnet_prefix }}.0/24
+      - {{ pelab_k3s_cluster_cidr }}
+ingress:
+  enabled: true
+  className: traefik
+  hosts:
+    - host: {{ pelab_hosts.gitea }}
+      paths:
+        - path: /
+  tls:
+    - secretName: {{ pelab_tls_secret_name }}
+      hosts: ["{{ pelab_hosts.gitea }}"]
+persistence:
+  enabled: true
+  size: 20Gi
+valkey-cluster:
+  enabled: false
+valkey:
+  enabled: false
+postgresql-ha:
+  enabled: false
+postgresql:
+  enabled: false
+test:
+  enabled: false

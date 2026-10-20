@@ -1,0 +1,66 @@
+---
+- name: Generate a private lab CA and wildcard certificate
+  ansible.builtin.include_tasks:
+    file: tls_selfsigned.yml
+    apply:
+      delegate_to: localhost
+      run_once: true
+      become: false
+  when: pelab_tls_generate_selfsigned | bool
+
+- name: Check the TLS files exist on the control node
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - "{{ pelab_tls_cert_path }}"
+    - "{{ pelab_tls_key_path }}"
+    - "{{ pelab_tls_ca_path }}"
+  register: host_base_tls_files
+  delegate_to: localhost
+  become: false
+
+- name: Fail when a TLS file is missing
+  ansible.builtin.assert:
+    that: host_base_tls_files.results | rejectattr('stat.exists') | list | length == 0
+    fail_msg: >-
+      Missing {{ host_base_tls_files.results | rejectattr('stat.exists') | map(attribute='item') | join(', ') }}.
+      Provide a wildcard certificate for *.{{ pelab_domain }} or set pelab_tls_generate_selfsigned=true.
+
+- name: Create the TLS directory
+  ansible.builtin.file:
+    path: "{{ pelab_tls_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Copy the wildcard certificate, key and CA
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ pelab_tls_dir }}/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - {src: "{{ pelab_tls_cert_path }}", dest: tls.crt, mode: "0644"}
+    - {src: "{{ pelab_tls_key_path }}", dest: tls.key, mode: "0600"}
+    - {src: "{{ pelab_tls_ca_path }}", dest: ca.crt, mode: "0644"}
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Check the certificate covers the lab domain
+  ansible.builtin.command:
+    argv: [openssl, x509, -in, "{{ pelab_tls_dir }}/tls.crt", -noout, -checkhost, "gitea.{{ pelab_domain }}"]
+  register: host_base_tls_checkhost
+  changed_when: false
+  failed_when: "'does match' not in host_base_tls_checkhost.stdout"
+
+- name: Trust the lab CA on the host
+  ansible.builtin.copy:
+    src: "{{ pelab_tls_dir }}/ca.crt"
+    dest: /usr/local/share/ca-certificates/pelab-lab-ca.crt
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Update CA certificates

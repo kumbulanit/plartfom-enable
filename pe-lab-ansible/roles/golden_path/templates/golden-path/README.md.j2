@@ -1,0 +1,103 @@
+# ${REPO_NAME}
+
+A small web service owned by **${REPO_OWNER}**, created from the PE Lab golden
+path. The golden path is the paved road from a commit to a running, observed
+service: you write code, and the platform does the rest within its guardrails.
+
+| What | Where |
+|---|---|
+| Dev | https://${REPO_NAME}-${REPO_OWNER}-dev.{{ pelab_domain }} |
+| Staging | https://${REPO_NAME}-${REPO_OWNER}-staging.{{ pelab_domain }} |
+| Prod | https://${REPO_NAME}-${REPO_OWNER}-prod.{{ pelab_domain }} |
+| Pipeline | https://{{ pelab_hosts.gitea }}/${REPO_OWNER}/${REPO_NAME}/actions |
+| Deployments | https://{{ pelab_hosts.argocd }} (search for ${REPO_OWNER}-${REPO_NAME}) |
+| Images, scan results, SBOMs | https://{{ pelab_hosts.harbor }} (project ${REPO_OWNER}) |
+| Dashboard and logs | https://{{ pelab_hosts.grafana }} (PE Lab / Golden path services) |
+| Portal | https://{{ pelab_hosts.backstage }} (catalog entry ${REPO_NAME}-${REPO_OWNER}) |
+
+## What the service does
+
+It answers three paths: `/` returns its name, version and environment; `/healthz`
+is the health check; `/metrics` is for Prometheus. The code is `app/main.py`,
+and it uses only the Python standard library.
+
+Run it in your workspace:
+
+```
+python3 -m app.main
+curl localhost:8080/
+pytest -q
+```
+
+## How a change reaches production
+
+1. **Change** the code on a branch and open a pull request. `main` is protected:
+   nothing is pushed to it directly.
+2. **Pipeline** (`.gitea/workflows/ci.yaml`) runs on every pull request:
+   ruff, pytest, gitleaks (secrets), hadolint, kustomize validation, a docker
+   build and a trivy scan.
+3. **Review**: a member of ${REPO_OWNER} approves the pull request (CODEOWNERS
+   asks your team). The pipeline's last step posts its verdict as the
+   `pipeline` status, and `main` requires it: a red pull request cannot be
+   merged. Then it is merged.
+4. **Build**: on main the pipeline also pushes the image to Harbor, tagged with
+   the commit SHA. Harbor scans it again and records its SBOM.
+{% if golden_path_signing | bool %}
+   The pipeline then signs the image with the platform's key (see
+   [Signed images](#signed-images)).
+{% endif %}
+5. **Deploy to dev**: Argo CD notices the new commit and deploys that image to
+   `${REPO_OWNER}-dev`. Nobody runs kubectl.
+6. **Release to staging and prod**: edit `deploy/staging/kustomization.yaml` (or `prod`),
+   set `newTag` to the SHA running in dev and the replica count above 0, and
+   open a pull request. Once approved and merged, Argo CD rolls it out.
+
+## Guardrails you may meet
+
+The platform checks every workload in team namespaces (Kyverno):
+
+- images must come from {{ pelab_hosts.harbor }}, and must not use the `latest` tag;
+- Deployments need the `app.kubernetes.io/name` and `app.kubernetes.io/part-of` labels.
+{% if golden_path_signing | bool %}
+- images from your Harbor project should be signed by the pipeline. This check
+  only reports: an unsigned image still runs (see [Signed images](#signed-images)).
+{% endif %}
+
+Namespaces also have quotas, default resource limits and network policies.
+If Argo CD reports a sync error, its message says which rule was broken.
+{% if golden_path_signing | bool %}
+
+## Signed images
+
+After pushing to Harbor, the pipeline signs the image with the platform's key
+(cosign, step "Sign the image"). It signs the image digest, so the signature
+covers exactly the bytes that were built and scanned. Harbor keeps the signature
+next to the image.
+
+Kyverno checks the signature of every Pod in your namespaces. The check is in
+audit mode: it does not block anything, and the result is in your namespace's
+policy report:
+
+```
+kubectl get policyreports -o wide
+```
+
+To check a signature yourself, save the platform's public key below as
+`cosign.pub`, and use the commit SHA of the image:
+
+```
+cosign verify --key cosign.pub --insecure-ignore-tlog=true {{ pelab_hosts.harbor }}/${REPO_OWNER}/${REPO_NAME}:<commit SHA>
+```
+
+The lab may have no internet access, so signatures are not recorded in the
+public transparency log (Rekor); `--insecure-ignore-tlog` tells cosign not to
+look for them there.
+
+```
+{{ lookup('ansible.builtin.file', golden_path_cosign_pub_file) }}
+```
+{% endif %}
+
+## Getting help
+
+Open an issue on https://{{ pelab_hosts.gitea }}/platform/golden-path/issues.

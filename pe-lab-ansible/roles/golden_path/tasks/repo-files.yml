@@ -1,0 +1,25 @@
+---
+# Builds golden_path_repo_files[<repository>]: the files under files/<source> as
+# they are, and the ones under templates/<source> rendered for this lab.
+# Called once per entry of golden_path_platform_repos (loop_var golden_path_repo).
+- name: Start an empty file list for {{ golden_path_repo.name }}
+  ansible.builtin.set_fact:
+    golden_path_repo_files: >-
+      {{ golden_path_repo_files | default({}) | combine({golden_path_repo.name: []}) }}
+
+- name: Collect the files of {{ golden_path_repo.name }}
+  ansible.builtin.set_fact:
+    golden_path_repo_files: >-
+      {{ golden_path_repo_files | default({})
+         | combine({golden_path_repo.name: golden_path_repo_files[golden_path_repo.name]
+                    + [{'path': item.path | regex_replace('[.]j2$', ''),
+                        'content': (lookup('ansible.builtin.template', item.src) if item.src.startswith(role_path ~ '/templates/')
+                                    else lookup('ansible.builtin.file', item.src, rstrip=false)
+                                         | replace('<lab domain>', pelab_domain if golden_path_repo.replace_domain | default(false) else '<lab domain>'))
+                                   | b64encode}]}) }}
+  loop: >-
+    {{ (lookup('community.general.filetree', role_path ~ '/files/' ~ golden_path_repo.source, exclude=golden_path_ignore, wantlist=true)
+        + lookup('community.general.filetree', role_path ~ '/templates/' ~ golden_path_repo.source, exclude=golden_path_ignore, wantlist=true))
+       | selectattr('state', 'equalto', 'file') | list }}
+  loop_control:
+    label: "{{ golden_path_repo.name }}/{{ item.path }}"

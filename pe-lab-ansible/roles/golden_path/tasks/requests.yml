@@ -1,0 +1,21 @@
+---
+# What the request repositories need in the cluster before Gitea is set up:
+# OpenTofu's state namespace and the plan pipeline's read-only identity, and the
+# only namespace in which Kyverno honours policy exceptions.
+- name: Prepare OpenTofu's state and the plan pipeline's read-only identity
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition: "{{ lookup('ansible.builtin.template', 'manifests/environments-platform.yaml.j2') | ansible.builtin.from_yaml_all | list }}"
+
+- name: Create the namespace for approved policy exceptions
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ golden_path_exception_namespace }}"
+        labels:
+          pelab.io/tier: platform

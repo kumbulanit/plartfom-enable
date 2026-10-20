@@ -1,0 +1,44 @@
+# Checks every change to the guardrails and every exception request.
+# It needs no credentials: the platform applies main itself, every two minutes,
+# and shows the result as the "platform/apply" status on the commit.
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: pelab-host
+    steps:
+      - name: Check out
+        run: |
+          git init -q .
+          git -c http.extraHeader="Authorization: token ${{ gitea.token }}" \
+            fetch -q --depth 1 "${{ gitea.server_url }}/${{ gitea.repository }}.git" "${{ gitea.ref }}"
+          git checkout -q FETCH_HEAD
+          git log -1 --format='Testing %h: %s'
+
+      - name: Policy tests (good passes, bad fails)
+        run: kyverno test tests/
+
+      - name: Exception requests (who, why, until when)
+        run: python3 tests/check-exceptions.py
+
+      # The merge gate. The pipeline posts its own verdict on the commit, as the
+      # "pipeline" status; main is protected so that a red one cannot be merged.
+      # (Gitea 1.27.0 cannot require the statuses its jobs write: see the README.)
+      - name: Post the verdict (the required check for merging)
+        if: always()
+        run: |
+          case "${{ job.status }}" in
+            success) STATE=success; TEXT="Policy tests and exception checks passed" ;;
+            *)       STATE=failure; TEXT="A check failed: open this run and read it" ;;
+          esac
+          curl -fsS -o /dev/null -X POST \
+            -H "Authorization: token ${{ gitea.token }}" -H "Content-Type: application/json" \
+            "${{ gitea.server_url }}/api/v1/repos/${{ gitea.repository }}/statuses/${{ gitea.event.pull_request.head.sha || gitea.sha }}" \
+            -d "{\"context\": \"pipeline\", \"state\": \"$STATE\", \"description\": \"$TEXT\", \"target_url\": \"${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_number }}\"}"
+          echo "pipeline: $STATE"

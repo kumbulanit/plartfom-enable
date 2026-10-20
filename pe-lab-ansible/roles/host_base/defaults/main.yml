@@ -1,0 +1,44 @@
+---
+# Apply all pending updates (apt dist-upgrade) on every run.
+host_base_upgrade: true
+# Reboot when the upgrade asks for it (/var/run/reboot-required).
+host_base_allow_reboot: true
+
+host_base_packages:
+  - ca-certificates
+  - chrony
+  - curl
+  - git
+  - htop
+  - jq
+  - openssl
+  - python3-pip
+  - python3-venv
+  - rsync
+  - snapd
+  - sqlite3
+  - tmux
+  - ufw
+  - unzip
+  - xz-utils
+  - zfsutils-linux
+
+host_base_sysctls:
+  # Requested for the course: SonarQube/OpenSearch, and file watchers in 30+ containers.
+  vm.max_map_count: 524288
+  fs.inotify.max_user_instances: 8192
+  fs.inotify.max_user_watches: 524288
+  # Also needed on a dense container host.
+  fs.inotify.max_queued_events: 1048576
+  fs.aio-max-nr: 1048576 # Redpanda (Seastar) asynchronous I/O
+  kernel.keys.maxkeys: 2000 # LXD: one keyring per container
+  kernel.keys.maxbytes: 2000000
+  net.ipv4.ip_forward: 1
+  net.ipv4.neigh.default.gc_thresh3: 8192
+
+# Open-file limit for login sessions and systemd services.
+host_base_nofile_limit: 1048576
+
+# Keep an SSH rule for the address Ansible is connecting from, so enabling
+# ufw can never lock out the run that enables it.
+host_base_ufw_keep_current_ssh_client: true

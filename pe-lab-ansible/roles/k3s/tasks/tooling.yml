@@ -1,0 +1,40 @@
+---
+- name: Download Helm
+  ansible.builtin.get_url:
+    url: "https://get.helm.sh/helm-v{{ k3s_helm_version }}-linux-amd64.tar.gz"
+    checksum: "sha256:https://get.helm.sh/helm-v{{ k3s_helm_version }}-linux-amd64.tar.gz.sha256sum"
+    dest: "{{ k3s_work_dir }}/helm-v{{ k3s_helm_version }}-linux-amd64.tar.gz"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create the Helm unpack directory
+  ansible.builtin.file:
+    path: "{{ k3s_work_dir }}/helm-v{{ k3s_helm_version }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Unpack Helm
+  ansible.builtin.unarchive:
+    src: "{{ k3s_work_dir }}/helm-v{{ k3s_helm_version }}-linux-amd64.tar.gz"
+    dest: "{{ k3s_work_dir }}/helm-v{{ k3s_helm_version }}"
+    remote_src: true
+    creates: "{{ k3s_work_dir }}/helm-v{{ k3s_helm_version }}/linux-amd64/helm"
+
+- name: Install Helm
+  ansible.builtin.copy:
+    src: "{{ k3s_work_dir }}/helm-v{{ k3s_helm_version }}/linux-amd64/helm"
+    dest: /usr/local/bin/helm
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Create the Python virtualenv for the kubernetes.core modules
+  ansible.builtin.pip:
+    name: "{{ k3s_python_packages }}"
+    virtualenv: "{{ pelab_venv }}"
+    virtualenv_command: python3 -m venv
+    virtualenv_site_packages: true

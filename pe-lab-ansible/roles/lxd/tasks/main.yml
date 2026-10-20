@@ -1,0 +1,10 @@
+---
+- name: Install and initialise LXD
+  ansible.builtin.import_tasks: install.yml
+
+- name: Configure the LXD bridge and host DNS
+  ansible.builtin.import_tasks: network.yml
+
+- name: Build the workspace image
+  ansible.builtin.import_tasks: image.yml
+  tags: [image]

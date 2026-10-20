@@ -1,0 +1,103 @@
+---
+- name: Check the runner count fits the address plan
+  ansible.builtin.assert:
+    that: pelab_runner_names | length <= 20
+    fail_msg: At most 20 runners fit in .11-.30 of {{ pelab_lxd_subnet_prefix }}.0/24.
+
+- name: Create the runner profile
+  community.general.lxd_profile:
+    name: "{{ runners_profile }}"
+    description: PE Lab Gitea Actions runner
+    state: present
+    config: "{{ runners_profile_config }}"
+    devices:
+      # The dir driver has no quotas, so the root size only applies to zfs.
+      root: >-
+        {{ {'type': 'disk', 'path': '/', 'pool': pelab_lxd_storage_pool}
+           | combine({'size': runners_root_size} if pelab_lxd_storage_driver == 'zfs' else {}) }}
+      eth0:
+        type: nic
+        name: eth0
+        network: "{{ pelab_lxd_bridge }}"
+
+- name: Create the host directories mounted into each runner
+  ansible.builtin.file:
+    path: "{{ runners_host_dir }}/{{ item }}/runner"
+    state: directory
+    mode: "0755"
+  loop: "{{ pelab_runner_names }}"
+
+- name: Create and start the runner containers
+  community.general.lxd_container:
+    name: "{{ item }}"
+    state: started
+    source:
+      type: image
+      alias: "{{ pelab_workspace_image }}"
+    profiles: ["{{ runners_profile }}"]
+    config:
+      user.pelab.role: runner
+    devices:
+      eth0:
+        type: nic
+        name: eth0
+        network: "{{ pelab_lxd_bridge }}"
+        ipv4.address: "{{ pelab_lxd_subnet_prefix }}.{{ runners_ip_offset + idx + 1 }}"
+        security.port_isolation: "{{ pelab_lxd_port_isolation | string | lower }}"
+      pelab:
+        type: disk
+        source: "{{ runners_host_dir }}/{{ item }}"
+        path: /etc/pelab
+        readonly: "true"
+    wait_for_ipv4_addresses: true
+    timeout: 600
+  loop: "{{ pelab_runner_names }}"
+  loop_control:
+    index_var: idx
+
+- name: Read the container UID map base
+  ansible.builtin.command:
+    argv: [lxc, config, get, "{{ pelab_runner_names[0] }}", volatile.idmap.base]
+  register: runners_idmap_base
+  changed_when: false
+
+- name: Hand the mounted directories to container root
+  ansible.builtin.file:
+    path: "{{ runners_host_dir }}/{{ item.0 }}{{ item.1 }}"
+    state: directory
+    owner: "{{ runners_idmap_base.stdout | int }}"
+    group: "{{ runners_idmap_base.stdout | int }}"
+    mode: "0755"
+  loop: "{{ pelab_runner_names | product(['', '/runner']) | list }}"
+  loop_control:
+    label: "{{ item.0 }}{{ item.1 }}"
+
+- name: Write the runner configuration
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: "{{ runners_host_dir }}/{{ item }}/runner/config.yaml"
+    owner: "{{ runners_idmap_base.stdout | int }}"
+    group: "{{ runners_idmap_base.stdout | int }}"
+    mode: "0640"
+  loop: "{{ pelab_runner_names }}"
+  loop_control:
+    index_var: idx
+  notify: Restart Gitea runners
+
+- name: Wait for each runner to finish booting
+  ansible.builtin.command:
+    argv: [lxc, exec, "{{ item }}", --, systemctl, is-system-running, --wait]
+  loop: "{{ pelab_runner_names }}"
+  register: runners_boot
+  changed_when: false
+  failed_when: runners_boot.stdout | trim not in ['running', 'degraded']
+
+- name: Register runners with Gitea
+  ansible.builtin.import_tasks: register.yml
+
+- name: Enable the runner service
+  ansible.builtin.command:
+    argv: [lxc, exec, "{{ item }}", --, systemctl, enable, --now, pelab-gitea-runner.service]
+  loop: "{{ pelab_runner_names }}"
+  register: runners_enable
+  changed_when: "'Created symlink' in runners_enable.stderr"

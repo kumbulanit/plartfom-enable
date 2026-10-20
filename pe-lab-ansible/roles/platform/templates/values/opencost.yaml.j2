@@ -1,0 +1,29 @@
+# OpenCost with synthetic on-prem prices, reading kube-prometheus-stack.
+opencost:
+  exporter:
+    defaultClusterId: pelab
+  prometheus:
+    internal:
+      enabled: true
+      serviceName: kube-prometheus-stack-prometheus
+      namespaceName: monitoring
+      port: 9090
+  customPricing:
+    enabled: true
+    provider: custom
+    costModel:
+      description: PE Lab synthetic on-prem prices
+{% for key, value in platform_opencost_prices | dictsort %}
+      {{ key }}: "{{ value }}"
+{% endfor %}
+  ui:
+    enabled: true
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      hosts:
+        - host: {{ pelab_hosts.opencost }}
+          paths: ["/"]
+      tls:
+        - secretName: {{ pelab_tls_secret_name }}
+          hosts: ["{{ pelab_hosts.opencost }}"]

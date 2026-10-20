@@ -1,0 +1,33 @@
+# SonarQube Community Build (extra) with its embedded database, which SonarSource
+# supports for evaluation only. vm.max_map_count is set on the host, so the
+# privileged sysctl init container is not needed.
+community:
+  enabled: true
+monitoringPasscodeSecretName: sonarqube-monitoring
+monitoringPasscodeSecretKey: passcode
+setAdminPassword:
+  passwordSecretName: sonarqube-admin
+initSysctl:
+  enabled: false
+sonarProperties:
+  sonar.core.serverBaseURL: https://{{ pelab_hosts.sonarqube }}
+persistence:
+  enabled: true
+  size: 10Gi
+resources:
+  requests:
+    cpu: 500m
+    memory: 3Gi
+  limits:
+    cpu: "2"
+    memory: 6Gi
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  hosts:
+    - name: {{ pelab_hosts.sonarqube }}
+      path: /
+      pathType: Prefix
+  tls:
+    - secretName: {{ pelab_tls_secret_name }}
+      hosts: ["{{ pelab_hosts.sonarqube }}"]

@@ -1,0 +1,91 @@
+---
+- name: Check whether k3s is already installed
+  ansible.builtin.stat:
+    path: /etc/systemd/system/k3s.service
+  register: k3s_unit_before
+
+- name: Create k3s directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ k3s_work_dir }}"
+    - /etc/rancher/k3s
+    - "{{ k3s_manifests_dir }}"
+
+- name: Download the k3s binary
+  ansible.builtin.get_url:
+    url: "{{ k3s_release_url }}/k3s"
+    checksum: "sha256:{{ k3s_release_url }}/sha256sum-amd64.txt"
+    dest: /usr/local/bin/k3s
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart k3s
+
+- name: Download the k3s install script for this release
+  ansible.builtin.get_url:
+    url: "{{ k3s_install_script_url }}"
+    dest: "{{ k3s_work_dir }}/install-{{ k3s_version }}.sh"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Write the k3s configuration
+  ansible.builtin.copy:
+    dest: /etc/rancher/k3s/config.yaml
+    content: "{{ k3s_config | to_nice_yaml(indent=2) }}"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart k3s
+
+- name: Configure the bundled Traefik
+  ansible.builtin.template:
+    src: traefik-config.yaml.j2
+    dest: "{{ k3s_manifests_dir }}/pelab-traefik-config.yaml"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Resolve the lab domain inside the cluster
+  ansible.builtin.template:
+    src: coredns-custom.yaml.j2
+    dest: "{{ k3s_manifests_dir }}/pelab-coredns-custom.yaml"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart CoreDNS
+
+- name: Install the k3s service
+  ansible.builtin.command:
+    argv: ["{{ k3s_work_dir }}/install-{{ k3s_version }}.sh"]
+    creates: /etc/systemd/system/k3s.service
+  environment:
+    INSTALL_K3S_SKIP_DOWNLOAD: "true"
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+    INSTALL_K3S_EXEC: server
+
+- name: Enable k3s
+  ansible.builtin.systemd_service:
+    name: k3s
+    enabled: true
+    state: started
+
+- name: Apply pending k3s restarts before waiting for the node
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for the node to be Ready
+  ansible.builtin.command:
+    argv: [k3s, kubectl, wait, --for=condition=Ready, node, --all, --timeout=60s]
+  register: k3s_node_ready
+  retries: 20
+  delay: 15
+  until: k3s_node_ready.rc == 0
+  changed_when: false
+
+- name: Install Helm and the Kubernetes Python client
+  ansible.builtin.import_tasks: tooling.yml

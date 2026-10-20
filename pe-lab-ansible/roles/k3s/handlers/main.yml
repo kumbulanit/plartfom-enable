@@ -1,0 +1,16 @@
+---
+- name: Restart k3s
+  ansible.builtin.systemd_service:
+    name: k3s
+    state: restarted
+  # A fresh install starts k3s itself; only an existing service needs a restart.
+  when: k3s_unit_before.stat.exists
+
+- name: Restart CoreDNS
+  ansible.builtin.command:
+    argv: [k3s, kubectl, --namespace=kube-system, rollout, restart, deployment/coredns]
+  register: k3s_coredns_restart
+  retries: 20
+  delay: 15
+  until: k3s_coredns_restart.rc == 0
+  changed_when: true

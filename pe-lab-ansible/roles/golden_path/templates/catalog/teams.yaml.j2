@@ -1,0 +1,30 @@
+# Teams and their members, as the portal shows ownership.
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: platform-team
+  title: Platform team
+  description: Runs the PE Lab Internal Developer Platform.
+spec:
+  type: team
+  children: []
+{% for team in pelab_team_names %}
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: {{ team }}
+  title: Team {{ team[-2:] }}
+spec:
+  type: team
+  children: []
+{% endfor %}
+{% for user, team in pelab_workspace_teams | dictsort %}
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: {{ user }}
+spec:
+  memberOf: [{{ team }}]
+{% endfor %}

@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+# {{ item }} may only forward to port 22 of its own container.
+{% for key in workspaces_pubkeys[item].splitlines() if key | trim and not key.startswith('#') %}
+restrict,port-forwarding,permitopen="{{ pelab_lxd_subnet_prefix }}.{{ workspaces_ip_offset + idx + 1 }}:22" {{ key | trim }}
+{% endfor %}

@@ -1,0 +1,21 @@
+---
+- name: Create the team namespaces
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition: "{{ lookup('ansible.builtin.template', 'namespaces.yaml.j2') | ansible.builtin.from_yaml_all | list }}"
+
+- name: Apply quotas, limits and network policy to the team namespaces
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition: "{{ lookup('ansible.builtin.template', 'guardrails.yaml.j2') | ansible.builtin.from_yaml_all | list }}"
+
+- name: Create delegate identities and team role bindings
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition: "{{ lookup('ansible.builtin.template', 'rbac.yaml.j2') | ansible.builtin.from_yaml_all | list }}"
+
+- name: Write each delegate's kubeconfig into their workspace
+  ansible.builtin.import_tasks: kubeconfigs.yml

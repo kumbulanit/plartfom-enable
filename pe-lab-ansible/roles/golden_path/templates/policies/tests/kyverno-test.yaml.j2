@@ -1,0 +1,35 @@
+# Tests for the guardrails, run by the pipeline on every change:
+#   kyverno test tests/
+# A good deployment must pass every rule; the shortcut must fail three of them;
+# the status page fails only the registry rule, and passes once its exception applies.
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: guardrails
+policies:
+  - ../policies/pelab-trusted-registry.yaml
+  - ../policies/pelab-immutable-tags.yaml
+  - ../policies/pelab-ownership-labels.yaml
+resources:
+  - ../examples/good.yaml
+  - ../examples/bad.yaml
+  - ../examples/status-page.yaml
+exceptions:
+  - ../examples/exception-template.yaml
+# The examples' namespace is a team namespace.
+variables: values.yaml
+results:
+  # The golden-path deployment passes everything.
+  - {policy: pelab-trusted-registry, rule: autogen-harbor-only, kind: Deployment, resources: [hello], result: pass}
+  - {policy: pelab-immutable-tags, rule: autogen-require-tag, kind: Deployment, resources: [hello], result: pass}
+  - {policy: pelab-immutable-tags, rule: autogen-no-latest, kind: Deployment, resources: [hello], result: pass}
+  - {policy: pelab-ownership-labels, rule: required-labels, kind: Deployment, resources: [hello], result: pass}
+  # The shortcut breaks three rules (it does have a tag: "latest").
+  - {policy: pelab-trusted-registry, rule: autogen-harbor-only, kind: Deployment, resources: [shortcut], result: fail}
+  - {policy: pelab-immutable-tags, rule: autogen-require-tag, kind: Deployment, resources: [shortcut], result: pass}
+  - {policy: pelab-immutable-tags, rule: autogen-no-latest, kind: Deployment, resources: [shortcut], result: fail}
+  - {policy: pelab-ownership-labels, rule: required-labels, kind: Deployment, resources: [shortcut], result: fail}
+  # The status page is allowed by its exception; the other rules still apply.
+  - {policy: pelab-trusted-registry, rule: autogen-harbor-only, kind: Deployment, resources: [status-page], result: skip}
+  - {policy: pelab-immutable-tags, rule: autogen-no-latest, kind: Deployment, resources: [status-page], result: pass}
+  - {policy: pelab-ownership-labels, rule: required-labels, kind: Deployment, resources: [status-page], result: pass}

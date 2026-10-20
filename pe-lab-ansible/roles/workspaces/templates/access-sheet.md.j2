@@ -1,0 +1,57 @@
+{% set address = pelab_lxd_subnet_prefix ~ '.' ~ (workspaces_ip_offset + idx + 1) %}
+{% set generated_key = pelab_credentials_dir ~ '/ssh/' ~ item %}
+# PE Lab access: {{ item }}
+
+Team: {{ pelab_workspace_teams[item] | default('unassigned (spare)') }}
+
+Your user name is `{{ item }}`. One password opens your workspace, Gitea and Harbor:
+{{ pelab_delegate_passwords[item] }}
+
+## Start here
+
+1. **Developer portal:** https://{{ pelab_hosts.backstage }}. Sign in as guest. It lists the platform's services, the golden path and every team's services.
+2. **Your workspace (browser IDE):** https://{{ item }}.{{ pelab_domain }}. It has a terminal, git, kubectl and all the course tools.
+3. **Your team's service:** https://{{ pelab_hosts.gitea }}/{{ pelab_workspace_teams[item] | default('<your team>') }}/hello. Sign in as `{{ item }}`. Read the README: it walks you from a change to production.
+4. **Your service running in dev:** https://hello-{{ pelab_workspace_teams[item] | default('<team>') }}-dev.{{ pelab_domain }}
+
+In the workspace terminal, `git clone https://{{ pelab_hosts.gitea }}/{{ pelab_workspace_teams[item] | default('<team>') }}/hello.git`
+asks for the same username and password. `kubectl get pods` shows your team's dev namespace.
+
+5. **The handbook:** https://{{ pelab_hosts.gitea }}/{{ golden_path_platform_org | default('platform') }}/{{ golden_path_handbook_repo | default('handbook') }}. Every lab, step by step.
+
+## Where to look
+
+| What | Address | Sign in |
+| --- | --- | --- |
+| Portal (catalog, templates) | https://{{ pelab_hosts.backstage }} | Guest |
+| Git, pull requests, pipelines | https://{{ pelab_hosts.gitea }} | `{{ item }}` and your password |
+| Images, scan reports, SBOMs | https://{{ pelab_hosts.harbor }} | `{{ item }}` and your password |
+| Deployments (read-only) | https://{{ pelab_hosts.argocd }} | No sign-in needed |
+| Dashboards and logs (read-only) | https://{{ pelab_hosts.grafana }} | No sign-in needed |
+| Environment requests | https://{{ pelab_hosts.gitea }}/{{ golden_path_platform_org | default('platform') }}/{{ golden_path_environments_repo | default('environments') }} | Day 3 |
+| Guardrails and exceptions | https://{{ pelab_hosts.gitea }}/{{ golden_path_platform_org | default('platform') }}/{{ golden_path_policies_repo | default('policies') }} | Day 5 |
+
+## SSH from Windows (OpenSSH client)
+
+{% if workspaces_provided_keys.results[idx].stat.exists %}
+Use the private key that matches `{{ item }}.pub`.
+{% else %}
+Private key: `{{ generated_key }}` (copy it to `%USERPROFILE%\.ssh\pelab_{{ item }}`).
+{% endif %}
+
+Add to `%USERPROFILE%\.ssh\config`:
+
+```
+Host pelab-jump
+    HostName {{ workspaces_jump_host }}
+    User {{ item }}
+    IdentityFile ~/.ssh/pelab_{{ item }}
+
+Host {{ item }}
+    HostName {{ address }}
+    User {{ item }}
+    ProxyJump pelab-jump
+    IdentityFile ~/.ssh/pelab_{{ item }}
+```
+
+Then connect with `ssh {{ item }}`.

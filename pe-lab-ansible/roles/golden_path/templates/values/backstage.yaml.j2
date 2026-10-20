@@ -1,0 +1,58 @@
+# Backstage, the developer portal. The upstream demo app with guest sign-in and its
+# built-in database is enough to show the catalog; replace the image with your
+# organisation's Backstage build (Keycloak sign-in, plugins) for real use.
+backstage:
+  image:
+    registry: ghcr.io
+    repository: backstage/backstage
+    tag: "{{ pelab_versions.backstage_image }}"
+  # Load the image's own app-config.yaml first; the chart adds appConfig after it.
+  args: ["--config", "app-config.yaml"]
+  extraEnvVars:
+    - name: GITEA_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: backstage-gitea
+          key: token
+    - name: NODE_EXTRA_CA_CERTS
+      value: /etc/pelab-ca/ca.crt
+  extraVolumes:
+    - name: pelab-ca
+      configMap:
+        name: pelab-ca
+  extraVolumeMounts:
+    - name: pelab-ca
+      mountPath: /etc/pelab-ca
+      readOnly: true
+  appConfig:
+    app:
+      title: PE Lab Developer Portal
+      baseUrl: https://{{ pelab_hosts.backstage }}
+    organization:
+      name: PE Lab
+    backend:
+      baseUrl: https://{{ pelab_hosts.backstage }}
+      cors:
+        origin: https://{{ pelab_hosts.backstage }}
+    integrations:
+      gitea:
+        - host: {{ pelab_hosts.gitea }}
+          username: {{ golden_path_bot_user }}
+          password: ${GITEA_TOKEN}
+    catalog:
+      rules:
+        - allow: [Component, System, API, Resource, Location, Group, User, Domain, Template]
+      locations:
+        - type: url
+          target: https://{{ pelab_hosts.gitea }}/{{ golden_path_platform_org }}/{{ golden_path_catalog_repo }}/src/branch/main/all.yaml
+    auth:
+      providers:
+        guest:
+          dangerouslyAllowOutsideDevelopment: true
+ingress:
+  enabled: true
+  className: traefik
+  host: {{ pelab_hosts.backstage }}
+  tls:
+    enabled: true
+    secretName: {{ pelab_tls_secret_name }}

@@ -1,0 +1,6 @@
+.git
+.gitea
+deploy
+tests
+**/__pycache__
+*.md

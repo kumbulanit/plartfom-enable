@@ -1,0 +1,29 @@
+---
+- name: Create namespaces, TLS secrets and credentials
+  ansible.builtin.import_tasks: prepare.yml
+
+- name: Add the Helm repositories
+  ansible.builtin.import_tasks: repos.yml
+
+- name: Install the platform services
+  kubernetes.core.helm:
+    name: "{{ item.name }}"
+    release_namespace: "{{ item.namespace }}"
+    chart_ref: "{{ pelab_charts[item.chart].chart }}"
+    chart_version: "{{ pelab_charts[item.chart].version }}"
+    values: "{{ lookup('ansible.builtin.template', 'values/' ~ item.name ~ '.yaml.j2') | from_yaml }}"
+    wait: true
+    wait_timeout: "{{ item.timeout | default(platform_helm_timeout) }}"
+  loop: "{{ platform_enabled_releases }}"
+  loop_control:
+    label: "{{ item.name }} ({{ pelab_charts[item.chart].chart }} {{ pelab_charts[item.chart].version }})"
+
+- name: Publish the API gateway through Traefik
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition: "{{ lookup('ansible.builtin.template', 'manifests/apisix-ingress.yaml.j2') | from_yaml }}"
+  when: "'apisix' in platform_enabled_names"
+
+- name: Configure the Harbor proxy cache and k3s registry mirror
+  ansible.builtin.import_tasks: harbor.yml

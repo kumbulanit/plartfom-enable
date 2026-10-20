@@ -1,0 +1,29 @@
+---
+# Runners are built from the workspace image, so jobs get the same tools the
+# delegates use (trivy, gitleaks, semgrep, checkov, cosign, ...).
+runners_profile: pelab-runner
+runners_profile_config:
+  boot.autostart: "true"
+  limits.cpu: "4"
+  limits.memory: 8GiB
+  security.nesting: "true"
+  security.syscalls.intercept.mknod: "true"
+  security.syscalls.intercept.setxattr: "true"
+  linux.kernel_modules: overlay,br_netfilter,nf_nat,nf_tables,ip_tables,ip6_tables,xt_conntrack
+runners_root_size: 80GiB
+
+# Runner N gets <pelab_lxd_subnet_prefix>.<offset + N>.
+runners_ip_offset: 10
+runners_host_dir: "{{ pelab_state_dir }}/runners"
+
+runners_gitea_url: "https://{{ pelab_hosts.gitea }}"
+runners_gitea_namespace: gitea
+runners_capacity: 2
+runners_job_timeout: 1h
+runners_cache_port: 8088
+# Jobs run directly in the runner container ("host" mode), which has the same
+# toolchain as the workspaces: ruff, pytest, gitleaks, hadolint, trivy, docker, ...
+# ubuntu-latest is an alias so ordinary workflows also find a runner.
+runners_labels:
+  - pelab-host:host
+  - ubuntu-latest:host

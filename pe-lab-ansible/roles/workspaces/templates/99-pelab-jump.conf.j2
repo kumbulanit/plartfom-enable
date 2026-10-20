@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+# Jump accounts for the PE Lab workspaces: key-only, no shell, and port
+# forwarding limited per key (permitopen) to the delegate's own container.
+Match Group {{ workspaces_jump_group }}
+    AuthorizedKeysFile {{ workspaces_jump_keys_dir }}/%u.keys
+    AuthenticationMethods publickey
+    PasswordAuthentication no
+    KbdInteractiveAuthentication no
+    AllowTcpForwarding local
+    AllowAgentForwarding no
+    AllowStreamLocalForwarding no
+    PermitTunnel no
+    X11Forwarding no
+    PermitTTY no
+    ForceCommand /usr/sbin/nologin

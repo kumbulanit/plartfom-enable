@@ -1,0 +1,34 @@
+# Single Redpanda broker (Kafka API) with Redpanda Console. fs.aio-max-nr is raised
+# on the host, so the privileged tuning init container is off.
+statefulset:
+  replicas: 1
+tls:
+  enabled: false
+external:
+  enabled: false
+tuning:
+  tune_aio_events: false
+resources:
+  cpu:
+    cores: 1
+    overprovisioned: true
+  memory:
+    container:
+      max: 2.5Gi
+storage:
+  persistentVolume:
+    enabled: true
+    size: 20Gi
+console:
+  enabled: true
+  ingress:
+    enabled: true
+    className: traefik
+    hosts:
+      - host: {{ pelab_hosts.redpanda }}
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: {{ pelab_tls_secret_name }}
+        hosts: ["{{ pelab_hosts.redpanda }}"]

@@ -1,0 +1,24 @@
+---
+- name: Give Backstage read access to Gitea
+  kubernetes.core.k8s:
+    state: present
+    apply: true
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: backstage-gitea
+        namespace: backstage
+      stringData:
+        token: "{{ golden_path_bot_token }}"
+  no_log: true
+
+- name: Install Backstage
+  kubernetes.core.helm:
+    name: backstage
+    release_namespace: backstage
+    chart_ref: "{{ pelab_charts.backstage.chart }}"
+    chart_version: "{{ pelab_charts.backstage.version }}"
+    values: "{{ lookup('ansible.builtin.template', 'values/backstage.yaml.j2') | from_yaml }}"
+    wait: true
+    wait_timeout: 15m

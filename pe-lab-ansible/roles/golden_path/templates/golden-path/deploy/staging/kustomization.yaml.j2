@@ -1,0 +1,32 @@
+# staging: released by pull request. Off (0 replicas) until the first release.
+# To release: copy the SHA running in dev into newTag, set the replica count
+# to 1, open a pull request and have a team member approve it. Argo CD
+# syncs it once it is merged to main.
+# URL: https://${REPO_NAME}-${REPO_OWNER}-staging.{{ pelab_domain }}
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ${REPO_OWNER}-staging
+resources:
+  - ../base
+images:
+  - name: {{ pelab_hosts.harbor }}/${REPO_OWNER}/${REPO_NAME}
+    newTag: not-released-yet
+replicas:
+  - name: ${REPO_NAME}
+    count: 0
+configMapGenerator:
+  - name: ${REPO_NAME}-settings
+    literals:
+      - APP_ENV=staging
+      - GREETING=Hello from staging
+patches:
+  - target:
+      kind: Ingress
+      name: ${REPO_NAME}
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: ${REPO_NAME}-${REPO_OWNER}-staging.{{ pelab_domain }}
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: ${REPO_NAME}-${REPO_OWNER}-staging.{{ pelab_domain }}

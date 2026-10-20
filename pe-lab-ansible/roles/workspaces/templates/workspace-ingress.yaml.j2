@@ -1,0 +1,64 @@
+{% for name in pelab_workspace_names %}
+{% set address = pelab_lxd_subnet_prefix ~ '.' ~ (workspaces_ip_offset + loop.index) %}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ name }}
+  namespace: {{ workspaces_ingress_namespace }}
+  labels:
+    app.kubernetes.io/name: code-server
+    app.kubernetes.io/instance: {{ name }}
+    app.kubernetes.io/managed-by: pe-lab-ansible
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: {{ workspaces_code_server_port }}
+      targetPort: {{ workspaces_code_server_port }}
+      protocol: TCP
+---
+# The Service has no selector: this slice points it at the LXD container.
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: {{ name }}-lxd
+  namespace: {{ workspaces_ingress_namespace }}
+  labels:
+    kubernetes.io/service-name: {{ name }}
+    endpointslice.kubernetes.io/managed-by: pe-lab-ansible
+addressType: IPv4
+ports:
+  - name: http
+    port: {{ workspaces_code_server_port }}
+    protocol: TCP
+endpoints:
+  - addresses: ["{{ address }}"]
+    conditions:
+      ready: true
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ name }}
+  namespace: {{ workspaces_ingress_namespace }}
+  labels:
+    app.kubernetes.io/name: code-server
+    app.kubernetes.io/instance: {{ name }}
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: ["{{ name }}.{{ pelab_domain }}"]
+      secretName: {{ pelab_tls_secret_name }}
+  rules:
+    - host: {{ name }}.{{ pelab_domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ name }}
+                port:
+                  number: {{ workspaces_code_server_port }}
+{% endfor %}

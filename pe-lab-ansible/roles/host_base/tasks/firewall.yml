@@ -1,0 +1,91 @@
+---
+# Ingress from the training network is limited to SSH, HTTP and HTTPS.
+# Note: HTTP/HTTPS reach Traefik through k3s ServiceLB (DNAT), which bypasses
+# ufw's INPUT rules; the k3s role applies the same source ranges on the
+# Traefik service (loadBalancerSourceRanges) so the restriction still holds.
+
+- name: Find the address Ansible connects from
+  ansible.builtin.shell:
+    cmd: echo "${SSH_CLIENT%% *}"
+  register: host_base_ssh_client
+  changed_when: false
+  become: false
+  when:
+    - host_base_ufw_keep_current_ssh_client | bool
+    - ansible_connection | default('ssh') not in ['local']
+
+- name: Keep SSH open for the current Ansible connection
+  community.general.ufw:
+    rule: allow
+    src: "{{ host_base_ssh_client.stdout }}"
+    port: "22"
+    proto: tcp
+    comment: pelab ansible control node
+  when:
+    - host_base_ssh_client is not skipped
+    - host_base_ssh_client.stdout | default('') | length > 0
+
+- name: Allow SSH from training and admin subnets
+  community.general.ufw:
+    rule: allow
+    src: "{{ item }}"
+    port: "22"
+    proto: tcp
+    comment: pelab ssh
+  loop: "{{ pelab_training_subnets + pelab_admin_subnets }}"
+
+- name: Allow HTTP and HTTPS from training and admin subnets
+  community.general.ufw:
+    rule: allow
+    src: "{{ item.0 }}"
+    port: "{{ item.1 }}"
+    proto: tcp
+    comment: pelab web
+  loop: "{{ (pelab_training_subnets + pelab_admin_subnets) | product(['80', '443']) | list }}"
+
+- name: Allow the Kubernetes API from admin subnets
+  community.general.ufw:
+    rule: allow
+    src: "{{ item }}"
+    port: "6443"
+    proto: tcp
+    comment: pelab k8s api
+  loop: "{{ pelab_admin_subnets }}"
+
+- name: Allow traffic from LXD containers to the host (DHCP, DNS, ingress, k8s API)
+  community.general.ufw:
+    rule: allow
+    direction: in
+    interface: "{{ pelab_lxd_bridge }}"
+    comment: pelab lxd bridge
+
+- name: Allow routed traffic to and from LXD containers
+  community.general.ufw:
+    rule: allow
+    route: true
+    direction: "{{ item }}"
+    interface: "{{ pelab_lxd_bridge }}"
+    comment: pelab lxd routing
+  loop: [in, out]
+
+- name: Allow traffic from k3s pods and services
+  community.general.ufw:
+    rule: allow
+    src: "{{ item }}"
+    comment: pelab k3s
+  loop:
+    - "{{ pelab_k3s_cluster_cidr }}"
+    - "{{ pelab_k3s_service_cidr }}"
+
+- name: Set default firewall policies
+  community.general.ufw:
+    default: "{{ item.policy }}"
+    direction: "{{ item.direction }}"
+  loop:
+    - {direction: incoming, policy: deny}
+    - {direction: outgoing, policy: allow}
+    - {direction: routed, policy: deny}
+
+- name: Enable the firewall
+  community.general.ufw:
+    state: enabled

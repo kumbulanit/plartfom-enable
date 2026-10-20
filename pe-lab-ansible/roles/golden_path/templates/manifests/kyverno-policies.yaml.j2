@@ -1,0 +1,161 @@
+# Platform guardrails (policy-as-code), enforced in every team namespace.
+# They are deliberately few and easy to read; Lab 6 adds tests, exceptions and more rules.
+# With golden_path_signing, a fourth policy reports images the pipeline did not sign.
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pelab-trusted-registry
+  annotations:
+    policies.kyverno.io/title: Images come from the lab registry
+    policies.kyverno.io/category: Supply chain
+    policies.kyverno.io/description: >-
+      Only images in {{ pelab_hosts.harbor }} may run in team namespaces. They were
+      built by a pipeline, scanned by Harbor and have an SBOM.
+spec:
+  background: true
+  rules:
+    - name: harbor-only
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  pelab.io/tier: team
+      validate:
+        failureAction: Enforce
+        message: >-
+          Images must come from {{ pelab_hosts.harbor }}. Build and push them with
+          the golden-path pipeline.
+        pattern:
+          spec:
+            =(initContainers):
+              - image: "{{ pelab_hosts.harbor }}/*"
+            containers:
+              - image: "{{ pelab_hosts.harbor }}/*"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pelab-immutable-tags
+  annotations:
+    policies.kyverno.io/title: No "latest" images
+    policies.kyverno.io/category: Supply chain
+    policies.kyverno.io/description: >-
+      Images need an explicit tag other than latest (the pipeline uses the commit
+      SHA), so every deployment is traceable to the commit it was built from.
+spec:
+  background: true
+  rules:
+    - name: require-tag
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  pelab.io/tier: team
+      validate:
+        failureAction: Enforce
+        message: Give every image an explicit tag, for example the commit SHA.
+        pattern:
+          spec:
+            containers:
+              - image: "*:*"
+    - name: no-latest
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  pelab.io/tier: team
+      validate:
+        failureAction: Enforce
+        message: The "latest" tag is not allowed; use the commit SHA the pipeline tagged the image with.
+        pattern:
+          spec:
+            containers:
+              - image: "!*:latest"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pelab-ownership-labels
+  annotations:
+    policies.kyverno.io/title: Workloads say what they are and who owns them
+    policies.kyverno.io/category: Ownership
+    policies.kyverno.io/description: >-
+      Deployments carry app.kubernetes.io/name and app.kubernetes.io/part-of (the
+      owning team), which the dashboards, cost reports and portal rely on.
+spec:
+  background: true
+  rules:
+    - name: required-labels
+      match:
+        any:
+          - resources:
+              kinds: [Deployment, StatefulSet]
+              namespaceSelector:
+                matchLabels:
+                  pelab.io/tier: team
+      validate:
+        failureAction: Enforce
+        message: Add the labels app.kubernetes.io/name and app.kubernetes.io/part-of (your team).
+        pattern:
+          metadata:
+            labels:
+              app.kubernetes.io/name: "?*"
+              app.kubernetes.io/part-of: "?*"
+{% if golden_path_signing | bool %}
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pelab-signed-images
+  annotations:
+    policies.kyverno.io/title: Team images are signed by the pipeline
+    policies.kyverno.io/category: Supply chain
+    policies.kyverno.io/description: >-
+      Images in the team projects of {{ pelab_hosts.harbor }} carry a cosign
+      signature that the golden-path pipeline made with the platform's key.
+      Audit only: an unsigned image still runs, and the namespace's policy
+      report shows it.
+spec:
+  background: true
+  # Audit only, so never block a deployment because the check could not run.
+  webhookConfiguration:
+    failurePolicy: Ignore
+  rules:
+    - name: pipeline-signature
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  pelab.io/tier: team
+      verifyImages:
+        - imageReferences:
+{% for team in pelab_team_names %}
+            - "{{ pelab_hosts.harbor }}/{{ team }}/*"
+{% endfor %}
+          # cosign 3 stores a signature as a Sigstore bundle next to the image
+          # (an OCI referrer); type Cosign only finds the older .sig tags.
+          type: SigstoreBundle
+          failureAction: Audit
+          # Report only: leave the image references as Argo CD deployed them.
+          mutateDigest: false
+          verifyDigest: false
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |-
+                      {{ lookup('ansible.builtin.file', golden_path_cosign_pub_file) | indent(22) }}
+                    # The pipeline signs without a transparency log (the lab may be offline).
+                    rekor:
+                      ignoreTlog: true
+                    ctlog:
+                      ignoreSCT: true
+{% endif %}

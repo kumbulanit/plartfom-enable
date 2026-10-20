@@ -1,0 +1,57 @@
+# Shows what a change to the environments would do, before anything changes.
+#
+# This pipeline only reads: its cluster credentials (secret ENVIRONMENTS_READER_KUBECONFIG)
+# can look at namespaces, budgets and the OpenTofu state, and change nothing.
+# The platform applies main itself, every two minutes, with credentials that no
+# pipeline can see; the result appears as the "platform/apply" status on the commit.
+name: plan
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  plan:
+    runs-on: pelab-host
+    env:
+      # The runners' local provider mirror: tofu init needs no internet.
+      TF_CLI_CONFIG_FILE: /etc/opentofu/tofurc
+    steps:
+      - name: Check out
+        run: |
+          git init -q .
+          git -c http.extraHeader="Authorization: token ${{ gitea.token }}" \
+            fetch -q --depth 1 "${{ gitea.server_url }}/${{ gitea.repository }}.git" "${{ gitea.ref }}"
+          git checkout -q FETCH_HEAD
+          git log -1 --format='Planning %h: %s'
+
+      - name: Format check
+        run: tofu fmt -check -recursive -diff
+
+      - name: Plan
+        env:
+          READER_KUBECONFIG: ${{ secrets.ENVIRONMENTS_READER_KUBECONFIG }}
+        run: |
+          export KUBE_CONFIG_PATH="$(mktemp)"
+          trap 'rm -f "$KUBE_CONFIG_PATH"' EXIT
+          printf '%s\n' "$READER_KUBECONFIG" > "$KUBE_CONFIG_PATH"
+          tofu init -input=false -no-color
+          tofu validate -no-color
+          # -lock=false: the pipeline only reads; the platform holds the lock when it applies.
+          tofu plan -input=false -lock=false -no-color
+
+      # The merge gate. The pipeline posts its own verdict on the commit, as the
+      # "pipeline" status; main is protected so that a red one cannot be merged.
+      # (Gitea 1.27.0 cannot require the statuses its jobs write: see the README.)
+      - name: Post the verdict (the required check for merging)
+        if: always()
+        run: |
+          case "${{ job.status }}" in
+            success) STATE=success; TEXT="Format check and plan passed" ;;
+            *)       STATE=failure; TEXT="Format check or plan failed: open this run and read it" ;;
+          esac
+          curl -fsS -o /dev/null -X POST \
+            -H "Authorization: token ${{ gitea.token }}" -H "Content-Type: application/json" \
+            "${{ gitea.server_url }}/api/v1/repos/${{ gitea.repository }}/statuses/${{ gitea.event.pull_request.head.sha || gitea.sha }}" \
+            -d "{\"context\": \"pipeline\", \"state\": \"$STATE\", \"description\": \"$TEXT\", \"target_url\": \"${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_number }}\"}"
+          echo "pipeline: $STATE"

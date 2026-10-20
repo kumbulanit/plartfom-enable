@@ -1,0 +1,14 @@
+---
+- name: Restart chrony
+  ansible.builtin.systemd_service:
+    name: chrony
+    state: restarted
+
+- name: Re-execute systemd
+  ansible.builtin.systemd_service:
+    daemon_reexec: true
+
+- name: Update CA certificates
+  ansible.builtin.command:
+    cmd: update-ca-certificates
+  changed_when: true

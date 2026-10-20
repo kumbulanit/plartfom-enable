@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  author: PE Lab
+  description: Team dev namespaces with RBAC, quotas and network policy, and delegate kubeconfigs (staging and prod come from the environment template)
+  license: MIT
+  min_ansible_version: "2.17"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble
+dependencies: []

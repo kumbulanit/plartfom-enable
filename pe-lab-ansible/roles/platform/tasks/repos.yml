@@ -1,0 +1,14 @@
+---
+- name: Add Helm repositories
+  kubernetes.core.helm_repository:
+    name: "{{ item.key }}"
+    repo_url: "{{ item.value }}"
+    state: present
+  loop: "{{ pelab_helm_repos | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Refresh the Helm repository indexes
+  ansible.builtin.command:
+    argv: [helm, repo, update]
+  changed_when: false

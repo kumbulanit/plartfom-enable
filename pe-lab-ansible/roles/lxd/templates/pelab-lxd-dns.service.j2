@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+# Sends lookups for *.lxd and *.{{ pelab_domain }} from the host to LXD's dnsmasq.
+[Unit]
+Description=Per-link DNS for {{ pelab_lxd_bridge }} (LXD containers and lab domain)
+BindsTo=sys-subsystem-net-devices-{{ pelab_lxd_bridge }}.device
+After=sys-subsystem-net-devices-{{ pelab_lxd_bridge }}.device
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/resolvectl dns {{ pelab_lxd_bridge }} {{ pelab_lxd_gateway }}
+ExecStart=/usr/bin/resolvectl domain {{ pelab_lxd_bridge }} ~lxd ~{{ pelab_domain }}
+ExecStopPost=/usr/bin/resolvectl revert {{ pelab_lxd_bridge }}
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sys-subsystem-net-devices-{{ pelab_lxd_bridge }}.device

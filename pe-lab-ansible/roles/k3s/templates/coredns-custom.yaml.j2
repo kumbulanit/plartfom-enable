@@ -1,0 +1,20 @@
+# {{ ansible_managed }}
+# Pods resolve every *.{{ pelab_domain }} name to the host, where Traefik
+# listens, so in-cluster clients use the same URLs and certificate as people.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  pelab.server: |
+    {{ pelab_domain }}:53 {
+        errors
+        cache 30
+        template IN A {{ pelab_domain }} {
+            answer "{% raw %}{{ .Name }}{% endraw %} 60 IN A {{ pelab_lxd_gateway }}"
+        }
+        template IN AAAA {{ pelab_domain }} {
+            rcode NOERROR
+        }
+    }

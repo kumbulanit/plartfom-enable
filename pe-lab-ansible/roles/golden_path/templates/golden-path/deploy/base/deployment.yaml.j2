@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${REPO_NAME}
+  labels:
+    app.kubernetes.io/name: ${REPO_NAME}
+    app.kubernetes.io/part-of: ${REPO_OWNER}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ${REPO_NAME}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ${REPO_NAME}
+        app.kubernetes.io/part-of: ${REPO_OWNER}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: app
+          # The tag is set per environment (deploy/<env>/kustomization.yaml).
+          image: {{ pelab_hosts.harbor }}/${REPO_OWNER}/${REPO_NAME}:unset
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: APP_NAME
+              value: ${REPO_NAME}
+          envFrom:
+            - configMapRef:
+                name: ${REPO_NAME}-settings
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]

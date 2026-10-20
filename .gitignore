@@ -1,0 +1,12 @@
+# This repository holds the Platform Engineering course: the lab (pe-lab-ansible)
+# and the course material (sarb). Everything else in this folder stays out.
+/*
+!/.gitignore
+!/README.md
+!/pe-lab-ansible/
+!/sarb/
+
+# Editor and operating-system files, anywhere.
+.DS_Store
+~$*
+node_modules/

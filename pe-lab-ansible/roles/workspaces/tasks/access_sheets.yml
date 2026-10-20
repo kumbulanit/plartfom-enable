@@ -1,0 +1,31 @@
+---
+- name: Create the access sheet directory on the control node
+  ansible.builtin.file:
+    path: "{{ pelab_credentials_dir }}/access"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: Write one access sheet per workspace
+  ansible.builtin.template:
+    src: access-sheet.md.j2
+    dest: "{{ pelab_credentials_dir }}/access/{{ item }}.md"
+    mode: "0600"
+  loop: "{{ pelab_workspace_names }}"
+  loop_control:
+    index_var: idx
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Write the workspace roster
+  ansible.builtin.template:
+    src: workspaces.csv.j2
+    dest: "{{ pelab_credentials_dir }}/workspaces.csv"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  no_log: true

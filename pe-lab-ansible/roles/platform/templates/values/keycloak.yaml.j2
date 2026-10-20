@@ -1,0 +1,47 @@
+# Keycloak (extra). Development mode with the built-in database: enough to
+# demonstrate identity federation; use an external Postgres for anything more.
+replicas: 1
+command:
+  - /opt/keycloak/bin/kc.sh
+  - start-dev
+http:
+  relativePath: /
+proxy:
+  enabled: true
+  mode: xforwarded
+  http:
+    enabled: true
+database:
+  vendor: dev-file
+extraEnv: |
+  - name: KC_HOSTNAME
+    value: https://{{ pelab_hosts.keycloak }}
+  - name: KC_BOOTSTRAP_ADMIN_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: keycloak-admin
+        key: username
+  - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: keycloak-admin
+        key: password
+  - name: JAVA_OPTS_APPEND
+    value: -XX:MaxRAMPercentage=70
+resources:
+  requests:
+    cpu: 250m
+    memory: 768Mi
+  limits:
+    memory: 1536Mi
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  rules:
+    - host: {{ pelab_hosts.keycloak }}
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: {{ pelab_tls_secret_name }}
+      hosts: ["{{ pelab_hosts.keycloak }}"]

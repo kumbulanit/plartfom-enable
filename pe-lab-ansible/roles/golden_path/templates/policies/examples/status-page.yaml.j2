@@ -1,0 +1,38 @@
+# The exception lab: a ready-made status page from Docker Hub. It has a fixed tag
+# and owner labels, but it is not in the lab registry, so the guardrails refuse
+# it until an approved exception exists (see exceptions/README.md).
+# Change team01 to your team in the three places below.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: status-page
+  namespace: team01-dev
+  labels:
+    app.kubernetes.io/name: status-page
+    app.kubernetes.io/part-of: team01
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: status-page
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: status-page
+        app.kubernetes.io/part-of: team01
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: web
+          # Runs as an ordinary user; pulled through the lab's Docker Hub cache.
+          image: docker.io/nginxinc/nginx-unprivileged:1.27-alpine
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]

@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+# Read by code-server@{{ item }} inside the container (CODE_SERVER_CONFIG).
+bind-addr: 0.0.0.0:{{ workspaces_code_server_port }}
+auth: password
+password: "{{ pelab_delegate_passwords[item] }}"
+cert: false
+disable-telemetry: true
+disable-update-check: true

@@ -34,7 +34,7 @@ CA_OPT=()
 # ---------------------------------------------------------------- host
 section "The VM"
 . /etc/os-release
-[ "${VERSION_ID:-}" = 24.04 ] && pass "Ubuntu ${VERSION_ID}" || warn "Ubuntu ${VERSION_ID:-?} (the lab is built for 24.04)"
+dpkg --compare-versions "${VERSION_ID:-0}" ge 22.04 && pass "Ubuntu ${VERSION_ID}" || warn "Ubuntu ${VERSION_ID:-?} (the lab needs 22.04 or later)"
 mem_gb=$(awk '/MemTotal/ {printf "%.0f", $2/1024/1024}' /proc/meminfo)
 avail_gb=$(awk '/MemAvailable/ {printf "%.1f", $2/1024/1024}' /proc/meminfo)
 [ "$mem_gb" -ge 20 ] && pass "Memory: ${mem_gb} GB, ${avail_gb} GB available" || warn "Memory: ${mem_gb} GB (the lab is sized for about 23 GB), ${avail_gb} GB available"

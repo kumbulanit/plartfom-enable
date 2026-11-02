@@ -30,8 +30,8 @@ Ubuntu 24.04.3 LTS
 97G
 ```
 
-That is Ubuntu 24.04, 8 processors, about 23 GB of memory and about 100 GB of
-disk. If yours is much smaller, tell the instructor before you go on.
+That is Ubuntu 24.04 (22.04 works too), 8 processors, about 23 GB of memory
+and about 100 GB of disk. If yours is much smaller, tell the instructor before you go on.
 
 ## Step 2. Get the course project
 

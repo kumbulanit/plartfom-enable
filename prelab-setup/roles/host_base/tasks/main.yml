@@ -1,10 +1,14 @@
 ---
-- name: Check the host is Ubuntu 24.04
+# The host runs k3s and LXD only; the workspace and runner containers are Ubuntu
+# 24.04 whatever the host is. Built and tested on 24.04; 22.04 works too.
+- name: Check the host is Ubuntu 22.04 or later
   ansible.builtin.assert:
     that:
       - ansible_facts['distribution'] == 'Ubuntu'
-      - ansible_facts['distribution_version'] is version('24.04', '>=')
-    fail_msg: "The lab targets Ubuntu Server 24.04 LTS; found {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}."
+      - ansible_facts['distribution_version'] is version('22.04', '>=')
+    fail_msg: >-
+      The lab needs Ubuntu 22.04 LTS or later (24.04 recommended);
+      found {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}.
 
 - name: Patch and install base packages
   ansible.builtin.import_tasks: packages.yml

@@ -367,8 +367,9 @@ from a separate control node instead, list it in `inventory/hosts.yml` with its
 **Control node.** ansible-core 2.17 or later, the collections from
 `requirements.yml`, and the Python packages `passlib` and `bcrypt` next to
 Ansible: they hash the delegates' Argo CD password. Homebrew's `ansible` has
-both; otherwise `pip install passlib bcrypt` into Ansible's Python. passlib 1.7.4
-prints a harmless "error reading bcrypt version" warning with bcrypt 5.
+both; otherwise `pip install passlib 'bcrypt<4.1'` into Ansible's Python
+(`install-prerequisites.sh` does that). passlib 1.7.4, its last release, fails
+with bcrypt 4.1 and later: "password cannot be longer than 72 bytes".
 
 **Without internet during the course.** The build needs the internet; the course
 can run without it if the build has warmed the caches. The Python base image is

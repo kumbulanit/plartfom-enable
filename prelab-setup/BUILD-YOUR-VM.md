@@ -57,7 +57,7 @@ bash ~/sarb/prelab-setup/install-prerequisites.sh
 
 *You should see* at the end: `All prerequisites are installed.` Then **close the
 terminal and open a new one**, so it finds Ansible: `ansible --version` prints
-`ansible [core 2.17]` or a later number.
+`ansible [core 2.18]` or a later number.
 
 You change no settings: the project is already set up for one person on their
 own VM.
@@ -67,7 +67,7 @@ own VM.
 ```bash
 sudo apt update && sudo apt install -y pipx git tmux
 pipx install --include-deps ansible
-pipx inject ansible passlib bcrypt
+pipx inject ansible passlib 'bcrypt<4.1'
 pipx ensurepath
 ```
 

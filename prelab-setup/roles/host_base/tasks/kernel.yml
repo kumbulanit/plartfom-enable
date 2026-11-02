@@ -1,0 +1,82 @@
+---
+- name: Set kernel parameters
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/90-pelab.conf
+    state: present
+    reload: true
+  loop: "{{ host_base_sysctls | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}={{ item.value }}"
+
+- name: Cap the ZFS cache (ARC) at boot
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/90-pelab-zfs.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Managed by Ansible (pe-lab-ansible)
+      options zfs zfs_arc_max={{ host_base_zfs_arc_max }}
+
+- name: Check whether the ZFS module is loaded
+  ansible.builtin.stat:
+    path: /sys/module/zfs/parameters/zfs_arc_max
+  register: host_base_zfs_param
+
+- name: Cap the ZFS cache (ARC) now
+  ansible.builtin.shell: |
+    set -eu
+    f=/sys/module/zfs/parameters/zfs_arc_max
+    if [ "$(cat "$f")" != "{{ host_base_zfs_arc_max }}" ]; then
+      echo "{{ host_base_zfs_arc_max }}" > "$f"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: host_base_zfs_arc
+  changed_when: "'changed' in host_base_zfs_arc.stdout"
+  # A container lab host (tests) shares its host's ZFS module and cannot change it.
+  when:
+    - host_base_zfs_param.stat.exists
+    - ansible_facts['virtualization_type'] not in ['lxc', 'docker', 'container', 'containerd']
+
+- name: Raise the open-file limit for login sessions
+  ansible.builtin.copy:
+    dest: /etc/security/limits.d/90-pelab-nofile.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Managed by Ansible (pe-lab-ansible)
+      *     soft  nofile  {{ host_base_nofile_limit }}
+      *     hard  nofile  {{ host_base_nofile_limit }}
+      root  soft  nofile  {{ host_base_nofile_limit }}
+      root  hard  nofile  {{ host_base_nofile_limit }}
+
+- name: Create systemd drop-in directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /etc/systemd/system.conf.d
+    - /etc/systemd/user.conf.d
+
+- name: Raise the open-file limit for systemd services
+  ansible.builtin.copy:
+    dest: "{{ item }}/90-pelab-limits.conf"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # Managed by Ansible (pe-lab-ansible)
+      [Manager]
+      DefaultLimitNOFILE={{ host_base_nofile_limit }}:{{ host_base_nofile_limit }}
+  loop:
+    - /etc/systemd/system.conf.d
+    - /etc/systemd/user.conf.d
+  notify: Re-execute systemd

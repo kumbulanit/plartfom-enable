@@ -1,0 +1,217 @@
+---
+# Site settings for the Platform Engineering training lab.
+# Values marked PLACEHOLDER must be changed for a real deployment (see README).
+
+# ---------------------------------------------------------------------------
+# Lab identity
+# ---------------------------------------------------------------------------
+# DNS zone for the lab. Every service is published as <service>.<pelab_domain>
+# and every workspace as studentNN.<pelab_domain>. On the VM itself these names
+# always resolve to the lab, so a delegate working on their own VM needs no DNS.
+# Only laptops reaching the lab from outside need a wildcard record
+# *.<pelab_domain> -> ansible_host.
+pelab_domain: pelab.example.internal
+# true only when the lab host is itself a container (Patchbay Labs): the clock, kernel settings
+# and firewall then belong to the machine it runs on. Leave false on a real server.
+pelab_container_host: false
+pelab_timezone: Africa/Johannesburg
+# PLACEHOLDER: on an isolated network point this at internal NTP servers.
+pelab_ntp_servers:
+  - ntp.ubuntu.com
+
+# ---------------------------------------------------------------------------
+# Cohort
+# ---------------------------------------------------------------------------
+# One delegate per VM (the default): every delegate has a virtual machine of their
+# own with the whole platform on it, and works alone. List one host per delegate in
+# inventory/hosts.yml; each is built the same way, as student01 in team01.
+# A shared server for a whole cohort still works: for example 25 delegates,
+# 5 teams, 2 spares and 5 runners on one host.
+pelab_cohort_size: 1
+pelab_team_count: 1
+pelab_spare_workspaces: 0
+pelab_runner_count: 1
+# Spare workspaces belong to no team until assigned, for example {student26: team03}.
+pelab_spare_team_assignments: {}
+
+# Role-play logins. true: Gitea also has a "reviewer" account in every team, and
+# the shared platform-approver account, and /etc/pelab/logins.md (on the host and
+# in every workspace) lists them, so a delegate working alone can review their own
+# change as the reviewer and approve their own environment and exception requests
+# as the platform team, in a private window. Role-play only: at work, accounts are
+# personal. false: neither account exists, the logins file lists only the
+# delegate's own login, and only the instructor (pelab-admin) approves.
+pelab_shared_logins: true
+
+# Derived names. Delegates are split into teams in order: student01-05 -> team01, ...
+pelab_workspace_names: >-
+  {{ query('ansible.builtin.sequence',
+           'start=1 count=' ~ (pelab_cohort_size | int + pelab_spare_workspaces | int) ~ ' format=student%02d') }}
+pelab_delegate_names: "{{ pelab_workspace_names[: pelab_cohort_size | int] }}"
+pelab_spare_names: "{{ pelab_workspace_names[pelab_cohort_size | int :] }}"
+pelab_runner_names: "{{ query('ansible.builtin.sequence', 'start=1 count=' ~ pelab_runner_count ~ ' format=runner%02d') }}"
+pelab_team_names: "{{ query('ansible.builtin.sequence', 'start=1 count=' ~ pelab_team_count ~ ' format=team%02d') }}"
+pelab_team_size: "{{ (pelab_cohort_size | int + pelab_team_count | int - 1) // pelab_team_count | int }}"
+pelab_team_members: "{{ dict(pelab_team_names | zip(pelab_delegate_names | batch(pelab_team_size | int) | list)) }}"
+# Workspace -> team, including any assigned spares.
+pelab_workspace_teams: >-
+  {{ dict(pelab_delegate_names | zip(pelab_team_names | product(range(pelab_team_size | int)) | map('first') | list))
+     | combine(pelab_spare_team_assignments) }}
+
+# ---------------------------------------------------------------------------
+# Team environments
+# ---------------------------------------------------------------------------
+# Every team gets dev, staging and prod. The lab build creates dev; each team
+# requests staging and prod itself on Day 3 from the environment template
+# (OpenTofu, repository platform/environments). Both use the settings below.
+pelab_environments: [dev, staging, prod]
+pelab_requested_environments: [staging, prod]
+# ClusterRole bound to a team's members in each environment. prod is read-only
+# for people: changes reach it through Argo CD (GitOps), not kubectl.
+pelab_team_member_roles:
+  dev: edit
+  staging: edit
+  prod: view
+# The CPU and memory budget of one environment (ResourceQuota). dev is small;
+# a team picks small or medium for staging and prod in the template.
+pelab_team_sizes:
+  small:
+    requests.cpu: "1"
+    requests.memory: 2Gi
+    limits.cpu: "2"
+    limits.memory: 4Gi
+    pods: "20"
+    persistentvolumeclaims: "5"
+    requests.storage: 20Gi
+    services.loadbalancers: "0"
+    services.nodeports: "0"
+  medium:
+    requests.cpu: "2"
+    requests.memory: 4Gi
+    limits.cpu: "4"
+    limits.memory: 8Gi
+    pods: "40"
+    persistentvolumeclaims: "10"
+    requests.storage: 40Gi
+    services.loadbalancers: "0"
+    services.nodeports: "0"
+# Defaults for containers that do not say what they need (LimitRange).
+pelab_team_limit_range:
+  default: {cpu: 500m, memory: 512Mi}
+  defaultRequest: {cpu: 50m, memory: 128Mi}
+  max: {cpu: "2", memory: 2Gi}
+# Pod Security Admission levels for team namespaces.
+pelab_team_pod_security:
+  enforce: baseline
+  warn: restricted
+  audit: restricted
+# Network policy: traffic stays inside the namespace, except
+#  - ingress from the ingress controllers and Prometheus,
+#  - egress to kube-system (DNS, and the lab ingress for *.<domain> URLs),
+#  - egress to shared services (Kafka, OTLP, Loki).
+pelab_team_ingress_from_namespaces: [kube-system, apisix, monitoring]
+pelab_team_egress_to_namespaces: [kube-system, monitoring, redpanda]
+# Delegate identities: one ServiceAccount per workspace, labelled with its team.
+pelab_users_namespace: pelab-users
+# Kyverno honours policy exceptions only in this namespace (the platform writes it).
+pelab_exception_namespace: pelab-exceptions
+
+# ---------------------------------------------------------------------------
+# Platform scope
+# ---------------------------------------------------------------------------
+# The core IDP is always installed: Gitea (+ Actions runners), Harbor, Argo CD,
+# Kyverno, Prometheus/Grafana, Loki/Alloy and Backstage, plus the golden path.
+# Add extras for the later labs, for example [opencost, argo-rollouts]:
+#   keycloak (identity), sonarqube (code quality), argo-rollouts (progressive
+#   delivery), jaeger (tracing), redpanda (event streaming), apisix (API gateway),
+#   opencost (FinOps).
+pelab_extras: []
+
+# ---------------------------------------------------------------------------
+# Network
+# ---------------------------------------------------------------------------
+# Subnets that may reach the lab from outside (SSH, HTTP, HTTPS). Empty: only the
+# VM itself, which is how a delegate works on their own VM (the build also keeps
+# SSH open for the address it is run from). Add the laptops' range if they browse
+# to the lab from outside, for example 10.50.0.0/22.
+pelab_training_subnets: []
+# PLACEHOLDER: instructor/automation subnets (SSH, HTTPS and the Kubernetes API).
+pelab_admin_subnets: []
+
+# LXD containers live on one /24 behind NAT. Addresses inside it:
+#   .1 gateway (host), .11-.30 runners, .101-.199 workspaces, .200-.250 DHCP.
+pelab_lxd_bridge: lxdbr0
+pelab_lxd_storage_pool: default
+# "zfs" (fast clones and snapshots, recommended) or "dir" (no disk quotas).
+pelab_lxd_storage_driver: zfs
+pelab_lxd_subnet_prefix: 10.120.0
+pelab_lxd_gateway: "{{ pelab_lxd_subnet_prefix }}.1"
+# Stops containers on the bridge talking to each other; they still reach the host.
+pelab_lxd_port_isolation: true
+
+# The Kubernetes node's name. Fixed (not the hostname), so a built VM can be
+# cloned: every copy keeps a working cluster with a new hostname and address.
+# Set it before the first build; changing it on a built VM breaks the cluster.
+pelab_k3s_node_name: pelab
+pelab_k3s_cluster_cidr: 10.42.0.0/16
+pelab_k3s_service_cidr: 10.43.0.0/16
+
+# ---------------------------------------------------------------------------
+# TLS (wildcard certificate for *.<pelab_domain>)
+# ---------------------------------------------------------------------------
+# PLACEHOLDER: PEM files on the control node. The certificate must carry
+# *.<pelab_domain> in its SAN; put intermediates after the leaf if there are any.
+pelab_tls_cert_path: "{{ playbook_dir }}/files/tls/wildcard.crt"
+pelab_tls_key_path: "{{ playbook_dir }}/files/tls/wildcard.key"
+# CA that issued the certificate; it is added to every trust store in the lab.
+pelab_tls_ca_path: "{{ playbook_dir }}/files/tls/ca.crt"
+# true (the default): create a private lab CA and wildcard certificate at the
+# paths above when they do not exist yet; each VM gets its own, and its browser
+# needs ca.crt imported once. false: bring the bank's certificate (files/tls/).
+pelab_tls_generate_selfsigned: true
+pelab_tls_ca_key_path: "{{ playbook_dir }}/files/tls/ca.key"
+pelab_tls_secret_name: pelab-wildcard-tls
+
+# ---------------------------------------------------------------------------
+# Paths and shared settings
+# ---------------------------------------------------------------------------
+pelab_state_dir: /opt/pelab
+pelab_tls_dir: /etc/pelab/tls
+pelab_venv: "{{ pelab_state_dir }}/venv"
+pelab_kubeconfig: /etc/rancher/k3s/k3s.yaml
+# Generated tokens, SSH keys and the logins file are written here where Ansible
+# runs, one folder per host.
+pelab_credentials_dir: "{{ playbook_dir }}/credentials/{{ inventory_hostname }}"
+# The lab's passwords (secrets.yml), part of the repository, so every machine
+# built from it has the same ones.
+pelab_password_dir: "{{ playbook_dir }}/files/passwords"
+# The delegates' passwords (and reviewer's and platform-approver's), used for the
+# workspace, Gitea and Harbor.
+pelab_delegate_password_dir: "{{ pelab_password_dir }}/delegates"
+# UID of the delegate account inside each workspace container.
+pelab_workspace_uid: 2000
+pelab_workspace_image: workspace
+# Snapshot every workspace is restored to by reset.yml.
+pelab_workspace_snapshot: clean
+# Per-workspace files on the host, mounted read-only at /etc/pelab in each container.
+pelab_workspaces_host_dir: "{{ pelab_state_dir }}/workspaces"
+# Namespace holding the Ingress objects for the workspaces' code-server.
+pelab_workspaces_namespace: pelab-workspaces
+
+# Public names of the shared services.
+pelab_hosts:
+  alertmanager: "alertmanager.{{ pelab_domain }}"
+  apisix: "api.{{ pelab_domain }}"
+  argocd: "argocd.{{ pelab_domain }}"
+  backstage: "backstage.{{ pelab_domain }}"
+  gitea: "gitea.{{ pelab_domain }}"
+  grafana: "grafana.{{ pelab_domain }}"
+  harbor: "harbor.{{ pelab_domain }}"
+  jaeger: "jaeger.{{ pelab_domain }}"
+  keycloak: "keycloak.{{ pelab_domain }}"
+  kubernetes: "k8s.{{ pelab_domain }}"
+  opencost: "opencost.{{ pelab_domain }}"
+  prometheus: "prometheus.{{ pelab_domain }}"
+  redpanda: "redpanda.{{ pelab_domain }}"
+  rollouts: "rollouts.{{ pelab_domain }}"
+  sonarqube: "sonarqube.{{ pelab_domain }}"

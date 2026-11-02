@@ -1,0 +1,34 @@
+---
+k3s_version: "{{ pelab_versions.k3s }}"
+k3s_release_url: "https://github.com/k3s-io/k3s/releases/download/{{ k3s_version | urlencode }}"
+k3s_install_script_url: "https://raw.githubusercontent.com/k3s-io/k3s/{{ k3s_version | urlencode }}/install.sh"
+k3s_work_dir: "{{ pelab_state_dir }}/k3s"
+k3s_manifests_dir: /var/lib/rancher/k3s/server/manifests
+
+# Written to /etc/rancher/k3s/config.yaml.
+k3s_config:
+  # A fixed node name, not the hostname, so a copy (clone) of a built VM keeps
+  # its node, and the volumes tied to it, when the copy gets a new hostname.
+  node-name: "{{ pelab_k3s_node_name }}"
+  write-kubeconfig-mode: "0600"
+  cluster-cidr: "{{ pelab_k3s_cluster_cidr }}"
+  service-cidr: "{{ pelab_k3s_service_cidr }}"
+  tls-san:
+    - "{{ ansible_host }}"
+    - "{{ pelab_lxd_gateway }}"
+    - "{{ pelab_hosts.kubernetes }}"
+  secrets-encryption: true
+  # ~70 platform pods plus team workloads exceed the default of 110.
+  kubelet-arg:
+    - max-pods=250
+
+# Who may reach Traefik on 80/443 (enforced by ServiceLB, see host_base/firewall.yml).
+k3s_ingress_source_ranges: >-
+  {{ pelab_training_subnets + pelab_admin_subnets
+     + [pelab_lxd_subnet_prefix ~ '.0/24', pelab_k3s_cluster_cidr, '127.0.0.0/8'] }}
+
+k3s_helm_version: "{{ pelab_versions.helm }}"
+k3s_python_packages:
+  - "kubernetes=={{ pelab_versions.python_kubernetes }}"
+  - PyYAML
+  - jsonpatch

@@ -1,0 +1,164 @@
+---
+# The golden path: the paved road from a commit to a running, observed service.
+#
+#   Gitea template platform/golden-path  ->  team repo (one "hello" per team to start)
+#   -> Gitea Actions (lint, test, secret scan, build, scan)  ->  Harbor (scan, SBOM)
+#   -> Argo CD (dev on every merge; staging/prod by approved pull request)
+#   -> Kyverno guardrails  ->  Prometheus/Grafana/Loki  ->  Backstage catalog
+
+golden_path_gitea_url: "https://{{ pelab_hosts.gitea }}"
+golden_path_gitea_api: "{{ golden_path_gitea_url }}/api/v1"
+golden_path_harbor_api: "https://{{ pelab_hosts.harbor }}/api/v2.0"
+
+# The course's lab content: sarb/labs, next to prelab-setup. Each day's folder holds
+# its instructions (README.md) and the code the platform puts in Gitea.
+golden_path_labs_dir: "{{ role_path }}/../../../labs"
+# The Gitea organisation that holds the platform's own repositories. Each one is
+# seeded once from labs/<source>: files as they are, *.j2 files rendered for this lab.
+golden_path_platform_org: platform
+golden_path_template_repo: golden-path
+golden_path_pipeline_templates_repo: pipeline-templates
+golden_path_catalog_repo: catalog
+golden_path_environments_repo: environments
+golden_path_policies_repo: policies
+golden_path_handbook_repo: handbook
+golden_path_platform_repos:
+  - name: "{{ golden_path_template_repo }}"
+    description: "Golden path: a Python web service with pipeline, deployment, dashboard and catalog entry"
+    source: day1/golden-path
+    template: true
+    marker: catalog-info.yaml
+  # Small pipelines a team copies into a service as it is (Day 4 Lab 5).
+  - name: "{{ golden_path_pipeline_templates_repo }}"
+    description: "Pipeline templates: small ready-made pipelines (smoke test, nightly scan) to copy into a service"
+    source: day4/pipeline-templates
+    marker: workflows/smoke-test.yaml
+  - name: "{{ golden_path_catalog_repo }}"
+    description: What the developer portal (Backstage) shows; Backstage reads all.yaml
+    source: day4/catalog
+    marker: all.yaml
+  # Teams ask for things here by pull request; the platform team approves and the
+  # platform applies main (see golden_path_applier_*).
+  - name: "{{ golden_path_environments_repo }}"
+    description: "Environment requests: each team asks for staging and prod here (OpenTofu)"
+    source: day3/environments
+    marker: main.tf
+    actions: true
+    requests: true
+  - name: "{{ golden_path_policies_repo }}"
+    description: The platform guardrails (Kyverno), their tests, and time-limited exceptions
+    source: day5/policies
+    marker: tests/kyverno-test.yaml
+    actions: true
+    requests: true
+  - name: "{{ golden_path_handbook_repo }}"
+    description: "The delegate handbook: every lab, step by step"
+    # Only the instructions: labs/README.md, glossary.md, each day's README.md and their pictures.
+    source: .
+    include: '^((README|glossary|day[1-6]/README)[.]md|images/[^/]+[.](svg|png|jpg))$'
+    marker: day1/README.md
+    replace_domain: true
+# Base64 of a binary file (a screenshot), for the repository seeding above.
+golden_path_b64_script: "import base64,sys; print(base64.b64encode(open(sys.argv[1],'rb').read()).decode())"
+# Local caches never go into the template repository.
+golden_path_ignore: '^(__pycache__|\.ruff_cache|\.pytest_cache|\.DS_Store)$'
+# Each team starts with this service, created from the template.
+golden_path_starter_repo: hello
+# Run the pipeline once on each new starter repo, so every team has a live app on day 1.
+golden_path_build_starters: true
+
+golden_path_request_repos: "{{ golden_path_platform_repos | selectattr('requests', 'defined') | map(attribute='name') | list }}"
+# Delegates may open pull requests in the request repositories; only these
+# accounts may approve them (the platform team: the instructors).
+golden_path_request_approvers: >-
+  {{ [pelab_gitea_admin_user] + ([pelab_platform_approver_user] if pelab_shared_logins | bool else []) }}
+# The last step of every pipeline posts its verdict on the commit as this
+# status, and main requires it to be green: a red pull request cannot be merged.
+# (Gitea 1.27.0 cannot require the statuses its own jobs write: see the README.)
+golden_path_pipeline_context: pipeline
+golden_path_request_protection:
+  rule_name: main
+  enable_push: false
+  required_approvals: 1
+  enable_approvals_whitelist: true
+  approvals_whitelist_username: "{{ golden_path_request_approvers }}"
+  block_on_rejected_reviews: true
+  dismiss_stale_approvals: true
+  enable_status_check: true
+  status_check_contexts: ["{{ golden_path_pipeline_context }}"]
+
+# Read-only Gitea account used by Argo CD and Backstage.
+golden_path_bot_user: platform-bot
+golden_path_bot_token_file: "{{ pelab_credentials_dir }}/gitea-bot-token.txt"
+
+# Harbor robot account the pipelines push with (one for all team projects).
+golden_path_robot_name: ci
+
+# Optional, for the supply-chain lab: the pipelines sign every image they push
+# with one platform key (cosign), and Kyverno checks the signature in team
+# namespaces (audit only). Off by default to keep the lab simple.
+golden_path_signing: false
+# The key pair is generated once and kept on the control node.
+golden_path_cosign_key_file: "{{ pelab_credentials_dir }}/cosign.key"
+golden_path_cosign_pub_file: "{{ pelab_credentials_dir }}/cosign.pub"
+# Added to each team organisation's Actions secrets when signing is on.
+golden_path_signing_secrets:
+  - {name: COSIGN_PRIVATE_KEY, value: "{{ lookup('ansible.builtin.file', golden_path_cosign_key_file) }}"}
+  - {name: COSIGN_PASSWORD, value: "{{ pelab_cosign_password }}"}
+
+# Branch protection applied to main in the starter repositories.
+golden_path_branch_protection:
+  rule_name: main
+  enable_push: false
+  required_approvals: 1
+  block_on_rejected_reviews: true
+  dismiss_stale_approvals: true
+  enable_status_check: true
+  status_check_contexts: ["{{ golden_path_pipeline_context }}"]
+
+# Argo CD may not change these in team namespaces: the platform owns them.
+golden_path_blocked_kinds:
+  - {group: "", kind: ResourceQuota}
+  - {group: "", kind: LimitRange}
+  - {group: networking.k8s.io, kind: NetworkPolicy}
+  - {group: rbac.authorization.k8s.io, kind: Role}
+  - {group: rbac.authorization.k8s.io, kind: RoleBinding}
+
+# ----------------------------------------------------------- platform applier
+# The platform applies the approved state (main) of the request repositories
+# itself, from the lab host, every golden_path_applier_interval: OpenTofu for
+# environments, kubectl for policies and exceptions. Pipelines never hold
+# credentials that can change the cluster. The result appears on each commit
+# as the status "platform/apply".
+golden_path_applier_user: platform-applier
+golden_path_applier_token_file: "{{ pelab_credentials_dir }}/gitea-applier-token.txt"
+golden_path_applier_dir: "{{ pelab_state_dir }}/applier"
+golden_path_applier_interval: 2min
+# The commit status the applier posts.
+golden_path_applier_context: platform/apply
+# OpenTofu's state for the environments (a Secret) and the plan pipeline's read-only identity.
+golden_path_tfstate_namespace: pelab-tfstate
+# Kyverno only honours PolicyExceptions in this namespace, and only the platform writes to it.
+golden_path_exception_namespace: "{{ pelab_exception_namespace }}"
+# OpenTofu for the lab host, from the download cache the lxd role fills.
+golden_path_tofu_archive: "{{ pelab_state_dir }}/cache/tools/tofu_{{ pelab_versions.opentofu }}_linux_amd64.tar.gz"
+# Providers in a local mirror, so `tofu init` needs no internet (host and workspace image).
+golden_path_tofu_mirror_dir: /usr/local/share/opentofu/plugins
+
+# ---------------------------------------------------- delivery safety net
+# Argo CD deploys the teams' services. If it gives trouble during the course:
+#   ansible-playbook safety-net.yml -e safety_net=on    (and =off to undo)
+# Argo CD is paused (nothing running is removed) and the platform applier deploys
+# each team repository's deploy/dev, deploy/staging and deploy/prod from main, on
+# its usual timer: dev at the latest commit whose pipeline passed, staging and
+# prod exactly as committed. Teams work the same way (pull requests, approvals);
+# the result appears on each commit as the status "safety-net/<env>".
+golden_path_safety_net_flag: "{{ golden_path_applier_dir }}/safety-net-on"
+golden_path_safety_net_context: safety-net
+# The only kinds the safety net deploys into a team namespace (the golden path uses
+# the first six). Anything else is refused, and the status says which kind.
+golden_path_safety_net_kinds: [Deployment, Service, Ingress, ConfigMap, ServiceMonitor, PrometheusRule,
+                               HorizontalPodAutoscaler, PodDisruptionBudget]
+# Argo CD's two controllers: scaled to 0 while the safety net is on.
+golden_path_argocd_controllers: >-
+  app.kubernetes.io/part-of=argocd,app.kubernetes.io/component in (application-controller,applicationset-controller)

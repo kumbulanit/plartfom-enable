@@ -1,0 +1,10 @@
+---
+profile: production
+offline: true
+exclude_paths:
+  - .cache/
+  - .ansible/
+  - collections/
+  - credentials/
+# The content of the platform's Gitea repositories (application code, OpenTofu,
+# Kyverno policies, pipelines, handbook) lives in ../labs, outside this project.

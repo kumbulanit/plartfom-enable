@@ -1,0 +1,28 @@
+---
+- name: Check the host is Ubuntu 24.04
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['distribution'] == 'Ubuntu'
+      - ansible_facts['distribution_version'] is version('24.04', '>=')
+    fail_msg: "The lab targets Ubuntu Server 24.04 LTS; found {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}."
+
+- name: Patch and install base packages
+  ansible.builtin.import_tasks: packages.yml
+
+# A lab host that is itself a container (pelab_container_host, used by Patchbay Labs to give each
+# delegate a lab of their own) shares the clock and the kernel with the machine it runs on, and sits
+# behind that machine's firewall: those three steps are left to the machine.
+- name: Configure time synchronisation
+  ansible.builtin.import_tasks: time.yml
+  when: not pelab_container_host | bool
+
+- name: Apply kernel parameters and limits
+  ansible.builtin.import_tasks: kernel.yml
+  when: not pelab_container_host | bool
+
+- name: Install the lab TLS certificate and CA
+  ansible.builtin.import_tasks: tls.yml
+
+- name: Configure the host firewall
+  ansible.builtin.import_tasks: firewall.yml
+  when: not pelab_container_host | bool

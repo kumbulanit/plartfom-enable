@@ -1,0 +1,47 @@
+---
+- name: Create the logins directory on the control node
+  ansible.builtin.file:
+    path: "{{ pelab_credentials_dir }}/logins"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Write each delegate's logins on the control node
+  ansible.builtin.template:
+    src: logins.md.j2
+    dest: "{{ pelab_credentials_dir }}/logins/{{ item }}.md"
+    mode: "0600"
+  loop: "{{ pelab_workspace_names }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+# On a delegate's own VM the logins are also on the host, so the delegate can
+# read them there before the workspace is open. A shared host keeps them private.
+- name: Write the delegate's logins on their own VM (/etc/pelab/logins.md)
+  ansible.builtin.template:
+    src: logins.md.j2
+    dest: /etc/pelab/logins.md
+    owner: root
+    group: root
+    mode: "0644"
+  vars:
+    item: "{{ pelab_workspace_names | first }}"
+  when: pelab_workspace_names | length == 1
+  no_log: true
+
+- name: Remove the host's logins file when the host is shared
+  ansible.builtin.file:
+    path: /etc/pelab/logins.md
+    state: absent
+  when: pelab_workspace_names | length != 1
+
+- name: Write the workspace roster
+  ansible.builtin.template:
+    src: workspaces.csv.j2
+    dest: "{{ pelab_credentials_dir }}/workspaces.csv"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true

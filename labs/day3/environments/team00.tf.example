@@ -1,0 +1,10 @@
+# Your team's request: a copy of this file named after your team (team01.tf for
+# example), with your team's name in both places below. The plan in the pull
+# request shows what will be created before anything changes.
+
+module "team00" {
+  source       = "./modules/team-environment"
+  team         = "team00"
+  environments = ["staging", "prod"]
+  size         = "small"
+}

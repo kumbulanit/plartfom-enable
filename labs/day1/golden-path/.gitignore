@@ -1,0 +1,6 @@
+# Files that Python and the test tools make while you work. They are rebuilt
+# every time, so they never belong in a commit.
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/

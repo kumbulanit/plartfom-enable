@@ -1,0 +1,28 @@
+# The delegates' shared read-only login in front of Prometheus and Alertmanager,
+# which have no login of their own. Traefik checks the browser's basic-auth
+# credentials against the htpasswd line below (the same bcrypt hash Argo CD
+# keeps; Traefik accepts bcrypt) and drops the Authorization header before the
+# request reaches them. The Ingresses in values/kube-prometheus-stack.yaml.j2
+# name the Middleware as monitoring-{{ platform_monitoring_login }}@kubernetescrd.
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: {{ platform_monitoring_login }}
+  namespace: monitoring
+# Traefik reads an Opaque basic-auth secret only when it has exactly one key,
+# holding htpasswd lines (type kubernetes.io/basic-auth would mean plain text).
+stringData:
+  users: "{{ pelab_viewer_user }}:{{ pelab_viewer_password_bcrypt }}"
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ platform_monitoring_login }}
+  namespace: monitoring
+spec:
+  basicAuth:
+    secret: {{ platform_monitoring_login }}
+    # Firefox and Safari show the realm in their sign-in box.
+    realm: "PE lab: sign in as {{ pelab_viewer_user }}"
+    removeHeader: true

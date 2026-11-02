@@ -1,0 +1,101 @@
+---
+# Shared services on k3s, installed in this order. Each release reads its values
+# from templates/values/<name>.yaml.j2 and its chart and version from pelab_charts.
+#
+# The core releases are the Internal Developer Platform the golden path uses.
+# Releases marked "extra" are installed only when listed in pelab_extras.
+# Backstage, the portal, is installed by the golden_path role once Gitea has
+# content for it to show.
+platform_helm_timeout: 15m
+platform_releases:
+  # Core
+  - {name: kube-prometheus-stack, namespace: monitoring, chart: kube_prometheus_stack, timeout: 20m}
+  - {name: kyverno, namespace: kyverno, chart: kyverno}
+  - {name: gitea, namespace: gitea, chart: gitea}
+  - {name: harbor, namespace: harbor, chart: harbor, timeout: 20m}
+  - {name: argo-cd, namespace: argocd, chart: argo_cd}
+  - {name: loki, namespace: monitoring, chart: loki}
+  - {name: alloy, namespace: monitoring, chart: alloy}
+  # Extras
+  - {name: keycloak, namespace: keycloak, chart: keycloak, extra: true}
+  - {name: sonarqube, namespace: sonarqube, chart: sonarqube, timeout: 20m, extra: true}
+  - {name: argo-rollouts, namespace: argo-rollouts, chart: argo_rollouts, extra: true}
+  - {name: jaeger, namespace: monitoring, chart: jaeger, extra: true}
+  - {name: redpanda, namespace: redpanda, chart: redpanda, extra: true}
+  - {name: apisix, namespace: apisix, chart: apisix, extra: true}
+  - {name: opencost, namespace: opencost, chart: opencost, extra: true}
+
+platform_enabled_releases: >-
+  {{ platform_releases | rejectattr('extra', 'defined') | list
+     + platform_releases | selectattr('extra', 'defined') | selectattr('name', 'in', pelab_extras) | list }}
+platform_enabled_names: "{{ platform_enabled_releases | map(attribute='name') | list }}"
+
+# Namespaces that receive the wildcard TLS secret and the lab CA ConfigMap.
+platform_namespaces: >-
+  {{ platform_enabled_releases | map(attribute='namespace') | unique
+     | union(['backstage', pelab_workspaces_namespace]) | list }}
+
+# Grafana's API, reached through Traefik with the lab CA, exactly as clients see it
+# (tasks/grafana.yml creates the delegates' shared read-only login there).
+platform_grafana_url: "https://{{ pelab_hosts.grafana }}"
+
+# Prometheus and Alertmanager have no login of their own, so Traefik asks for
+# the delegates' shared read-only one in front of their Ingresses (HTTP basic
+# auth: the browser's own prompt). The Secret holding the htpasswd line and the
+# Middleware that reads it share this name in the monitoring namespace
+# (tasks/prepare.yml, templates/manifests/monitoring-login.yaml.j2); the
+# kube-prometheus-stack values put the Middleware on both Ingresses.
+platform_monitoring_login: delegate-login
+
+# Admin credentials handed to the charts as Kubernetes secrets.
+platform_admin_secrets:
+  - name: grafana-admin
+    namespace: monitoring
+    release: kube-prometheus-stack
+    data: {admin-user: admin, admin-password: "{{ pelab_grafana_admin_password }}"}
+  - name: gitea-admin
+    namespace: gitea
+    release: gitea
+    data: {username: "{{ pelab_gitea_admin_user }}", password: "{{ pelab_gitea_admin_password }}"}
+  - name: harbor-admin
+    namespace: harbor
+    release: harbor
+    data: {HARBOR_ADMIN_PASSWORD: "{{ pelab_harbor_admin_password }}"}
+  - name: keycloak-admin
+    namespace: keycloak
+    release: keycloak
+    data: {username: "{{ pelab_keycloak_admin_user }}", password: "{{ pelab_keycloak_admin_password }}"}
+  - name: sonarqube-admin
+    namespace: sonarqube
+    release: sonarqube
+    data: {password: "{{ pelab_sonarqube_admin_password }}", currentPassword: admin}
+  - name: sonarqube-monitoring
+    namespace: sonarqube
+    release: sonarqube
+    data: {passcode: "{{ pelab_sonarqube_monitoring_passcode }}"}
+  - name: apisix-admin
+    namespace: apisix
+    release: apisix
+    data: {admin: "{{ pelab_apisix_admin_key }}", viewer: "{{ pelab_apisix_viewer_key }}"}
+
+# Harbor proxy cache for Docker Hub. k3s pulls docker.io images through it,
+# and the golden path builds FROM <harbor>/dockerhub/library/python.
+platform_harbor_proxy_caches:
+  - name: dockerhub
+    type: docker-hub
+    url: https://hub.docker.com
+    mirror: docker.io
+    username: "{{ pelab_dockerhub_username }}"
+    password: "{{ pelab_dockerhub_token }}"
+  # More upstreams, for example:
+  # - {name: ghcr, type: github-ghcr, url: https://ghcr.io, mirror: ghcr.io}
+  # - {name: quay, type: quay, url: https://quay.io, mirror: quay.io}
+# Point k3s containerd at the Harbor proxy caches (falls back to upstream if Harbor is down).
+platform_k3s_registry_mirrors: true
+
+# Synthetic on-prem prices for OpenCost (per hour; CPU per core, RAM and storage per GiB).
+platform_opencost_prices:
+  CPU: "0.031"
+  RAM: "0.004"
+  storage: "0.00005"
+  GPU: "0"

@@ -1,0 +1,37 @@
+# Pipeline template: nightly vulnerability scan. Owned by the platform team.
+#
+# Use it: copy this file, unchanged, into your service's repository as
+#   .gitea/workflows/nightly-scan.yaml
+#
+# The main pipeline scans an image once, when it is built. New weaknesses (CVEs)
+# are found every day, in images that have not changed. This pipeline scans the
+# image of your latest commit on main again, every night at 02:00, and on demand
+# from the Actions tab (nightly-scan → Run Workflow).
+name: nightly-scan
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: pelab-host
+    env:
+      IMAGE: ${{ vars.REGISTRY }}/${{ gitea.repository }}:${{ gitea.sha }}
+    steps:
+      - name: Fetch the image from Harbor
+        env:
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+        run: |
+          export DOCKER_CONFIG="$(mktemp -d)"
+          echo "$HARBOR_PASSWORD" | docker login "${{ vars.REGISTRY }}" -u "$HARBOR_USERNAME" --password-stdin
+          docker pull -q "${IMAGE,,}"
+
+      - name: Scan it (trivy)
+        run: trivy image --no-progress --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "${IMAGE,,}"
+
+      - name: Clean up
+        if: always()
+        run: docker image rm "${IMAGE,,}" > /dev/null 2>&1 || true

@@ -1,0 +1,32 @@
+# Pipeline templates
+
+Small, ready-made pipelines from the platform team. Each one is a single file
+that works in any service made from the golden path, without changes.
+
+| Template | What it does | When it runs |
+|---|---|---|
+| [workflows/smoke-test.yaml](workflows/smoke-test.yaml) | Checks that a running environment of your service answers: its page, its health check, and the environment it reports | When you click Run Workflow (choose dev, staging or prod) |
+| [workflows/nightly-scan.yaml](workflows/nightly-scan.yaml) | Scans the image of your latest commit on main again for known weaknesses (CVEs) | Every night at 02:00, and when you click Run Workflow |
+
+## Use one
+
+1. Open the template file and copy all of it (the copy button above the file).
+2. In your service's repository: **Add File → New File**. Name it
+   `.gitea/workflows/<the same file name>`, for example
+   `.gitea/workflows/smoke-test.yaml`, and paste.
+3. Commit it on a new branch and open a pull request. It is reviewed and
+   merged like any other change.
+4. After the merge, open the **Actions** tab: the new pipeline is in the list
+   on the left. Click it, then **Run Workflow**.
+
+## Where the main pipeline comes from
+
+The pipeline every service already has, `.gitea/workflows/ci.yaml` (lint,
+tests, secret scan, build, scan, push, sign), is in the golden-path template,
+[platform/golden-path](https://{{ pelab_hosts.gitea }}/{{ golden_path_platform_org }}/{{ golden_path_template_repo }}). Each new service gets a copy of it when
+it is created from that template.
+
+## Ask for a change, or a new template
+
+Open an issue in this repository. Please do not change a template in your own
+copy: if it needs a fix, everyone needs it.

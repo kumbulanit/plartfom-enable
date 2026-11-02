@@ -1,0 +1,140 @@
+---
+lxd_snap_channel: "{{ pelab_versions.lxd_snap_channel }}"
+# Hold snap refreshes so LXD does not restart in the middle of a course day.
+lxd_hold_refresh: true
+
+lxd_storage_pool: "{{ pelab_lxd_storage_pool }}"
+lxd_storage_driver: "{{ pelab_lxd_storage_driver }}"
+# zfs only: a spare block device such as /dev/nvme1n1. Empty uses a loop file.
+lxd_storage_source: ""
+# zfs only: size of the loop file when lxd_storage_source is empty: 20 GiB per
+# workspace and runner, at least 40 GiB (one delegate's VM: 40 GiB, which leaves
+# room on a 100 GB disk; 27 workspaces and 5 runners: 640 GiB).
+lxd_storage_size: "{{ [(pelab_workspace_names | length + pelab_runner_names | length) * 20, 40] | max }}GiB"
+lxd_storage_config: >-
+  {{ {'source': lxd_storage_source} if lxd_storage_source | length > 0
+     else ({'size': lxd_storage_size} if lxd_storage_driver == 'zfs' else {}) }}
+
+# Bridge settings, enforced on every run.
+lxd_bridge_config:
+  ipv4.address: "{{ pelab_lxd_gateway }}/24"
+  ipv4.nat: "true"
+  ipv4.dhcp.ranges: "{{ pelab_lxd_subnet_prefix }}.200-{{ pelab_lxd_subnet_prefix }}.250"
+  ipv6.address: none
+  dns.domain: lxd
+  # Containers resolve every lab name to the host, where Traefik listens.
+  raw.dnsmasq: "address=/{{ pelab_domain }}/{{ pelab_lxd_gateway }}"
+
+lxd_preseed:
+  config:
+    images.auto_update_interval: "0"
+  networks:
+    - name: "{{ pelab_lxd_bridge }}"
+      type: bridge
+      config: "{{ lxd_bridge_config }}"
+  storage_pools:
+    - name: "{{ lxd_storage_pool }}"
+      driver: "{{ lxd_storage_driver }}"
+      config: "{{ lxd_storage_config }}"
+  profiles:
+    - name: default
+      devices:
+        root: {path: /, pool: "{{ lxd_storage_pool }}", type: disk}
+        eth0: {name: eth0, network: "{{ pelab_lxd_bridge }}", type: nic}
+
+# ---------------------------------------------------------------------------
+# Workspace image
+# ---------------------------------------------------------------------------
+lxd_image_alias: "{{ pelab_workspace_image }}"
+# Rebuild even when the build inputs have not changed.
+lxd_image_force_rebuild: false
+lxd_image_builder: pelab-image-builder
+# LXD settings of the builder container (a container lab host also needs security.privileged).
+lxd_image_builder_config:
+  security.nesting: "true"
+  security.syscalls.intercept.mknod: "true"
+  security.syscalls.intercept.setxattr: "true"
+# Base image. On an isolated network, point this at an internal simplestreams mirror.
+lxd_image_source:
+  server: https://cloud-images.ubuntu.com/releases
+  protocol: simplestreams
+  alias: "24.04"
+lxd_image_build_timeout: 5400
+lxd_cache_dir: "{{ pelab_state_dir }}/cache/tools"
+lxd_build_dir: "{{ pelab_state_dir }}/image"
+
+lxd_image_apt_packages:
+  - bash-completion
+  - build-essential
+  - ca-certificates
+  - curl
+  - dnsutils
+  - git
+  - gnupg
+  - iputils-ping
+  - jq
+  - less
+  - make
+  - nano
+  - netcat-openbsd
+  - openssh-server
+  - pipx
+  - python3
+  - python3-dev
+  - python3-pip
+  - python3-venv
+  - python3-yaml
+  - sudo
+  - tmux
+  - unzip
+  - vim
+  - wget
+  - xz-utils
+
+# Release artifacts, downloaded once on the host and checksum-verified against
+# the checksum file each project publishes. code-server publishes none.
+lxd_gh: https://github.com
+lxd_image_artifacts:
+  - dest: docker.asc
+    url: https://download.docker.com/linux/ubuntu/gpg
+  - dest: "kubectl-{{ pelab_versions.kubectl }}"
+    url: "https://dl.k8s.io/release/v{{ pelab_versions.kubectl }}/bin/linux/amd64/kubectl"
+    checksum: "sha256:https://dl.k8s.io/release/v{{ pelab_versions.kubectl }}/bin/linux/amd64/kubectl.sha256"
+  - dest: "helm-v{{ pelab_versions.helm }}-linux-amd64.tar.gz"
+    url: "https://get.helm.sh/helm-v{{ pelab_versions.helm }}-linux-amd64.tar.gz"
+    checksum: "sha256:https://get.helm.sh/helm-v{{ pelab_versions.helm }}-linux-amd64.tar.gz.sha256sum"
+  - dest: "k9s-{{ pelab_versions.k9s }}_Linux_amd64.tar.gz"
+    url: "{{ lxd_gh }}/derailed/k9s/releases/download/v{{ pelab_versions.k9s }}/k9s_Linux_amd64.tar.gz"
+    checksum: "sha256:{{ lxd_gh }}/derailed/k9s/releases/download/v{{ pelab_versions.k9s }}/checksums.sha256"
+  - dest: "argocd-{{ pelab_versions.argocd_cli }}-linux-amd64"
+    url: "{{ lxd_gh }}/argoproj/argo-cd/releases/download/v{{ pelab_versions.argocd_cli }}/argocd-linux-amd64"
+    checksum: "sha256:{{ lxd_gh }}/argoproj/argo-cd/releases/download/v{{ pelab_versions.argocd_cli }}/cli_checksums.txt"
+  - dest: "tofu_{{ pelab_versions.opentofu }}_linux_amd64.tar.gz"
+    url: "{{ lxd_gh }}/opentofu/opentofu/releases/download/v{{ pelab_versions.opentofu }}/tofu_{{ pelab_versions.opentofu }}_linux_amd64.tar.gz"
+    checksum: "sha256:{{ lxd_gh }}/opentofu/opentofu/releases/download/v{{ pelab_versions.opentofu }}/tofu_{{ pelab_versions.opentofu }}_SHA256SUMS"
+  - dest: "trivy_{{ pelab_versions.trivy }}_Linux-64bit.deb"
+    url: "{{ lxd_gh }}/aquasecurity/trivy/releases/download/v{{ pelab_versions.trivy }}/trivy_{{ pelab_versions.trivy }}_Linux-64bit.deb"
+    checksum: "sha256:{{ lxd_gh }}/aquasecurity/trivy/releases/download/v{{ pelab_versions.trivy }}/trivy_{{ pelab_versions.trivy }}_checksums.txt"
+  - dest: "gitleaks_{{ pelab_versions.gitleaks }}_linux_x64.tar.gz"
+    url: "{{ lxd_gh }}/gitleaks/gitleaks/releases/download/v{{ pelab_versions.gitleaks }}/gitleaks_{{ pelab_versions.gitleaks }}_linux_x64.tar.gz"
+    checksum: "sha256:{{ lxd_gh }}/gitleaks/gitleaks/releases/download/v{{ pelab_versions.gitleaks }}/gitleaks_{{ pelab_versions.gitleaks }}_checksums.txt"
+  - dest: "cosign-{{ pelab_versions.cosign }}-linux-amd64"
+    url: "{{ lxd_gh }}/sigstore/cosign/releases/download/v{{ pelab_versions.cosign }}/cosign-linux-amd64"
+    checksum: "sha256:{{ lxd_gh }}/sigstore/cosign/releases/download/v{{ pelab_versions.cosign }}/cosign_checksums.txt"
+  - dest: "kyverno-cli_v{{ pelab_versions.kyverno_cli }}_linux_x86_64.tar.gz"
+    url: "{{ lxd_gh }}/kyverno/kyverno/releases/download/v{{ pelab_versions.kyverno_cli }}/kyverno-cli_v{{ pelab_versions.kyverno_cli }}_linux_x86_64.tar.gz"
+    checksum: "sha256:{{ lxd_gh }}/kyverno/kyverno/releases/download/v{{ pelab_versions.kyverno_cli }}/checksums.txt"
+  - dest: "hadolint-{{ pelab_versions.hadolint }}-linux-x86_64"
+    url: "{{ lxd_gh }}/hadolint/hadolint/releases/download/v{{ pelab_versions.hadolint }}/hadolint-linux-x86_64"
+    checksum: "sha256:{{ lxd_gh }}/hadolint/hadolint/releases/download/v{{ pelab_versions.hadolint }}/checksums.sha256"
+  - dest: "k6-v{{ pelab_versions.k6 }}-linux-amd64.deb"
+    url: "{{ lxd_gh }}/grafana/k6/releases/download/v{{ pelab_versions.k6 }}/k6-v{{ pelab_versions.k6 }}-linux-amd64.deb"
+    checksum: "sha256:{{ lxd_gh }}/grafana/k6/releases/download/v{{ pelab_versions.k6 }}/k6-v{{ pelab_versions.k6 }}-checksums.txt"
+  - dest: "oasdiff_{{ pelab_versions.oasdiff }}_linux_amd64.tar.gz"
+    url: "{{ lxd_gh }}/oasdiff/oasdiff/releases/download/v{{ pelab_versions.oasdiff }}/oasdiff_{{ pelab_versions.oasdiff }}_linux_amd64.tar.gz"
+    checksum: "sha256:{{ lxd_gh }}/oasdiff/oasdiff/releases/download/v{{ pelab_versions.oasdiff }}/checksums.txt"
+  - dest: "code-server_{{ pelab_versions.code_server }}_amd64.deb"
+    url: "{{ lxd_gh }}/coder/code-server/releases/download/v{{ pelab_versions.code_server }}/code-server_{{ pelab_versions.code_server }}_amd64.deb"
+  - dest: "gitea-runner-{{ pelab_versions.gitea_runner }}-linux-amd64.xz"
+    url: "https://dl.gitea.com/gitea-runner/{{ pelab_versions.gitea_runner }}/gitea-runner-{{ pelab_versions.gitea_runner }}-linux-amd64.xz"
+    checksum: "sha256:https://dl.gitea.com/gitea-runner/{{ pelab_versions.gitea_runner }}/gitea-runner-{{ pelab_versions.gitea_runner }}-linux-amd64.xz.sha256"

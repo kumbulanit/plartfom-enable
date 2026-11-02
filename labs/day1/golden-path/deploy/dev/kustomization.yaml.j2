@@ -1,0 +1,26 @@
+# dev: Argo CD deploys every commit on main here automatically and sets the
+# image tag to that commit's SHA, so nothing in this file needs to change.
+# dev sets no GREETING: it shows the greeting written in app/main.py, so a
+# change to the code is visible in dev as soon as it is merged. staging and
+# prod set their own (same image, different settings).
+# URL: https://${REPO_NAME}-${REPO_OWNER}-dev.{{ pelab_domain }}
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ${REPO_OWNER}-dev
+resources:
+  - ../base
+configMapGenerator:
+  - name: ${REPO_NAME}-settings
+    literals:
+      - APP_ENV=dev
+patches:
+  - target:
+      kind: Ingress
+      name: ${REPO_NAME}
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: ${REPO_NAME}-${REPO_OWNER}-dev.{{ pelab_domain }}
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: ${REPO_NAME}-${REPO_OWNER}-dev.{{ pelab_domain }}

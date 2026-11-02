@@ -1,0 +1,95 @@
+---
+# Used by reset.yml for a new cohort. Removes the teams' Gitea organisations,
+# repositories and delegate accounts, the cohort's environment and exception
+# requests (the request repositories), the images in the team Harbor projects
+# and the delegates' Harbor logins. Running the golden_path role afterwards
+# creates them again.
+
+- name: Remove the teams' Gitea content
+  module_defaults:
+    ansible.builtin.uri:
+      user: "{{ pelab_gitea_admin_user }}"
+      password: "{{ pelab_gitea_admin_password }}"
+      force_basic_auth: true
+      ca_path: "{{ pelab_tls_dir }}/ca.crt"
+  block:
+    - name: List each team's repositories
+      ansible.builtin.uri:
+        url: "{{ golden_path_gitea_api }}/orgs/{{ item }}/repos?limit=50"
+        status_code: [200, 404]
+      loop: "{{ pelab_team_names }}"
+      register: golden_path_team_repos
+
+    - name: Delete the team repositories
+      ansible.builtin.uri:
+        url: "{{ golden_path_gitea_api }}/repos/{{ item.full_name }}"
+        method: DELETE
+        status_code: [204, 404]
+      loop: "{{ golden_path_team_repos.results | selectattr('status', 'equalto', 200) | map(attribute='json') | flatten }}"
+      loop_control:
+        label: "{{ item.full_name }}"
+      changed_when: true
+
+    - name: Delete the team organisations
+      ansible.builtin.uri:
+        url: "{{ golden_path_gitea_api }}/orgs/{{ item }}"
+        method: DELETE
+        status_code: [204, 404]
+      loop: "{{ pelab_team_names }}"
+      changed_when: true
+
+    - name: Delete the delegate accounts, the shared approver and the reviewer
+      ansible.builtin.uri:
+        url: "{{ golden_path_gitea_api }}/admin/users/{{ item }}?purge=true"
+        method: DELETE
+        status_code: [204, 404]
+      loop: "{{ pelab_workspace_names + [pelab_platform_approver_user, pelab_reviewer_user] }}"
+      changed_when: true
+
+    - name: Delete the request repositories (they are seeded again, empty)
+      ansible.builtin.uri:
+        url: "{{ golden_path_gitea_api }}/repos/{{ golden_path_platform_org }}/{{ item }}"
+        method: DELETE
+        status_code: [204, 404]
+      loop: "{{ golden_path_request_repos }}"
+      changed_when: true
+
+- name: Remove the teams' images from Harbor
+  module_defaults:
+    ansible.builtin.uri:
+      user: admin
+      password: "{{ pelab_harbor_admin_password }}"
+      force_basic_auth: true
+      ca_path: "{{ pelab_tls_dir }}/ca.crt"
+  block:
+    - name: List the image repositories in each team project
+      ansible.builtin.uri:
+        url: "{{ golden_path_harbor_api }}/projects/{{ item }}/repositories?page_size=100"
+        status_code: [200, 403, 404]
+      loop: "{{ pelab_team_names }}"
+      register: golden_path_team_images
+
+    - name: Delete them
+      ansible.builtin.uri:
+        url: "{{ golden_path_harbor_api }}/projects/{{ item.name | regex_replace('/.*$', '') }}/repositories/{{ item.name | regex_replace('^[^/]+/', '') }}"
+        method: DELETE
+        status_code: [200, 404]
+      loop: "{{ golden_path_team_images.results | selectattr('status', 'equalto', 200) | map(attribute='json') | flatten }}"
+      loop_control:
+        label: "{{ item.name }}"
+      changed_when: true
+
+    - name: List the Harbor users
+      ansible.builtin.uri:
+        url: "{{ golden_path_harbor_api }}/users?page_size=100"
+      register: golden_path_harbor_users
+
+    - name: Delete the delegates' Harbor logins
+      ansible.builtin.uri:
+        url: "{{ golden_path_harbor_api }}/users/{{ item.user_id }}"
+        method: DELETE
+        status_code: [200, 404]
+      loop: "{{ golden_path_harbor_users.json | selectattr('username', 'in', pelab_workspace_names) | list }}"
+      loop_control:
+        label: "{{ item.username }}"
+      changed_when: true

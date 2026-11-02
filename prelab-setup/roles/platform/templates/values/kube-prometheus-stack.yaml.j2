@@ -1,0 +1,118 @@
+# Prometheus, Alertmanager and Grafana. k3s runs the control plane in one
+# process, so its separate etcd/scheduler/controller-manager/proxy targets are off.
+kubeEtcd:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+defaultRules:
+  rules:
+    etcd: false
+    kubeControllerManager: false
+    kubeProxy: false
+    kubeSchedulerAlerting: false
+    kubeSchedulerRecording: false
+
+prometheus:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    # Traefik asks for the delegates' shared read-only login first (tasks/prepare.yml).
+    annotations:
+      traefik.ingress.kubernetes.io/router.middlewares: monitoring-{{ platform_monitoring_login }}@kubernetescrd
+    hosts: ["{{ pelab_hosts.prometheus }}"]
+    paths: ["/"]
+    pathType: Prefix
+    tls:
+      - secretName: {{ pelab_tls_secret_name }}
+        hosts: ["{{ pelab_hosts.prometheus }}"]
+  prometheusSpec:
+    externalUrl: https://{{ pelab_hosts.prometheus }}
+    retention: 7d
+    # Also stop at 5 GB, so metrics never fill a small VM's disk.
+    retentionSize: 5GB
+    # Pick up ServiceMonitors, PodMonitors and rules from every namespace (teams too).
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false
+    # Lets k6 and OpenTelemetry push metrics (remote write) to
+    # http://kube-prometheus-stack-prometheus.monitoring.svc:9090/api/v1/write.
+    # Push inside the cluster: the Ingress asks for the delegates' login.
+    enableRemoteWriteReceiver: true
+    resources:
+      requests: {cpu: 250m, memory: 1Gi}
+      limits: {memory: 4Gi}
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: [ReadWriteOnce]
+          resources:
+            requests:
+              storage: 20Gi
+
+alertmanager:
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    # Same login as Prometheus: Alertmanager accepts silences, so nobody anonymous.
+    annotations:
+      traefik.ingress.kubernetes.io/router.middlewares: monitoring-{{ platform_monitoring_login }}@kubernetescrd
+    hosts: ["{{ pelab_hosts.alertmanager }}"]
+    paths: ["/"]
+    pathType: Prefix
+    tls:
+      - secretName: {{ pelab_tls_secret_name }}
+        hosts: ["{{ pelab_hosts.alertmanager }}"]
+  alertmanagerSpec:
+    externalUrl: https://{{ pelab_hosts.alertmanager }}
+
+grafana:
+  admin:
+    existingSecret: grafana-admin
+    userKey: admin-user
+    passwordKey: admin-password
+  grafana.ini:
+    server:
+      root_url: https://{{ pelab_hosts.grafana }}
+    # Nobody reads the dashboards without a login. Delegates share the read-only
+    # account "delegate" (a Viewer, created by tasks/grafana.yml once the chart is
+    # up); changing a dashboard still needs the admin login.
+    auth.anonymous:
+      enabled: false
+  persistence:
+    enabled: true
+    size: 5Gi
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    hosts: ["{{ pelab_hosts.grafana }}"]
+    tls:
+      - secretName: {{ pelab_tls_secret_name }}
+        hosts: ["{{ pelab_hosts.grafana }}"]
+  additionalDataSources:
+    - name: Loki
+      uid: loki
+      type: loki
+      access: proxy
+      url: http://loki.monitoring.svc:3100
+{% if 'jaeger' in pelab_extras %}
+    - name: Jaeger
+      uid: jaeger
+      type: jaeger
+      access: proxy
+      url: http://jaeger.monitoring.svc:16686
+{% endif %}
+  # Dashboards come from ConfigMaps labelled grafana_dashboard=1 in any namespace.
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL
+      folderAnnotation: grafana_folder
+      provider:
+        foldersFromFilesStructure: true

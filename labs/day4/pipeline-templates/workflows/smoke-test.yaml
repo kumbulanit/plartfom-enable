@@ -1,0 +1,46 @@
+# Pipeline template: smoke test. Owned by the platform team.
+#
+# Use it: copy this file, unchanged, into your service's repository as
+#   .gitea/workflows/smoke-test.yaml
+# then run it from your repository's Actions tab: smoke-test → Run Workflow.
+#
+# It checks that a running environment of your service answers: its page, its
+# health check, and the environment it says it is. It works out your service's
+# address by itself, from the repository's name and team, so there is nothing
+# to fill in.
+name: smoke-test
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which environment to check
+        type: choice
+        options: [dev, staging, prod]
+        default: dev
+
+jobs:
+  smoke-test:
+    runs-on: pelab-host
+    env:
+      ENVIRONMENT: ${{ inputs.environment || 'dev' }}
+    steps:
+      - name: Work out the address
+        run: |
+          DOMAIN="${{ vars.REGISTRY }}"; DOMAIN="${DOMAIN#harbor.}"
+          REPO="${{ gitea.repository }}"; NAME="${REPO#*/}"; TEAM="${REPO%%/*}"
+          URL="https://${NAME,,}-${TEAM,,}-${ENVIRONMENT}.${DOMAIN}"
+          echo "URL=$URL" >> "$GITHUB_ENV"
+          echo "Checking $URL"
+
+      - name: The service answers
+        run: curl -fsS --retry 3 --retry-delay 5 --retry-all-errors "$URL/"
+
+      - name: Its health check says ok
+        run: curl -fsS "$URL/healthz"
+
+      - name: It runs as the right environment
+        run: |
+          curl -fsS "$URL/" | grep -q "\"environment\": \"$ENVIRONMENT\"" \
+            && echo "It says it is $ENVIRONMENT." \
+            || { echo "It does not say it is $ENVIRONMENT."; exit 1; }

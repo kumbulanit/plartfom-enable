@@ -1,0 +1,27 @@
+---
+# Builds golden_path_repo_files[<repository>] from labs/<source>: files as they are,
+# *.j2 files rendered for this lab (and saved without .j2), pictures (png, jpg) byte for byte.
+# Called once per entry of golden_path_platform_repos (loop_var golden_path_repo).
+- name: Start an empty file list for {{ golden_path_repo.name }}
+  ansible.builtin.set_fact:
+    golden_path_repo_files: >-
+      {{ golden_path_repo_files | default({}) | combine({golden_path_repo.name: []}) }}
+
+- name: Collect the files of {{ golden_path_repo.name }}
+  ansible.builtin.set_fact:
+    golden_path_repo_files: >-
+      {{ golden_path_repo_files | default({})
+         | combine({golden_path_repo.name: golden_path_repo_files[golden_path_repo.name]
+                    + [{'path': item.path | regex_replace('[.]j2$', ''),
+                        'content': ((lookup('ansible.builtin.pipe', 'python3 -c ' ~ (golden_path_b64_script | quote) ~ ' ' ~ (item.src | quote)))
+                                    if item.path is match('.*[.](png|jpg)$')
+                                    else ((lookup('ansible.builtin.template', item.src) if item.path.endswith('.j2')
+                                           else (lookup('ansible.builtin.file', item.src, rstrip=false)
+                                                 | replace('<lab domain>',
+                                                           pelab_domain if golden_path_repo.replace_domain | default(false) else '<lab domain>')))
+                                          | b64encode))}]}) }}
+  loop: >-
+    {{ lookup('community.general.filetree', golden_path_labs_dir ~ '/' ~ golden_path_repo.source, exclude=golden_path_ignore, wantlist=true)
+       | selectattr('state', 'equalto', 'file') | selectattr('path', 'match', golden_path_repo.include | default('.')) | list }}
+  loop_control:
+    label: "{{ golden_path_repo.name }}/{{ item.path }}"

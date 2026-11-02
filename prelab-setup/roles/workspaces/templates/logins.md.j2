@@ -1,0 +1,41 @@
+{# One delegate's logins and addresses. Written to /etc/pelab/logins.md in the
+   workspace, on the host when the host has one delegate, and on the control node. #}
+# Your lab logins
+
+Your user name is `{{ item }}`{{ (' and your team is `' ~ pelab_workspace_teams[item] ~ '`') if pelab_workspace_teams[item] is defined else '' }}.
+Print this file again at any time: `cat /etc/pelab/logins.md`.
+
+| Who | User | Password | Use it for |
+| --- | --- | --- | --- |
+| You | `{{ item }}` | `{{ pelab_delegate_passwords[item] }}` | Your workspace, Gitea, Harbor |
+{% if pelab_shared_logins | bool %}
+| The reviewer | `{{ pelab_reviewer_user }}` | `{{ pelab_reviewer_password }}` | Gitea only: approves your pull requests (Day 2 onwards) |
+| The platform team | `{{ pelab_platform_approver_user }}` | `{{ pelab_platform_approver_password }}` | Gitea only: approves your environment request (Day 3) and exception request (Day 5) |
+{% endif %}
+| Read-only viewer | `{{ pelab_viewer_user }}` | `{{ pelab_viewer_password }}` | Argo CD and Grafana |
+
+## Where to look
+
+| What | Address | Sign in |
+| --- | --- | --- |
+| Your workspace (editor and terminal) | https://{{ item }}.{{ pelab_domain }}/?folder=/home/{{ item }} | `{{ item }}` |
+| Portal (catalog, templates) | https://{{ pelab_hosts.backstage }} | guest |
+| Git, pull requests, pipelines | https://{{ pelab_hosts.gitea }} | `{{ item }}` |
+| Images, scan reports, SBOMs | https://{{ pelab_hosts.harbor }} | `{{ item }}` |
+| Deployments (read-only) | https://{{ pelab_hosts.argocd }} | `{{ pelab_viewer_user }}` |
+| Dashboards and logs (read-only) | https://{{ pelab_hosts.grafana }} | `{{ pelab_viewer_user }}` |
+| The handbook | https://{{ pelab_hosts.gitea }}/{{ golden_path_platform_org | default('platform') }}/{{ golden_path_handbook_repo | default('handbook') }} | `{{ item }}` |
+{% if pelab_shared_logins | bool %}
+
+## Playing a second person
+
+Some steps need a second person: a reviewer who approves your change, or the
+platform team who approves your request. You play them. Keep your own login in
+your normal browser window, and open a **private window** for the other person
+(Edge and Chrome: Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a
+Mac Cmd+Shift+P). Sign in there as `{{ pelab_reviewer_user }}` or `{{ pelab_platform_approver_user }}`,
+do the step, and close the private window.
+
+This is role-play, so every step can be done alone. At work you never share a
+login: accounts are personal, and the second person is a real colleague.
+{% endif %}

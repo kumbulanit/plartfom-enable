@@ -1,0 +1,16 @@
+---
+# Imported first by every playbook that builds or changes a lab. inventory/all-vms.yml
+# is only for the instructor's checks (ansible pelab ...): a playbook run with it would
+# write new passwords on the instructor's machine and push them to the VMs.
+- name: Refuse to change a lab from the checks-only inventory
+  hosts: pelab
+  gather_facts: false
+  tasks:
+    - name: Stop when the inventory is only for checks
+      ansible.builtin.assert:
+        that: not (pelab_checks_only | default(false) | bool)
+        fail_msg: >-
+          inventory/all-vms.yml is only for checks (ansible pelab ...). Run this
+          playbook on the delegate's VM itself, with the default inventory.
+        quiet: true
+      tags: [always]

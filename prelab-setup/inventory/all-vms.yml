@@ -1,0 +1,17 @@
+---
+# For the instructor only: every delegate's VM, reached over SSH, for the
+# commands in the instructor guides that check or change every VM at once
+# (morning checks, the Day 3 drift). It holds no passwords and builds nothing:
+# each delegate builds their own VM with inventory/hosts.yml.
+# Use it with: export ANSIBLE_INVENTORY=inventory/all-vms.yml
+all:
+  children:
+    pelab:
+      vars:
+        # Playbooks refuse to run with this inventory (checks-only-guard.yml).
+        pelab_checks_only: true
+      hosts:
+        pelab01:
+          ansible_host: 192.0.2.10 # PLACEHOLDER: the first delegate's VM
+        # pelab02:
+        #   ansible_host: 192.0.2.11

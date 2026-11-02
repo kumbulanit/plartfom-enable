@@ -1,0 +1,26 @@
+---
+- name: Check the cohort fits the address plan
+  ansible.builtin.assert:
+    that:
+      - pelab_workspace_names | length <= 99
+      - pelab_team_count | int >= 1
+    fail_msg: At most 99 workspaces (cohort plus spares) fit in .101-.199 of {{ pelab_lxd_subnet_prefix }}.0/24.
+
+- name: Prepare delegate SSH keys on the control node
+  ansible.builtin.import_tasks: keys.yml
+
+- name: Create the workspace containers
+  ansible.builtin.import_tasks: containers.yml
+
+- name: Configure SSH jump access on the host
+  ansible.builtin.import_tasks: jump.yml
+
+- name: Initialise accounts and take the clean snapshot
+  ansible.builtin.import_tasks: init.yml
+
+- name: Publish code-server through Traefik
+  ansible.builtin.import_tasks: ingress.yml
+  when: workspaces_manage_ingress | bool
+
+- name: Write the logins files
+  ansible.builtin.import_tasks: logins.yml

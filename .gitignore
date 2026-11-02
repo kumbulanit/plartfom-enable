@@ -1,12 +1,18 @@
-# This repository holds the Platform Engineering course: the lab (pe-lab-ansible)
-# and the course material (sarb). Everything else in this folder stays out.
-/*
-!/.gitignore
-!/README.md
-!/pe-lab-ansible/
-!/sarb/
+# This repository is the Platform Engineering course: docs/ (decks and guides),
+# labs/ (each day's instructions and code) and prelab-setup/ (the lab build).
+# prelab-setup/.gitignore keeps the build's passwords, keys and backups out.
 
 # Editor and operating-system files, anywhere.
 .DS_Store
 ~$*
 node_modules/
+__pycache__/
+*.pyc
+# One person's tool settings.
+.qodo/
+# Slide decks: built from docs/slides/src (npm run decks); not committed for now.
+*.pptx
+# IDE settings.
+.idea/
+# The client brief stays out of git.
+BRIEF_*.pdf

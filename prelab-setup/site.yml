@@ -1,0 +1,51 @@
+---
+# Full build of the PE Lab on one Ubuntu Server 24.04 host. Safe to re-run.
+# Run one part with --tags, e.g. --tags platform or --tags workspaces.
+
+- name: Refuse to run from the checks-only inventory
+  ansible.builtin.import_playbook: checks-only-guard.yml
+
+- name: Prepare the host and build the workspace image
+  hosts: pelab
+  become: true
+  roles:
+    - role: host_base
+      tags: [host_base]
+    - role: lxd
+      tags: [lxd]
+
+- name: Install k3s
+  hosts: pelab
+  become: true
+  gather_facts: false
+  roles:
+    - role: k3s
+      tags: [k3s]
+
+- name: Deploy the platform, workspaces, runners, team namespaces and the golden path
+  hosts: pelab
+  become: true
+  gather_facts: false
+  environment:
+    KUBECONFIG: "{{ pelab_kubeconfig }}"
+    K8S_AUTH_KUBECONFIG: "{{ pelab_kubeconfig }}"
+  pre_tasks:
+    # A host fact rather than a play var, so tasks delegated to the control node
+    # keep their own Python.
+    - name: Use the virtualenv that has the Kubernetes client
+      ansible.builtin.set_fact:
+        ansible_python_interpreter: "{{ pelab_venv }}/bin/python"
+      tags: [always]
+  roles:
+    - role: platform
+      tags: [platform]
+    - role: workspaces
+      tags: [workspaces]
+    - role: runners
+      tags: [runners]
+    - role: teams
+      tags: [teams]
+    - role: golden_path
+      tags: [golden_path]
+    - role: backup
+      tags: [backup]

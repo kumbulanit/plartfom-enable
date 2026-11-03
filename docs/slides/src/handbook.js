@@ -361,7 +361,7 @@ function handbookReadme() {
     '',
     '## The code behind the labs',
     '',
-    'In the course repository (`sarb/labs`), each day\'s folder holds its instructions (`README.md`) and the code the platform puts in Gitea when the lab is built. Files ending in `.j2` are filled in for the lab at that point (its domain, its teams). In the lab, open the Gitea repositories instead.',
+    'In the course repository (`plartfom-enable/labs`), each day\'s folder holds its instructions (`README.md`) and the code the platform puts in Gitea when the lab is built. Files ending in `.j2` are filled in for the lab at that point (its domain, its teams). In the lab, open the Gitea repositories instead.',
     '',
     table(['Day', 'Folder', 'In the lab'], [
       ['1, and every day after', '`day1/golden-path/`', '`platform/golden-path`: the template every team\'s `hello` and every new service is made from (the app, its tests, the Dockerfile, the pipeline, the deployments)'],
@@ -388,7 +388,7 @@ function runOfTheDay(d) {
   const out = ['## Before the day', '', f.before.map((t) => `- [ ] ${md(t)}`).join('\n'), '',
     '## The day, hour by hour', '', table(['Time', 'What', 'Slides', 'Notes'], f.timetable), '',
     '## What you do yourself', '',
-    'Each delegate built their own VM, and its passwords are on it. `ansible pelab ...` commands run from your machine, in `prelab-setup/`, after `export ANSIBLE_INVENTORY=inventory/all-vms.yml` (pelab05 instead of pelab reaches one VM). `ansible-playbook ...` commands run on the VM they are for, in `~/sarb/prelab-setup`, with `-K`. Without SSH to the VMs, the delegate runs the command on their VM with `sudo` in front.', ''];
+    'Each delegate built their own VM, and its passwords are on it. `ansible pelab ...` commands run from your machine, in `prelab-setup/`, after `export ANSIBLE_INVENTORY=inventory/all-vms.yml` (pelab05 instead of pelab reaches one VM). `ansible-playbook ...` commands run on the VM they are for, in `~/plartfom-enable/prelab-setup`, with `-K`. Without SSH to the VMs, the delegate runs the command on their VM with `sudo` in front.', ''];
   for (const a of f.actions) {
     out.push(`**${md(a.when)}.** ${md(a.what)}${a.where ? ` *(${md(a.where)})*` : ''}`, '');
     if (a.run) out.push(fence(a.run, 'bash'), '');

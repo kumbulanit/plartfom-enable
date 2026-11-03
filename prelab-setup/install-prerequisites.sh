@@ -4,12 +4,12 @@
 # collections. Safe to run again.
 #
 # From a copy of the project:
-#   bash ~/sarb/prelab-setup/install-prerequisites.sh
-# Before you have a copy (the script clones it into ~/sarb):
+#   bash ~/plartfom-enable/prelab-setup/install-prerequisites.sh
+# Before you have a copy (the script clones it into ~/plartfom-enable):
 #   bash install-prerequisites.sh <repository address>
 #
 # Add --build to start the build straight away, inside tmux:
-#   bash ~/sarb/prelab-setup/install-prerequisites.sh --build
+#   bash ~/plartfom-enable/prelab-setup/install-prerequisites.sh --build
 set -euo pipefail
 
 REPO=""
@@ -78,14 +78,14 @@ SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$SELF_DIR/site.yml" ]; then
   SETUP="$SELF_DIR"
   step "Using the project in $(dirname "$SETUP")"
-elif [ -f "$HOME/sarb/prelab-setup/site.yml" ]; then
-  SETUP="$HOME/sarb/prelab-setup"
-  step "Using the project already in ~/sarb"
+elif [ -f "$HOME/plartfom-enable/prelab-setup/site.yml" ]; then
+  SETUP="$HOME/plartfom-enable/prelab-setup"
+  step "Using the project already in ~/plartfom-enable"
 else
   [ -n "$REPO" ] || fail "No copy of the project found. Run it again with the repository address: bash $0 <repository address>"
-  step "Copying the project into ~/sarb"
-  git clone "$REPO" "$HOME/sarb"
-  SETUP="$HOME/sarb/prelab-setup"
+  step "Copying the project into ~/plartfom-enable"
+  git clone "$REPO" "$HOME/plartfom-enable"
+  SETUP="$HOME/plartfom-enable/prelab-setup"
 fi
 
 step "Installing the Ansible collections"

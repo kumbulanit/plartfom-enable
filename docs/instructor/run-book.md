@@ -8,7 +8,7 @@ own with the whole platform on it, where they are `student01` in `team01`, and
 [BUILD-YOUR-VM.md](../../prelab-setup/BUILD-YOUR-VM.md).
 
 - **Playbooks** (`ansible-playbook ...`) run on the VM they are for, in
-  `~/sarb/prelab-setup`, with `-K` for the sudo password: the delegate types them,
+  `~/plartfom-enable/prelab-setup`, with `-K` for the sudo password: the delegate types them,
   or you do over SSH on that VM.
 - **Checks on every VM at once** (`ansible pelab ...`) run from your own machine,
   in `prelab-setup/`, after `export ANSIBLE_INVENTORY=inventory/all-vms.yml` (each
@@ -29,7 +29,7 @@ own with the whole platform on it, where they are `student01` in `team01`, and
 | Every service and link, in one page | `credentials/pelab01/platform.md` | written by the build |
 | The delegate's logins | `/etc/pelab/logins.md` on their VM; a copy in `credentials/pelab01/logins/student01.md` | nothing to print |
 
-The `credentials/pelab01/` files are on each delegate's VM, next to the project (`~/sarb/prelab-setup/credentials/pelab01/`): each VM has its own, and no machine has everyone's. Git never commits them.
+The `credentials/pelab01/` files are on each delegate's VM, next to the project (`~/plartfom-enable/prelab-setup/credentials/pelab01/`): each VM has its own, and no machine has everyone's. Git never commits them.
 
 ## Build
 
@@ -88,7 +88,7 @@ The applier's last lines should read `environments ...: Up to date` and
 | Merge blocked, approved, and the run is green but the pull request says the check `pipeline` is missing | The run was cancelled or the runner stopped before the last step | Re-run the pipeline (Actions → the run → Re-run all jobs); check the runner with `sudo lxc list` on that VM |
 | An environment or exception request will not merge | Only `pelab-admin` and `platform-approver` count | The delegate signs in as `platform-approver` (its password is in the logins file) in a private window and approves; read the plan or the reason with them |
 | A pull request on hello or rates will not merge for lack of an approval | One approval from another account is needed; the author's own does not count | The delegate signs in as `reviewer` in a private window and approves |
-| A delegate cannot find their password | | It is in `/etc/pelab/logins.md` on their VM (`cat /etc/pelab/logins.md`), and in `~/sarb/prelab-setup/credentials/pelab01/logins/student01.md` on the same VM |
+| A delegate cannot find their password | | It is in `/etc/pelab/logins.md` on their VM (`cat /etc/pelab/logins.md`), and in `~/plartfom-enable/prelab-setup/credentials/pelab01/logins/student01.md` on the same VM |
 | Argo CD or Grafana rejects a delegate's password | Those two take the read-only account, not `studentNN` | `delegate` with its password from the logins file. If that fails too, the account is missing or changed: `ansible-playbook site.yml --tags platform` puts it back |
 
 ## Reset

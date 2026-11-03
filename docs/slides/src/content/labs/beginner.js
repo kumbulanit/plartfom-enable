@@ -37,12 +37,12 @@ module.exports = {
         plain: 'Make a folder, put a small file in it, and look at what is there.',
         do: [
           { text: 'Make a folder called day1 in your home folder. It prints nothing: on Linux, no message means it worked.', cmd: 'mkdir -p ~/day1' },
-          { text: 'Go into that folder. It prints nothing either, but look at the end of the prompt: it changes from ~$ to ~/day1$. The prompt always shows where you are.', cmd: 'cd ~/day1', see: 'Only the prompt changes:', out: 'student07@student07:~/day1$' },
+          { text: 'Go into that folder. It prints nothing either, but look at the end of the prompt: it changes from ~$ to ~/day1$. The prompt always shows where you are.', cmd: 'cd ~/day1', see: 'Only the prompt changes:', out: 'student01@student01:~/day1$' },
           { text: 'Create a file called notes.txt with the word hello in it. Again, nothing is printed.', cmd: 'echo "hello" > notes.txt' },
-          { text: 'Now list what is in the folder, with details, to see your file.', cmd: 'ls -la', see: 'Three lines (your dates and times differ). The last one is your file:', out: 'total 4\ndrwxr-xr-x 2 student07 student07 4096 Nov  2 09:41 .\ndrwxr-x--- 9 student07 student07 4096 Nov  2 09:41 ..\n-rw-r--r-- 1 student07 student07    6 Nov  2 09:41 notes.txt' },
+          { text: 'Now list what is in the folder, with details, to see your file.', cmd: 'ls -la', see: 'Three lines (your dates and times differ). The last one is your file:', out: 'total 4\ndrwxr-xr-x 2 student01 student01 4096 Nov  2 09:41 .\ndrwxr-x--- 9 student01 student01 4096 Nov  2 09:41 ..\n-rw-r--r-- 1 student01 student01    6 Nov  2 09:41 notes.txt' },
         ],
         read: [
-          'Look only at the last line, the one ending in notes.txt: that is your file. The rest of that line is detail: who may read it (-rw-r--r--, explained in step 2), who owns it (student07, you), how big it is (6: the five letters of hello and an invisible end-of-line), and when it was made.',
+          'Look only at the last line, the one ending in notes.txt: that is your file. The rest of that line is detail: who may read it (-rw-r--r--, explained in step 2), who owns it (student01, you), how big it is (6: the five letters of hello and an invisible end-of-line), and when it was made.',
           'The lines ending in . and .. are the folder itself and the folder above it. Every folder lists them; you can ignore them.',
           'If your file shows -rw-rw-r-- instead of -rw-r--r--, that is also normal.',
         ],
@@ -54,7 +54,7 @@ module.exports = {
         plain: 'Lock your file so that only you can read it.',
         do: [
           { text: 'Change who may use the file: only you may read and change it, nobody else may even read it. It prints nothing.', cmd: 'chmod 600 notes.txt' },
-          { text: 'Look at the file\'s details again.', cmd: 'ls -la notes.txt', see: 'The start of the line has changed to -rw-------:', out: '-rw------- 1 student07 student07 6 Nov  2 09:41 notes.txt' },
+          { text: 'Look at the file\'s details again.', cmd: 'ls -la notes.txt', see: 'The start of the line has changed to -rw-------:', out: '-rw------- 1 student01 student01 6 Nov  2 09:41 notes.txt' },
         ],
         check: 'The line starts with -rw------- : one rw for you, then only dashes for everyone else.',
       },
@@ -66,7 +66,7 @@ module.exports = {
         plain: 'Check that a program that runs in the background (Docker) is working, and read its diary (its log).',
         do: [
           { text: 'Ask the system how the Docker program is doing.', cmd: 'systemctl status docker --no-pager', see: 'A few lines; the important one is Active, which says active (running) in green:', out: '● docker.service - Docker Application Container Engine\n     Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; preset: enabled)\n     Active: active (running) since Mon 2026-11-02 08:01:12 UTC; 1h 40min ago\n...', note: 'If the screen does not give you the prompt back, press q.' },
-          { text: 'Read the last ten lines Docker wrote in its log today. sudo means "as the administrator": reading the system\'s logs needs it. In your workspace it does not ask for a password.', cmd: 'sudo journalctl -u docker --since today | tail', see: 'Ten lines, each starting with a date and time, then the computer\'s name and the program, then what happened. For example:', out: 'Nov 02 08:01:12 student07 dockerd[312]: time="2026-11-02T08:01:12Z" level=info msg="API listen on /run/docker.sock"' },
+          { text: 'Read the last ten lines Docker wrote in its log today. sudo means "as the administrator": reading the system\'s logs needs it. In your workspace it does not ask for a password.', cmd: 'sudo journalctl -u docker --since today | tail', see: 'Ten lines, each starting with a date and time, then the computer\'s name and the program, then what happened. For example:', out: 'Nov 02 08:01:12 student01 dockerd[312]: time="2026-11-02T08:01:12Z" level=info msg="API listen on /run/docker.sock"' },
         ],
         check: 'The status says Active: active (running), and you have read a few log lines.',
       },
@@ -77,7 +77,7 @@ module.exports = {
       5: {
         plain: 'Run one command as yourself and once as the administrator, and see the difference.',
         do: [
-          { text: 'Ask "who am I?".', cmd: 'whoami', see: 'Your own user name:', out: 'student07' },
+          { text: 'Ask "who am I?".', cmd: 'whoami', see: 'Your own user name:', out: 'student01' },
           { text: 'Ask the same question with sudo in front.', cmd: 'sudo whoami', see: 'The administrator, whose name on Linux is always root:', out: 'root' },
         ],
         check: 'whoami said your user name, and sudo whoami said root.',
@@ -99,7 +99,7 @@ module.exports = {
           { text: 'Paste this one line on its own and press Enter. It asks "Your full name:": type your name (for example Thandi Nkosi) and press Enter. Git puts this name on every change you save. It then prints the name back so you can check it.', cmd: 'read -p "Your full name: " NAME && git config --global user.name "$NAME" && git config --global user.name', see: 'Your question, your answer, and the name printed back:', out: 'Your full name: Thandi Nkosi\nThandi Nkosi' },
           { text: 'Tell Git your e-mail address in the lab. Prints nothing.', cmd: 'git config --global user.email "$ME@$DOMAIN"' },
           { text: 'Let Git remember your password for today, so you type it only once. Prints nothing.', cmd: 'git config --global credential.helper "cache --timeout=36000"' },
-          { text: 'Go to your home folder and copy (clone) your team\'s code from Gitea. Git asks for a Username: type your studentNN and press Enter. Then a Password: type your password (from your logins file, cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type a password: that is normal, keep typing.', cmd: 'cd ~\ngit clone https://gitea.$DOMAIN/$TEAM/hello', see: 'Git asks who you are, then copies the code (your numbers may differ a little):', out: 'Cloning into \'hello\'...\nUsername for \'https://gitea.<lab domain>\': student07\nPassword for \'https://student07@gitea.<lab domain>\':\nremote: Enumerating objects: 31, done.\nremote: Counting objects: 100% (31/31), done.\nremote: Compressing objects: 100% (24/24), done.\nremote: Total 31 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)\nReceiving objects: 100% (31/31), 11.00 KiB | 11.00 MiB/s, done.\nResolving deltas: 100% (1/1), done.' },
+          { text: 'Go to your home folder and copy (clone) your team\'s code from Gitea. Git asks for a Username: type student01 and press Enter. Then a Password: type your password (from your logins file, cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type a password: that is normal, keep typing.', cmd: 'cd ~\ngit clone https://gitea.$DOMAIN/$TEAM/hello', see: 'Git asks who you are, then copies the code (your numbers may differ a little):', out: 'Cloning into \'hello\'...\nUsername for \'https://gitea.<lab domain>\': student01\nPassword for \'https://student01@gitea.<lab domain>\':\nremote: Enumerating objects: 31, done.\nremote: Counting objects: 100% (31/31), done.\nremote: Compressing objects: 100% (24/24), done.\nremote: Total 31 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)\nReceiving objects: 100% (31/31), 11.00 KiB | 11.00 MiB/s, done.\nResolving deltas: 100% (1/1), done.' },
           { text: 'Go into the copy and list what is inside.', cmd: 'cd hello\nls', see: 'The files and folders of the website, and your prompt now ends in ~/hello$:', out: 'Dockerfile  README.md  app  catalog-info.yaml  deploy  pyproject.toml  tests' },
         ],
         check: 'Your prompt ends in ~/hello$, and ls shows app, tests and Dockerfile among others.',
@@ -156,8 +156,8 @@ module.exports = {
       },
       1: {
         plain: 'Make your own private copy of the code (a branch) to work in, with your name on it.',
-        tryit: { text: 'git branch lists your branches, with a * next to the one you are on now. Paste it:', cmd: 'git branch', see: 'Your new branch, with the *, and main:', out: '* greeting-student07\n  main' },
-        check: 'Git said "Switched to a new branch \'greeting-studentNN\'" with your own user name.',
+        tryit: { text: 'git branch lists your branches, with a * next to the one you are on now. Paste it:', cmd: 'git branch', see: 'Your new branch, with the *, and main:', out: '* greeting-student01\n  main' },
+        check: 'Git said "Switched to a new branch \'greeting-student01\'" with your own user name.',
       },
       2: {
         plain: 'Change one sentence in the program: the greeting the website answers with.',
@@ -171,14 +171,14 @@ module.exports = {
         plain: 'Save your change in Git, with a short note that says what it does.',
         do: [
           { text: 'Tell Git which changes go into this save: all of them. Prints nothing.', cmd: 'git add -A' },
-          { text: 'Save it, with a note. The note should finish the sentence "This change will...".', cmd: 'git commit -m "Change the greeting for $TEAM"', see: 'Your branch, the save\'s short id (yours differs) and your note, then what changed:', out: '[greeting-student07 6514a43] Change the greeting for team03\n 1 file changed, 1 insertion(+), 1 deletion(-)' },
+          { text: 'Save it, with a note. The note should finish the sentence "This change will...".', cmd: 'git commit -m "Change the greeting for $TEAM"', see: 'Your branch, the save\'s short id (yours differs) and your note, then what changed:', out: '[greeting-student01 6514a43] Change the greeting for team01\n 1 file changed, 1 insertion(+), 1 deletion(-)' },
         ],
-        tryit: { text: 'git log shows the history of saves, newest first. Paste it:', cmd: 'git log --oneline -3', see: 'Your save at the top, with your note (your ids differ):', out: '6514a43 (HEAD -> greeting-student07) Change the greeting for team03\ne448d09 (origin/main, origin/HEAD, main) Initial commit' },
+        tryit: { text: 'git log shows the history of saves, newest first. Paste it:', cmd: 'git log --oneline -3', see: 'Your save at the top, with your note (your ids differ):', out: '6514a43 (HEAD -> greeting-student01) Change the greeting for team01\ne448d09 (origin/main, origin/HEAD, main) Initial commit' },
         check: 'Git printed one line with your branch name and your note, and "1 file changed".',
       },
       5: {
         plain: 'Upload your branch to Gitea, so your team can see it and review it.',
-        check: 'In Gitea, teamNN/hello → Branches lists greeting-studentNN.',
+        check: 'In Gitea, team01/hello → Branches lists greeting-student01.',
       },
     },
   },
@@ -194,8 +194,8 @@ module.exports = {
       0: {
         plain: 'Ask for your change to be accepted into main, and say why.',
         do: [
-          'In the terminal from Lab 1, find the line remote:   https://gitea.<lab domain>/teamNN/hello/pulls/new/greeting-studentNN. Hold Ctrl (on a Mac Cmd) and click the link in the terminal: it opens in a new browser tab.',
-          'Gitea shows your change and a form under it. The title is already your commit message ("Change the greeting for teamNN"): keep it or make it clearer. It should say what changes.',
+          'In the terminal from Lab 1, find the line remote:   https://gitea.<lab domain>/team01/hello/pulls/new/greeting-student01. Hold Ctrl (on a Mac Cmd) and click the link in the terminal: it opens in a new browser tab.',
+          'Gitea shows your change and a form under it. The title is already your commit message ("Change the greeting for team01"): keep it or make it clearer. It should say what changes.',
           { text: 'In the box under the title, write two lines on why: for example "Shows our team\'s name on the dev page, so we can see our own release."', shot: { src: 'gitea-02-new-pr-form.png', caption: 'The new pull request form: at the top, which branch goes into which (pull from your branch, merge into main); the title, already filled in; and the box where you write why. Your names, team and numbers are your own.' } },
           { text: 'Click Create Pull Request (the blue button under the form).', shot: { src: 'gitea-03-pr-created.png', caption: 'Your pull request is created: its number (#1), your description, your commit, and at the bottom the checks starting. The yellow dot means "still running". Your names, team and numbers are your own.' } },
         ],
@@ -205,7 +205,7 @@ module.exports = {
         plain: 'As the reviewer, in a private window, read your change line by line and leave a comment.',
         do: [
           'Open a private window (Edge or Chrome: Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a Mac Cmd+Shift+P), go to https://gitea.<lab domain>, click Sign In and sign in as reviewer with its password from cat /etc/pelab/logins.md.',
-          'As the reviewer, open your pull request (teamNN/hello → Pull Requests → yours) and click the Files Changed tab.',
+          'As the reviewer, open your pull request (team01/hello → Pull Requests → yours) and click the Files Changed tab.',
           'The old line is shown in red with -, the new line in green with +.',
           { text: 'Move the mouse over the green line: a blue + appears at its left. Click it, write a short comment (a question or a suggestion) and click Add single comment.', shot: { src: 'gitea-04-line-comment.png', caption: 'Files Changed, seen by the reviewer: the old line 22 in red, the new one in green, and a comment being written under the green line. Add single comment posts it. Your names, team and numbers are your own.' } },
         ],
@@ -225,14 +225,14 @@ module.exports = {
         do: [
           { text: 'On the Conversation tab, click the small arrow to the right of the merge button and choose Create squash commit.', shot: { src: 'gitea-07-merge-squash.png', caption: 'Ready to merge: the reviewer\'s approval, "All checks were successful", and the merge button\'s menu open. Choose Create squash commit. Your names, team and numbers are your own.' } },
           { text: 'Click the merge button, which now reads Create squash commit. A small form opens: the title of the commit (your pull request\'s title with its number, for example (#1)) and a message that already says who reviewed it (Reviewed-by: ...).', shot: { src: 'gitea-08-squash-form.png', caption: 'The squash commit form: the title with the pull request number (#1), a message that records who reviewed it (Reviewed-by), and Delete Branch ticked. In the lab the address in the message is your lab\'s Gitea. Your names, team and numbers are your own.' } },
-          'Tick Delete Branch "greeting-studentNN" (your branch has done its job) and click Create squash commit.',
+          'Tick Delete Branch "greeting-student01" (your branch has done its job) and click Create squash commit.',
           { text: 'In the workspace terminal, go into your copy and switch to main.', cmd: 'cd ~/hello\ngit switch main', see: 'Git switches back to main:', out: 'Switched to branch \'main\'\nYour branch is up to date with \'origin/main\'.' },
-          { text: 'Fetch the merge from Gitea.', cmd: 'git pull', see: 'Git fetches main and updates your copy (your ids differ):', out: 'From https://gitea.<lab domain>/team03/hello\n   e448d09..b70e47f  main       -> origin/main\nUpdating e448d09..b70e47f\nFast-forward\n app/main.py | 2 +-\n 1 file changed, 1 insertion(+), 1 deletion(-)' },
-          { text: 'Show the last three saves (commits) in the history, one line each.', cmd: 'git log --oneline -3', see: 'Your change at the top, as one commit with the pull request number:', out: 'b70e47f (HEAD -> main, origin/main, origin/HEAD) Change the greeting for team03 (#1)\ne448d09 Initial commit' },
+          { text: 'Fetch the merge from Gitea.', cmd: 'git pull', see: 'Git fetches main and updates your copy (your ids differ):', out: 'From https://gitea.<lab domain>/team01/hello\n   e448d09..b70e47f  main       -> origin/main\nUpdating e448d09..b70e47f\nFast-forward\n app/main.py | 2 +-\n 1 file changed, 1 insertion(+), 1 deletion(-)' },
+          { text: 'Show the last three saves (commits) in the history, one line each.', cmd: 'git log --oneline -3', see: 'Your change at the top, as one commit with the pull request number:', out: 'b70e47f (HEAD -> main, origin/main, origin/HEAD) Change the greeting for team01 (#1)\ne448d09 Initial commit' },
         ],
         check: 'git log shows your change at the top of main, with (#1) or your pull request\'s number.',
       },
-      4: { plain: 'Watch the platform build your change and put it live in dev, without anyone touching a server.', check: 'Argo CD shows teamNN-hello-dev as Synced and Healthy.' },
+      4: { plain: 'Watch the platform build your change and put it live in dev, without anyone touching a server.', check: 'Argo CD shows team01-hello-dev as Synced and Healthy.' },
       5: { plain: 'Visit dev and see your own greeting answering there.', check: 'The dev page shows DEV in big red letters and your greeting.' },
     },
   },
@@ -250,14 +250,14 @@ module.exports = {
           { text: 'Go to main and make sure it is up to date.', cmd: 'cd ~/hello\ngit switch main && git pull', see: 'Main, up to date:', out: 'Already on \'main\'\nYour branch is up to date with \'origin/main\'.\nAlready up to date.' },
           { text: 'Add a line at the end of README.md. Prints nothing.', cmd: 'echo "Direct edit" >> README.md' },
           { text: 'Save it in Git, directly on main.', cmd: 'git add -A\ngit commit -m "Direct edit"', see: 'Git saves it on your copy of main (this part works, because it is only on your workspace):', out: '[main e34ccb5] Direct edit\n 1 file changed, 1 insertion(+)' },
-          { text: 'Now try to upload main to Gitea.', cmd: 'git push', see: 'Refused. Look for the line with "Not allowed":', out: 'remote:\nremote: error:\nremote: error: Not allowed to push to protected branch main\nremote: error:\nTo https://gitea.<lab domain>/team03/hello\n ! [remote rejected] main -> main (pre-receive hook declined)\nerror: failed to push some refs to \'https://gitea.<lab domain>/team03/hello\'' },
+          { text: 'Now try to upload main to Gitea.', cmd: 'git push', see: 'Refused. Look for the line with "Not allowed":', out: 'remote:\nremote: error:\nremote: error: Not allowed to push to protected branch main\nremote: error:\nTo https://gitea.<lab domain>/team01/hello\n ! [remote rejected] main -> main (pre-receive hook declined)\nerror: failed to push some refs to \'https://gitea.<lab domain>/team01/hello\'' },
         ],
         check: 'git push ended with "Not allowed to push to protected branch main" and "failed to push".',
       },
       1: {
         plain: 'Throw away the change Gitea refused, so your copy of main matches Gitea again.',
         do: [
-          { text: 'Make your main exactly like Gitea\'s, throwing away the refused save.', cmd: 'git reset --hard origin/main', see: 'Git names the save it went back to:', out: 'HEAD is now at b70e47f Change the greeting for team03 (#1)' },
+          { text: 'Make your main exactly like Gitea\'s, throwing away the refused save.', cmd: 'git reset --hard origin/main', see: 'Git names the save it went back to:', out: 'HEAD is now at b70e47f Change the greeting for team01 (#1)' },
           { text: 'Check.', cmd: 'git status', see: 'Clean, and in step with Gitea:', out: 'On branch main\nYour branch is up to date with \'origin/main\'.\n\nnothing to commit, working tree clean' },
         ],
         check: 'git status says "nothing to commit, working tree clean".',
@@ -291,7 +291,7 @@ module.exports = {
     ],
     end: 'Both pull requests merged, and one greeting in main that you chose.',
     steps: {
-      0: { plain: 'Change the same line (the greeting) to something different on two branches, A and B, and open a pull request for each.', check: 'teamNN/hello → Pull Requests shows two pull requests, A\'s and B\'s.' },
+      0: { plain: 'Change the same line (the greeting) to something different on two branches, A and B, and open a pull request for each.', check: 'team01/hello → Pull Requests shows two pull requests, A\'s and B\'s.' },
       1: {
         plain: 'Merge A\'s pull request first. B\'s pull request then no longer fits.',
         do: [
@@ -311,7 +311,7 @@ module.exports = {
           'Reload the page if it was already open: the message above the merge button no longer says "This pull request has changes conflicting with the target branch". The checks start again (yellow dot).',
           'Approve as the reviewer: open a private window (Edge or Chrome: Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a Mac Cmd+Shift+P), go to https://gitea.<lab domain>, click Sign In and sign in as reviewer. Open B\'s pull request, click Files Changed, then Review (top right) → Approve. Close the private window.',
           'Back in your own window, reload the pull request. When it shows the approval and "All checks were successful", click the small arrow next to the merge button, choose Create squash commit, and confirm.',
-          'A few minutes later, reload your dev tab (https://hello-teamNN-dev.<lab domain>/): the greeting you chose in step 4.',
+          'A few minutes later, reload your dev tab (https://hello-team01-dev.<lab domain>/): the greeting you chose in step 4.',
         ],
         check: 'B\'s pull request is merged, and the dev page shows the greeting you kept.',
       },

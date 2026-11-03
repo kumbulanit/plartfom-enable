@@ -63,7 +63,7 @@ Each day has concepts and a live demo, then hands-on labs, then a short quiz. Wo
 
 ## The code behind the labs
 
-In the course repository (`sarb/labs`), each day's folder holds its instructions (`README.md`) and the code the platform puts in Gitea when the lab is built. Files ending in `.j2` are filled in for the lab at that point (its domain, its teams). In the lab, open the Gitea repositories instead.
+In the course repository (`plartfom-enable/labs`), each day's folder holds its instructions (`README.md`) and the code the platform puts in Gitea when the lab is built. Files ending in `.j2` are filled in for the lab at that point (its domain, its teams). In the lab, open the Gitea repositories instead.
 
 | Day | Folder | In the lab |
 | --- | --- | --- |

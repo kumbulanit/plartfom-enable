@@ -29,7 +29,7 @@ Deck: `Day1-Platform-engineering-and-Linux-basics.pptx`. Delegates follow the ha
 
 ## What you do yourself
 
-Each delegate built their own VM, and its passwords are on it. `ansible pelab ...` commands run from your machine, in `prelab-setup/`, after `export ANSIBLE_INVENTORY=inventory/all-vms.yml` (pelab05 instead of pelab reaches one VM). `ansible-playbook ...` commands run on the VM they are for, in `~/sarb/prelab-setup`, with `-K`. Without SSH to the VMs, the delegate runs the command on their VM with `sudo` in front.
+Each delegate built their own VM, and its passwords are on it. `ansible pelab ...` commands run from your machine, in `prelab-setup/`, after `export ANSIBLE_INVENTORY=inventory/all-vms.yml` (pelab05 instead of pelab reaches one VM). `ansible-playbook ...` commands run on the VM they are for, in `~/plartfom-enable/prelab-setup`, with `-K`. Without SSH to the VMs, the delegate runs the command on their VM with `sudo` in front.
 
 **09:00, while everyone signs in.** If a workspace does not load, restart it on that delegate's VM (here pelab05). If a password is refused, check it is typed exactly as in the logins file (it is case-sensitive: Lab-xxxx-xxxx-1234). *(Your machine, one VM)*
 

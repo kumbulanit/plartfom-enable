@@ -319,8 +319,8 @@ server. Any of these works:
    token with read access when git asks for a password.
 
    ```bash
-   git clone <repository URL> sarb
-   cd sarb/prelab-setup
+   git clone <repository URL> plartfom-enable
+   cd plartfom-enable/prelab-setup
    ansible-galaxy collection install -r requirements.yml
    ```
 

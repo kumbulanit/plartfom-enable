@@ -232,7 +232,7 @@ module.exports = {
       boldFirst: true,
       rows: [
         ['/', 'The root: the top of the tree; every other folder is inside it', 'Every path starts here'],
-        ['/home/studentNN  (~)', 'Your own folder: your files and your copy of the code', 'All week: ~/hello, ~/day1'],
+        ['/home/student01  (~)', 'Your own folder: your files and your copy of the code', 'All week: ~/hello, ~/day1'],
         ['/etc', 'Settings (configuration files) for the system and its programs', 'Reading how a service is set up'],
         ['/var/log', 'Log files written by programs', 'Day 1 Lab 2: reading a log'],
         ['/usr/bin', 'The programs themselves: git, python3, curl...', 'When you type a command'],
@@ -305,7 +305,7 @@ module.exports = {
         ['Health checks', 'An address that says "I am alive", for the platform to ask', '/healthz answers ok'],
         ['Metrics', 'Numbers the service publishes about itself', '/metrics: requests, version, uptime'],
         ['Disposable', 'Starts fast and can be stopped and replaced at any time', 'Starts in a second; Ctrl+C stops it cleanly'],
-        ['One codebase', 'One repository, many deployments', 'teamNN/hello runs as dev, staging and prod'],
+        ['One codebase', 'One repository, many deployments', 'team01/hello runs as dev, staging and prod'],
       ],
       notes: 'This is why Lab 3 changes environment variables and not code. On Day 4 the same image runs with three sets of settings; on Day 6 Kubernetes asks /healthz and Grafana reads /metrics. The twelve-factor app was published by engineers at Heroku in 2011 and is still the common reference.',
     },

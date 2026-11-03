@@ -73,7 +73,7 @@ module.exports = {
     ],
     actions: [
       { when: 'Lab 2', what: 'Each merge runs the pipeline twice (pull request, then main), on the VM\'s one runner: a few minutes of waiting is normal. Use the wait for slide 10. If one pipeline waits more than 10 minutes, check that VM\'s runner (here pelab05).', where: 'Your machine, one VM', run: 'ansible pelab05 -b -a "lxc exec runner01 -- systemctl status pelab-gitea-runner --no-pager"' },
-      { when: 'Lab 3', what: 'Every delegate must see the three refusals. If a push straight to main succeeds, stop: the protection is missing on that VM. Put it back: on that VM, in ~/sarb/prelab-setup (the delegate types it, or you over SSH).', where: 'On that VM', run: 'ansible-playbook site.yml --tags golden_path -K' },
+      { when: 'Lab 3', what: 'Every delegate must see the three refusals. If a push straight to main succeeds, stop: the protection is missing on that VM. Put it back: on that VM, in ~/plartfom-enable/prelab-setup (the delegate types it, or you over SSH).', where: 'On that VM', run: 'ansible-playbook site.yml --tags golden_path -K' },
       { when: 'Lab 5', what: 'Make sure every delegate saved their charter (~/charter/charter.md): they use it in the Day 6 capstone.' },
       BACKUP,
     ],

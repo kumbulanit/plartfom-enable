@@ -116,10 +116,10 @@ resource "local_file" "note" {
 
 **Before you start:**
 
-1. Your workspace is open in the browser (https://studentNN.<lab domain>, signed in with your password).
-2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student07@student07:~$
+1. Your workspace is open in the browser (https://student01.<lab domain>, signed in with your password).
+2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
-4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type your studentNN and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
+4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
 5. Nothing in this lab touches anything shared. You can make mistakes safely: the worst case is that you start the lab again.
 
 #### Step 1. Write the code
@@ -515,10 +515,10 @@ module "team01" {
 
 **Before you start:**
 
-1. Your workspace is open in the browser (https://studentNN.<lab domain>, signed in with your password).
-2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student07@student07:~$
+1. Your workspace is open in the browser (https://student01.<lab domain>, signed in with your password).
+2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
-4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type your studentNN and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
+4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
 5. Have your logins at hand (cat /etc/pelab/logins.md): you need your password, and for step 4 the platform-approver login.
 
 #### Step 1. Copy the environments repository and make a branch
@@ -806,7 +806,7 @@ requests.memory         0     2Gi
 
 - The plan says "Invalid value for variable": the message says what to fix (the team name, the environments or the size).
 - The plan pipeline fails before the plan with an access error: tell the instructor (the read-only credentials).
-- Merge stays grey: only the platform team can approve this repository, as pelab-admin (the instructor) or platform-approver (its password is in cat /etc/pelab/logins.md). An approval as studentNN does not count.
+- Merge stays grey: only the platform team can approve this repository, as pelab-admin (the instructor) or platform-approver (its password is in cat /etc/pelab/logins.md). An approval as student01 does not count.
 - No platform/apply status after five minutes: tell the instructor (the platform applier on the lab host).
 
 ### Who may change the cluster

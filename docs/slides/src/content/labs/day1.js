@@ -132,8 +132,8 @@ module.exports = {
     words: [
       ['Workspace', 'Your own small Linux computer for the week, running on the lab server. You use it in the browser: an editor at the top, a terminal at the bottom.'],
       ['Terminal', 'The window where you type commands and the computer answers in text.'],
-      ['Prompt', 'The text before the cursor, for example student07@student07:~/day1$. It says who you are (student07), on which computer (student07) and in which folder (~/day1). The $ means "ready for a command".'],
-      ['Home folder (~)', 'Your own folder, /home/studentNN. ~ is its short name.'],
+      ['Prompt', 'The text before the cursor, for example student01@student01:~/day1$. It says who you are (student01), on which computer (student01) and in which folder (~/day1). The $ means "ready for a command".'],
+      ['Home folder (~)', 'Your own folder, /home/student01. ~ is its short name.'],
       ['Permission', 'Who may read, change or run a file.'],
       ['Process', 'A program that is running right now.'],
       ['Service', 'A program the system starts and keeps running for you, such as Docker.'],
@@ -141,8 +141,8 @@ module.exports = {
       ['sudo', '"Do this as the administrator", for one command.'],
     ],
     start: [
-      'Open your workspace at https://studentNN.<lab domain> (your user name and password are in your logins file, /etc/pelab/logins.md on your VM: your instructor shows you how to open it). The first time, the browser shows a sign-in page: type the password and press Enter.',
-      'Open a terminal: menu ☰ (top left) → Terminal → New Terminal. It appears at the bottom of the window, with a prompt like student07@student07:~$',
+      'Open your workspace at https://student01.<lab domain> (your user name and password are in your logins file, /etc/pelab/logins.md on your VM: your instructor shows you how to open it). The first time, the browser shows a sign-in page: type the password and press Enter.',
+      'Open a terminal: menu ☰ (top left) → Terminal → New Terminal. It appears at the bottom of the window, with a prompt like student01@student01:~$',
       'To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter.',
       'Do not worry about breaking anything: the workspace is yours alone, and the instructor can reset it.',
     ],
@@ -159,7 +159,7 @@ module.exports = {
           ['ls -la', 'list the folder\'s contents (ls) as a long list with details (-l), including hidden entries (-a).'],
         ],
         see: 'Three lines: the folder itself (.), the folder above it (..), and your file:',
-        out: 'total 4\ndrwxr-xr-x 2 student07 student07 4096 Nov  2 09:41 .\ndrwxr-x--- 9 student07 student07 4096 Nov  2 09:41 ..\n-rw-r--r-- 1 student07 student07    6 Nov  2 09:41 notes.txt',
+        out: 'total 4\ndrwxr-xr-x 2 student01 student01 4096 Nov  2 09:41 .\ndrwxr-x--- 9 student01 student01 4096 Nov  2 09:41 ..\n-rw-r--r-- 1 student01 student01    6 Nov  2 09:41 notes.txt',
         read: [
           'Read the notes.txt line from left to right: its permissions (-rw-r--r--), its owner (you) and group (your own group, with the same name), its size (6 bytes: the five letters of hello and an invisible line break), and when it was last changed.',
           'The first character says what it is: - for a file, d for a folder (directory).',
@@ -174,8 +174,8 @@ module.exports = {
           explain: [
             ['echo "I am $ME, in $TEAM, on $DOMAIN"', 'print a sentence. $ME, $TEAM and $DOMAIN are filled in by the workspace with your user name, your team and the lab domain.'],
           ],
-          see: 'Your own user name and team (here student07 in team03):',
-          out: 'I am student07, in team03, on <lab domain>',
+          see: 'Your own user name and team (here student01 in team01):',
+          out: 'I am student01, in team01, on <lab domain>',
           read: ['Many commands in this handbook use $ME, $TEAM and $DOMAIN, so you can paste them exactly as they are: the workspace fills in your own values.'],
         },
       },
@@ -193,7 +193,7 @@ module.exports = {
           ['ls -la notes.txt', 'show the details of that one file again.'],
         ],
         see: 'The permissions are now -rw-------:',
-        out: '-rw------- 1 student07 student07 6 Nov  2 09:41 notes.txt',
+        out: '-rw------- 1 student01 student01 6 Nov  2 09:41 notes.txt',
         read: [
           'rw- for you, --- for your group, --- for everyone else: now only you can read the file.',
           'chmod 644 would give the original back: read and write for you, read for everyone else.',
@@ -215,7 +215,7 @@ module.exports = {
           ['top', 'show the processes live, updated every few seconds. q leaves it.'],
         ],
         see: 'A table of processes, something like this. Yours lists other programs too, such as code-server (your editor in the browser) and dockerd (Docker):',
-        out: 'USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\nroot           1  0.0  0.1  22048 12872 ?        Ss   08:01   0:02 /sbin/init\nroot         312  0.1  0.9 1906540 74136 ?       Ssl  08:01   0:09 /usr/bin/dockerd ...\nstudent07    401  1.2  2.8 1196064 230412 ?      Ssl  08:01   1:02 /usr/lib/code-server/lib/node ...\n...',
+        out: 'USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\nroot           1  0.0  0.1  22048 12872 ?        Ss   08:01   0:02 /sbin/init\nroot         312  0.1  0.9 1906540 74136 ?       Ssl  08:01   0:09 /usr/bin/dockerd ...\nstudent01    401  1.2  2.8 1196064 230412 ?      Ssl  08:01   1:02 /usr/lib/code-server/lib/node ...\n...',
         read: [
           'USER is who runs it, PID its number, %CPU and %MEM how much of the processor and memory it uses right now, COMMAND what it is.',
           'In top, the top lines summarise the whole machine: how many tasks, how busy the processors are, how much memory is used and free.',
@@ -236,7 +236,7 @@ module.exports = {
           ['| tail', 'keep only the last ten lines: the most recent.'],
         ],
         see: 'Something like this: the service is active (running), shown in green, then the last ten lines it wrote to its log:',
-        out: '● docker.service - Docker Application Container Engine\n     Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; preset: enabled)\n     Active: active (running) since Mon 2026-11-02 08:01:12 UTC; 1h 40min ago\n...\nNov 02 08:01:12 student07 dockerd[312]: time="2026-11-02T08:01:12Z" level=info msg="API listen on /run/docker.sock"',
+        out: '● docker.service - Docker Application Container Engine\n     Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; preset: enabled)\n     Active: active (running) since Mon 2026-11-02 08:01:12 UTC; 1h 40min ago\n...\nNov 02 08:01:12 student01 dockerd[312]: time="2026-11-02T08:01:12Z" level=info msg="API listen on /run/docker.sock"',
         read: [
           'Loaded ... enabled: the system starts Docker by itself at every boot.',
           'Active: active (running): it is running now, and since when.',
@@ -275,13 +275,13 @@ module.exports = {
           ['sudo whoami', 'the same question, but run as the administrator (sudo: "do this as the administrator"). The administrator account on Linux is called root.'],
         ],
         see: 'First your own user name, then root:',
-        out: 'student07\nroot',
+        out: 'student01\nroot',
         read: [
           'The same command answers differently with sudo in front: for that one command you were the administrator, root. The next command is you again.',
           'Every course tool you use this week (git, kubectl, tofu, docker, python) was installed this way, with sudo, by the platform team.',
         ],
         ifnot: [
-          ['sudo asks for a password', 'type your studentNN password, from your logins file (nothing appears while you type).'],
+          ['sudo asks for a password', 'type the student01 password, from your logins file (nothing appears while you type).'],
         ],
       },
     ],
@@ -297,7 +297,7 @@ module.exports = {
       'Why doing all of this by hand does not scale.',
     ],
     words: [
-      ['Repository (repo)', 'A folder of code with its whole history, kept in Gitea. Your team\'s service lives in the repository teamNN/hello.'],
+      ['Repository (repo)', 'A folder of code with its whole history, kept in Gitea. Your service lives in the repository team01/hello: on your own VM you are student01, in team01.'],
       ['Clone', 'Copy a repository from Gitea to your workspace.'],
       ['Port', 'A numbered door on a computer that a program listens on. hello listens on 8080 unless told otherwise.'],
       ['localhost', '"This computer": your own workspace.'],
@@ -317,13 +317,13 @@ module.exports = {
         do: [
           { text: 'Paste this one line on its own and press Enter. It asks "Your full name:": type your name (for example Thandi Nkosi) and press Enter. Git puts this name on every change you save.', cmd: 'read -p "Your full name: " NAME && git config --global user.name "$NAME" && git config --global user.name' },
           'Git answers with the name it saved. Now paste the box below and press Enter.',
-          'Git asks for a Username: type your studentNN and press Enter. Then for a Password: type your password (from your logins file) and press Enter. Nothing appears while you type the password: that is normal.',
+          'Git asks for a Username: type student01 and press Enter. Then for a Password: type your password (from your logins file) and press Enter. Nothing appears while you type the password: that is normal.',
         ],
         run: 'git config --global user.email "$ME@$DOMAIN"\ngit config --global credential.helper "cache --timeout=36000"\ncd ~\ngit clone https://gitea.$DOMAIN/$TEAM/hello\ncd hello\nls',
         explain: [
           ['read -p "Your full name: " NAME', 'ask you a question (-p: the prompt) and keep your answer in NAME.'],
           ['git config --global user.name "$NAME"', 'tell Git your name, for every repository (--global). The last part, git config --global user.name, prints it back so you can check it.'],
-          ['git config --global user.email "$ME@$DOMAIN"', 'tell Git your e-mail address in the lab, for example student07@<lab domain>.'],
+          ['git config --global user.email "$ME@$DOMAIN"', 'tell Git your e-mail address in the lab, for example student01@<lab domain>.'],
           ['git config --global credential.helper "cache --timeout=36000"', 'make Git remember your password for 10 hours (36,000 seconds), so you type it once a day.'],
           ['cd ~', 'go to your home folder.'],
           ['git clone https://gitea.$DOMAIN/$TEAM/hello', 'copy your team\'s repository hello, with its whole history, into a new folder called hello.'],
@@ -331,7 +331,7 @@ module.exports = {
           ['ls', 'list what is inside.'],
         ],
         see: 'First the name you typed, printed back by Git. Then the box: Git asks who you are, copies the repository (the numbers may differ a little), and ls lists the files and folders of the service:',
-        out: 'Your full name: Thandi Nkosi\nThandi Nkosi\n\nCloning into \'hello\'...\nUsername for \'https://gitea.<lab domain>\': student07\nPassword for \'https://student07@gitea.<lab domain>\':\nremote: Enumerating objects: 31, done.\nremote: Counting objects: 100% (31/31), done.\nremote: Compressing objects: 100% (24/24), done.\nremote: Total 31 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)\nReceiving objects: 100% (31/31), 11.00 KiB | 11.00 MiB/s, done.\nResolving deltas: 100% (1/1), done.\nDockerfile  README.md  app  catalog-info.yaml  deploy  pyproject.toml  tests',
+        out: 'Your full name: Thandi Nkosi\nThandi Nkosi\n\nCloning into \'hello\'...\nUsername for \'https://gitea.<lab domain>\': student01\nPassword for \'https://student01@gitea.<lab domain>\':\nremote: Enumerating objects: 31, done.\nremote: Counting objects: 100% (31/31), done.\nremote: Compressing objects: 100% (24/24), done.\nremote: Total 31 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)\nReceiving objects: 100% (31/31), 11.00 KiB | 11.00 MiB/s, done.\nResolving deltas: 100% (1/1), done.\nDockerfile  README.md  app  catalog-info.yaml  deploy  pyproject.toml  tests',
         read: [
           'app: the program itself (app/main.py, about 100 lines of Python).',
           'tests: the automatic checks for it, used from Day 2.',

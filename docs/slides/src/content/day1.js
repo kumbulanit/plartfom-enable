@@ -281,7 +281,7 @@ module.exports = [
       'Everything you need is already inside it: Git, Docker, Python, OpenTofu, kubectl and the security scanners. Your files survive between days.',
     ],
     lab: [
-      `Open https://studentNN.${DOMAIN} with the password from your logins file (/etc/pelab/logins.md on your VM).`,
+      `Open https://student01.${DOMAIN} with the password from your logins file (/etc/pelab/logins.md on your VM).`,
       'Open a terminal: Menu, Terminal, New Terminal (or Ctrl + `).',
       'The prompt shows your user and the current folder.',
       'If the page will not load, tell the lab assistant; a spare workspace is ready.',
@@ -350,7 +350,7 @@ module.exports = [
     practises: ["How a web service works", "One request through hello", "Build once, configure outside: how a cloud-native app behaves", "One code, three environments"],
     debrief: "You sent real requests and read real answers (status codes, a body, a log line and a count), then ran the same code as \"staging\" by changing only its settings. Every manual step you counted is one the platform takes over: Git on Day 2, environments on Day 3, the image on Day 4, the pipeline on Day 5 and the release on Day 6.",
     steps: [
-      { do: `Clone your team's repository: git clone https://gitea.${DOMAIN}/teamNN/hello && cd hello`, expect: 'A hello folder with app/, tests/, deploy/ and a Dockerfile.' },
+      { do: `Clone your team's repository: git clone https://gitea.${DOMAIN}/team01/hello && cd hello`, expect: 'A hello folder with app/, tests/, deploy/ and a Dockerfile.' },
       { do: 'Start it: python3 -m app.main', expect: 'A JSON log line saying the server started on port 8080.' },
       { do: 'In a second terminal: curl -s localhost:8080/ and curl -i localhost:8080/healthz', expect: '"environment": "local" in the first answer; HTTP 200 ok in the second.' },
       { do: 'Stop it (Ctrl + C) and start it as staging: APP_ENV=staging GREETING="Hello from staging" PORT=8081 python3 -m app.main', expect: 'curl -s localhost:8081/ now says "environment": "staging".' },

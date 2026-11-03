@@ -16,7 +16,7 @@ ansible-playbook safety-net.yml -e safety_net=off    # switch off
 ansible-playbook safety-net.yml                      # which one is deploying now
 ```
 
-Run these on the delegate's VM, in `~/sarb/prelab-setup`, with `-K` for the sudo
+Run these on the delegate's VM, in `~/plartfom-enable/prelab-setup`, with `-K` for the sudo
 password. The same switch is also `sudo pelab-safety-net on`, `off` or `status`
 on the VM, or for every VM at once from your machine (with
 `ANSIBLE_INVENTORY=inventory/all-vms.yml`): `ansible pelab -b -a

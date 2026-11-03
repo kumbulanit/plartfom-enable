@@ -27,7 +27,7 @@ Deck: `Day6-Deploy-observe-and-the-capstone.pptx`. Delegates follow the handbook
 
 ## What you do yourself
 
-Each delegate built their own VM, and its passwords are on it. `ansible pelab ...` commands run from your machine, in `prelab-setup/`, after `export ANSIBLE_INVENTORY=inventory/all-vms.yml` (pelab05 instead of pelab reaches one VM). `ansible-playbook ...` commands run on the VM they are for, in `~/sarb/prelab-setup`, with `-K`. Without SSH to the VMs, the delegate runs the command on their VM with `sudo` in front.
+Each delegate built their own VM, and its passwords are on it. `ansible pelab ...` commands run from your machine, in `prelab-setup/`, after `export ANSIBLE_INVENTORY=inventory/all-vms.yml` (pelab05 instead of pelab reaches one VM). `ansible-playbook ...` commands run on the VM they are for, in `~/plartfom-enable/prelab-setup`, with `-K`. Without SSH to the VMs, the delegate runs the command on their VM with `sudo` in front.
 
 **Lab 1.** Each delegate promotes hello twice: staging (one copy), then prod (two copies). The tag must be an image that exists in Harbor; a wrong tag shows as an image pull error.
 

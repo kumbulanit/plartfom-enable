@@ -231,7 +231,7 @@ Pushed harbor.<lab domain>/team03/hello:b70e47f7a1c2.... Argo CD deploys it to d
 
 **If you are stuck**
 
-- Harbor shows a sign-in page: sign in as studentNN with your lab password.
+- Harbor shows a sign-in page: sign in as student01 with your lab password.
 - No SBOM yet: Harbor makes it shortly after the image is pushed. Refresh after a minute.
 
 ## Lab 2: break it on purpose
@@ -254,10 +254,10 @@ Pushed harbor.<lab domain>/team03/hello:b70e47f7a1c2.... Argo CD deploys it to d
 
 **Before you start:**
 
-1. Your workspace is open in the browser (https://studentNN.<lab domain>, signed in with your password).
-2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student07@student07:~$
+1. Your workspace is open in the browser (https://student01.<lab domain>, signed in with your password).
+2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
-4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type your studentNN and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
+4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
 5. Your copy of hello in ~/hello.
 6. After step 1 you open a pull request; keep its page open in the browser. Every push in this lab shows a new pipeline result there, at the bottom of the Conversation tab.
 
@@ -558,10 +558,10 @@ spec:
 
 **Before you start:**
 
-1. Your workspace is open in the browser (https://studentNN.<lab domain>, signed in with your password).
-2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student07@student07:~$
+1. Your workspace is open in the browser (https://student01.<lab domain>, signed in with your password).
+2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
-4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type your studentNN and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
+4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
 5. kubectl already points at your team's dev namespace (try kubectl get pods).
 
 #### Step 1. Get the guardrails repository and a copy of the bad example
@@ -721,7 +721,7 @@ rm ~/shortcut.yaml
 
 **If you are stuck**
 
-- Error from server (Forbidden) without a policy name: check the namespace is your team's dev namespace (teamNN-dev).
+- Error from server (Forbidden) without a policy name: check the namespace is your team's dev namespace (team01-dev).
 - Accepted too early? Check you changed team01 to your team: the rules only apply in team namespaces.
 
 ### Lab 4: test a policy like code, with the Kyverno CLI
@@ -922,10 +922,10 @@ The brief asks for exactly this: every exception must record scope, rationale, a
 
 **Before you start:**
 
-1. Your workspace is open in the browser (https://studentNN.<lab domain>, signed in with your password).
-2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student07@student07:~$
+1. Your workspace is open in the browser (https://student01.<lab domain>, signed in with your password).
+2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
-4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type your studentNN and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
+4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
 5. Your copy of platform/policies (~/policies).
 
 #### Step 1. Try the status page

@@ -43,12 +43,12 @@ The instructor gives you the repository address.
 
 ```bash
 sudo apt update && sudo apt install -y git
-git clone <repository address> ~/sarb
+git clone <repository address> ~/plartfom-enable
 ```
 
 `sudo` asks for your password on the VM.
 
-*You should see:* `Cloning into '/home/<you>/sarb'...` and no error.
+*You should see:* `Cloning into '/home/<you>/plartfom-enable'...` and no error.
 
 ## Step 3. Install the prerequisites
 
@@ -56,7 +56,7 @@ One script installs everything the build needs: pipx, git, tmux, Ansible (with
 passlib and bcrypt) and Ansible's collections. You can run it again safely.
 
 ```bash
-bash ~/sarb/prelab-setup/install-prerequisites.sh
+bash ~/plartfom-enable/prelab-setup/install-prerequisites.sh
 ```
 
 *You should see* at the end: `All prerequisites are installed.` Then **close the
@@ -79,7 +79,7 @@ pipx ensurepath
 Close the terminal and open a new one, then:
 
 ```bash
-cd ~/sarb/prelab-setup
+cd ~/plartfom-enable/prelab-setup
 ansible-galaxy collection install -r requirements.yml
 ```
 
@@ -92,14 +92,14 @@ Start `tmux` first. If your connection drops, the build keeps running, and
 
 ```bash
 tmux
-cd ~/sarb/prelab-setup
+cd ~/plartfom-enable/prelab-setup
 ansible-playbook site.yml -K
 ```
 
 `-K` makes Ansible ask for your sudo password once (`BECOME password:`). Type
 the password you use for `sudo`.
 
-*Or, in one command:* `bash ~/sarb/prelab-setup/install-prerequisites.sh --build`
+*Or, in one command:* `bash ~/plartfom-enable/prelab-setup/install-prerequisites.sh --build`
 starts tmux and the build for you (`tmux attach -t build` brings it back after a
 dropped connection).
 
@@ -130,7 +130,7 @@ web address, the workspace and runner, Gitea, Harbor, Argo CD, the guardrails
 and the hello app. It changes nothing.
 
 ```bash
-bash ~/sarb/prelab-setup/check-lab.sh
+bash ~/plartfom-enable/prelab-setup/check-lab.sh
 ```
 
 *You should see* a line per check (PASS, WARN or FAIL) and at the end
@@ -159,7 +159,7 @@ pipelines), both `RUNNING`.
 ## Step 6. Trust your lab's certificate in the browser
 
 Your lab made its own certificate, so the browser on your VM needs to trust it
-once. The file is `~/sarb/prelab-setup/files/tls/ca.crt`.
+once. The file is `~/plartfom-enable/prelab-setup/files/tls/ca.crt`.
 
 - **Firefox:** Settings → Privacy & Security → Certificates → View Certificates
   → Authorities → Import, choose the file, tick "Trust this CA to identify
@@ -168,7 +168,7 @@ once. The file is `~/sarb/prelab-setup/files/tls/ca.crt`.
 
   ```bash
   sudo apt install -y libnss3-tools
-  certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n pelab-ca -i ~/sarb/prelab-setup/files/tls/ca.crt
+  certutil -d sql:$HOME/.pki/nssdb -A -t "C,," -n pelab-ca -i ~/plartfom-enable/prelab-setup/files/tls/ca.crt
   ```
 
   Then close and reopen the browser.

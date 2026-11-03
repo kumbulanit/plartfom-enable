@@ -115,10 +115,10 @@ Here you change one sentence of the website, the greeting, and take it through a
 
 **Before you start:**
 
-1. Your workspace is open in the browser (https://studentNN.<lab domain>, signed in with your password).
-2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student07@student07:~$
+1. Your workspace is open in the browser (https://student01.<lab domain>, signed in with your password).
+2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
-4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type your studentNN and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
+4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
 5. Your copy of hello from Day 1, in ~/hello. If you do not have it, do step 1 of Day 1 Lab 3 first.
 6. The file list on the left of the workspace (the Explorer, the two-pages icon at the top of the left bar) shows your home folder. If it says "You have not yet opened a folder": click Open Folder, type /home/ followed by your user name (for example /home/student07), and click OK.
 
@@ -211,11 +211,11 @@ git branch
 **You should see:** Your new branch, with the \*, and main:
 
 ```
-* greeting-student07
+* greeting-student01
   main
 ```
 
-**Check before you go on:** Git said "Switched to a new branch 'greeting-studentNN'" with your own user name.
+**Check before you go on:** Git said "Switched to a new branch 'greeting-student01'" with your own user name.
 
 #### Step 3. Change the greeting
 
@@ -350,7 +350,7 @@ Changes not staged for commit:
    **You should see:** Your branch, the save's short id (yours differs) and your note, then what changed:
 
    ```
-   [greeting-student07 6514a43] Change the greeting for team03
+   [greeting-student01 6514a43] Change the greeting for team01
     1 file changed, 1 insertion(+), 1 deletion(-)
    ```
 
@@ -377,7 +377,7 @@ git log --oneline -3
 **You should see:** Your save at the top, with your note (your ids differ):
 
 ```
-6514a43 (HEAD -> greeting-student07) Change the greeting for team03
+6514a43 (HEAD -> greeting-student01) Change the greeting for team01
 e448d09 (origin/main, origin/HEAD, main) Initial commit
 ```
 
@@ -420,13 +420,13 @@ branch 'greeting-student07' set up to track 'origin/greeting-student07'.
 
 - *rejected (non-fast-forward)*: someone pushed to a branch with the same name first, which should not happen with $ME in the name. Run git pull --rebase, then git push again.
 
-**Check before you go on:** In Gitea, teamNN/hello → Branches lists greeting-studentNN.
+**Check before you go on:** In Gitea, team01/hello → Branches lists greeting-student01.
 
 **Done when:** Your branch is in Gitea (teamNN/hello → Branches shows greeting-studentNN).
 
 **If you are stuck**
 
-- Author identity unknown: run git config --global user.name "Your Name" and git config --global user.email studentNN@<lab domain>.
+- Author identity unknown: run git config --global user.name "Your Name" and git config --global user.email student01@<lab domain>.
 - rejected (non-fast-forward): someone pushed first. Run git pull --rebase, then push again.
 
 ## Lab 2: review and merge
@@ -495,9 +495,9 @@ You play both people: the author, in your normal browser window, and the colleag
 
 **Do this:**
 
-1. In the terminal from Lab 1, find the line remote:   https://gitea.<lab domain>/teamNN/hello/pulls/new/greeting-studentNN. Hold Ctrl (on a Mac Cmd) and click the link in the terminal: it opens in a new browser tab.
+1. In the terminal from Lab 1, find the line remote:   https://gitea.<lab domain>/team01/hello/pulls/new/greeting-student01. Hold Ctrl (on a Mac Cmd) and click the link in the terminal: it opens in a new browser tab.
 
-2. Gitea shows your change and a form under it. The title is already your commit message ("Change the greeting for teamNN"): keep it or make it clearer. It should say what changes.
+2. Gitea shows your change and a form under it. The title is already your commit message ("Change the greeting for team01"): keep it or make it clearer. It should say what changes.
 
 3. In the box under the title, write two lines on why: for example "Shows our team's name on the dev page, so we can see our own release."
 
@@ -537,7 +537,7 @@ You play both people: the author, in your normal browser window, and the colleag
 
 1. Open a private window (Edge or Chrome: Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a Mac Cmd+Shift+P), go to https://gitea.<lab domain>, click Sign In and sign in as reviewer with its password from cat /etc/pelab/logins.md.
 
-2. As the reviewer, open your pull request (teamNN/hello → Pull Requests → yours) and click the Files Changed tab.
+2. As the reviewer, open your pull request (team01/hello → Pull Requests → yours) and click the Files Changed tab.
 
 3. The old line is shown in red with -, the new line in green with +.
 
@@ -614,7 +614,7 @@ You play both people: the author, in your normal browser window, and the colleag
 
    *The squash commit form: the title with the pull request number (#1), a message that records who reviewed it (Reviewed-by), and Delete Branch ticked. In the lab the address in the message is your lab's Gitea. Your names, team and numbers are your own.*
 
-3. Tick Delete Branch "greeting-studentNN" (your branch has done its job) and click Create squash commit.
+3. Tick Delete Branch "greeting-student01" (your branch has done its job) and click Create squash commit.
 
 4. In the workspace terminal, go into your copy and switch to main.
 
@@ -639,7 +639,7 @@ You play both people: the author, in your normal browser window, and the colleag
    **You should see:** Git fetches main and updates your copy (your ids differ):
 
    ```
-   From https://gitea.<lab domain>/team03/hello
+   From https://gitea.<lab domain>/team01/hello
       e448d09..b70e47f  main       -> origin/main
    Updating e448d09..b70e47f
    Fast-forward
@@ -656,7 +656,7 @@ You play both people: the author, in your normal browser window, and the colleag
    **You should see:** Your change at the top, as one commit with the pull request number:
 
    ```
-   b70e47f (HEAD -> main, origin/main, origin/HEAD) Change the greeting for team03 (#1)
+   b70e47f (HEAD -> main, origin/main, origin/HEAD) Change the greeting for team01 (#1)
    e448d09 Initial commit
    ```
 
@@ -703,7 +703,7 @@ You play both people: the author, in your normal browser window, and the colleag
 
 > **Tip:** If your instructor has switched on the safety net, Argo CD is paused. Look at your merge commit in Gitea instead (Commits → the tick next to it): safety-net/dev says "Deployed to teamNN-dev" with your commit.
 
-**Check before you go on:** Argo CD shows teamNN-hello-dev as Synced and Healthy.
+**Check before you go on:** Argo CD shows team01-hello-dev as Synced and Healthy.
 
 #### Step 6. See your change in dev
 
@@ -759,7 +759,7 @@ curl -s https://hello-$TEAM-dev.$DOMAIN/
 
 **If you are stuck**
 
-- Argo CD asks for a user name and password: delegate, with its password from cat /etc/pelab/logins.md. Your studentNN password does not work there.
+- Argo CD asks for a user name and password: delegate, with its password from cat /etc/pelab/logins.md. Your student01 password does not work there.
 - Merge stays grey: it needs one approval from a second person. Your own approval does not count. Approve as reviewer in a private window, with its password from cat /etc/pelab/logins.md.
 - "Some checks are pending" or "Some required checks failed" although approved: the required check called pipeline is not green yet. Wait for the run to finish; if it is red, fix it on the branch and push again (Day 5 shows how to read the failure). The "When checks succeed" button only queues the merge: nothing merges while the check is red.
 - Argo CD still shows the old commit: the pipeline must finish first (Actions tab). Argo CD checks Git every minute, so it notices within a minute or two.
@@ -808,10 +808,10 @@ Each time, the platform should say no. Here a "no" is a success: it is proof tha
 
 **Before you start:**
 
-1. Your workspace is open in the browser (https://studentNN.<lab domain>, signed in with your password).
-2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student07@student07:~$
+1. Your workspace is open in the browser (https://student01.<lab domain>, signed in with your password).
+2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
-4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type your studentNN and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
+4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
 5. Have a notes file or a sheet ready: you will copy three messages.
 
 #### Step 1. Push straight to main
@@ -872,9 +872,9 @@ Each time, the platform should say no. Here a "no" is a success: it is proof tha
    remote: error:
    remote: error: Not allowed to push to protected branch main
    remote: error:
-   To https://gitea.<lab domain>/team03/hello
+   To https://gitea.<lab domain>/team01/hello
     ! [remote rejected] main -> main (pre-receive hook declined)
-   error: failed to push some refs to 'https://gitea.<lab domain>/team03/hello'
+   error: failed to push some refs to 'https://gitea.<lab domain>/team01/hello'
    ```
 
 **What each line does:**
@@ -905,7 +905,7 @@ Each time, the platform should say no. Here a "no" is a success: it is proof tha
    **You should see:** Git names the save it went back to:
 
    ```
-   HEAD is now at b70e47f Change the greeting for team03 (#1)
+   HEAD is now at b70e47f Change the greeting for team01 (#1)
    ```
 
 2. Check.
@@ -1210,7 +1210,7 @@ branch 'conflict-b-student07' set up to track 'origin/conflict-b-student07'.
 
 - When you have opened both pull requests: teamNN/hello → Pull Requests shows two, both changing line 22.
 
-**Check before you go on:** teamNN/hello → Pull Requests shows two pull requests, A's and B's.
+**Check before you go on:** team01/hello → Pull Requests shows two pull requests, A's and B's.
 
 #### Step 2. Merge A first
 
@@ -1363,7 +1363,7 @@ GREETING = os.environ.get("GREETING", "Hello from branch A and branch B")
 
 5. Back in your own window, reload the pull request. When it shows the approval and "All checks were successful", click the small arrow next to the merge button, choose Create squash commit, and confirm.
 
-6. A few minutes later, reload your dev tab (https://hello-teamNN-dev.<lab domain>/): the greeting you chose in step 4.
+6. A few minutes later, reload your dev tab (https://hello-team01-dev.<lab domain>/): the greeting you chose in step 4.
 
 **What each line does:**
 

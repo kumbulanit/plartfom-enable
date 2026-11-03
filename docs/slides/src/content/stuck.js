@@ -13,16 +13,16 @@ module.exports = {
     'Permission denied: work inside your home folder (cd ~).',
   ],
   'Lab 3: run hello by hand, and count the steps': [
-    'git clone asks for a user name and password: studentNN and your password (cat /etc/pelab/logins.md).',
+    'git clone asks for a user name and password: student01 and your password (cat /etc/pelab/logins.md).',
     'Address already in use: a copy is still running. Stop it with pkill -f app.main, or use another PORT.',
     'curl: connection refused: the app is not running, or it runs on another port. Check the first terminal.',
   ],
   'Lab 1: your first change, on a branch': [
-    'Author identity unknown: run git config --global user.name "Your Name" and git config --global user.email studentNN@<lab domain>.',
+    'Author identity unknown: run git config --global user.name "Your Name" and git config --global user.email student01@<lab domain>.',
     'rejected (non-fast-forward): someone pushed first. Run git pull --rebase, then push again.',
   ],
   'Lab 2: review, approve, merge, and watch it go live': [
-    'Argo CD asks for a user name and password: delegate, with its password from cat /etc/pelab/logins.md. Your studentNN password does not work there.',
+    'Argo CD asks for a user name and password: delegate, with its password from cat /etc/pelab/logins.md. Your student01 password does not work there.',
     'Merge stays grey: it needs one approval from a second person. Your own approval does not count. Approve as reviewer in a private window, with its password from cat /etc/pelab/logins.md.',
     '"Some checks are pending" or "Some required checks failed" although approved: the required check called pipeline is not green yet. Wait for the run to finish; if it is red, fix it on the branch and push again (Day 5 shows how to read the failure). The "When checks succeed" button only queues the merge: nothing merges while the check is red.',
     'Argo CD still shows the old commit: the pipeline must finish first (Actions tab). Argo CD checks Git every minute, so it notices within a minute or two.',
@@ -44,7 +44,7 @@ module.exports = {
   'Lab 2: request staging and prod from the template': [
     'The plan says "Invalid value for variable": the message says what to fix (the team name, the environments or the size).',
     'The plan pipeline fails before the plan with an access error: tell the instructor (the read-only credentials).',
-    'Merge stays grey: only the platform team can approve this repository, as pelab-admin (the instructor) or platform-approver (its password is in cat /etc/pelab/logins.md). An approval as studentNN does not count.',
+    'Merge stays grey: only the platform team can approve this repository, as pelab-admin (the instructor) or platform-approver (its password is in cat /etc/pelab/logins.md). An approval as student01 does not count.',
     'No platform/apply status after five minutes: tell the instructor (the platform applier on the lab host).',
   ],
   'Lab 3: drift, and destroy and recreate': [
@@ -73,7 +73,7 @@ module.exports = {
     'Red for staging is expected: rates has no staging yet.',
   ],
   'Lab 1: read the pipeline and its evidence': [
-    'Harbor shows a sign-in page: sign in as studentNN with your lab password.',
+    'Harbor shows a sign-in page: sign in as student01 with your lab password.',
     'No SBOM yet: Harbor makes it shortly after the image is pushed. Refresh after a minute.',
   ],
   'Lab 2: break the pipeline three ways, and fix it': [
@@ -81,7 +81,7 @@ module.exports = {
     'Your test change did not break anything: check you changed an expected value (for example 200 to 201), not the code under test.',
   ],
   'Lab 3: watch the guardrails refuse a bad deployment': [
-    'Error from server (Forbidden) without a policy name: check the namespace is your team\'s dev namespace (teamNN-dev).',
+    'Error from server (Forbidden) without a policy name: check the namespace is your team\'s dev namespace (team01-dev).',
     'Accepted too early? Check you changed team01 to your team: the rules only apply in team namespaces.',
   ],
   'Lab 4: test a policy like code, with the Kyverno CLI': [

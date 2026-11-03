@@ -100,10 +100,10 @@ ENTRYPOINT ["python", "-m", "app.main"]
 
 **Before you start:**
 
-1. Your workspace is open in the browser (https://studentNN.<lab domain>, signed in with your password).
-2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student07@student07:~$
+1. Your workspace is open in the browser (https://student01.<lab domain>, signed in with your password).
+2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
-4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type your studentNN and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
+4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
 5. Your copy of hello, in ~/hello. Docker is already installed in your workspace; nothing else is needed.
 
 #### Step 1. Build the image
@@ -837,10 +837,10 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 
 **Before you start:**
 
-1. Your workspace is open in the browser (https://studentNN.<lab domain>, signed in with your password).
-2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student07@student07:~$
+1. Your workspace is open in the browser (https://student01.<lab domain>, signed in with your password).
+2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
-4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type your studentNN and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
+4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
 5. Lab 3 done: teamNN/rates exists and answers in dev.
 
 #### Step 1. Copy the new repository and make a branch

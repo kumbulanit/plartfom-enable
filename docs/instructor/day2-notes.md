@@ -31,7 +31,7 @@ Deck: `Day2-Git-and-working-together.pptx`. Delegates follow the handbook (Gitea
 
 ## What you do yourself
 
-Each delegate built their own VM, and its passwords are on it. `ansible pelab ...` commands run from your machine, in `prelab-setup/`, after `export ANSIBLE_INVENTORY=inventory/all-vms.yml` (pelab05 instead of pelab reaches one VM). `ansible-playbook ...` commands run on the VM they are for, in `~/sarb/prelab-setup`, with `-K`. Without SSH to the VMs, the delegate runs the command on their VM with `sudo` in front.
+Each delegate built their own VM, and its passwords are on it. `ansible pelab ...` commands run from your machine, in `prelab-setup/`, after `export ANSIBLE_INVENTORY=inventory/all-vms.yml` (pelab05 instead of pelab reaches one VM). `ansible-playbook ...` commands run on the VM they are for, in `~/plartfom-enable/prelab-setup`, with `-K`. Without SSH to the VMs, the delegate runs the command on their VM with `sudo` in front.
 
 **Lab 2.** Each merge runs the pipeline twice (pull request, then main), on the VM's one runner: a few minutes of waiting is normal. Use the wait for slide 10. If one pipeline waits more than 10 minutes, check that VM's runner (here pelab05). *(Your machine, one VM)*
 
@@ -39,7 +39,7 @@ Each delegate built their own VM, and its passwords are on it. `ansible pelab ..
 ansible pelab05 -b -a "lxc exec runner01 -- systemctl status pelab-gitea-runner --no-pager"
 ```
 
-**Lab 3.** Every delegate must see the three refusals. If a push straight to main succeeds, stop: the protection is missing on that VM. Put it back: on that VM, in ~/sarb/prelab-setup (the delegate types it, or you over SSH). *(On that VM)*
+**Lab 3.** Every delegate must see the three refusals. If a push straight to main succeeds, stop: the protection is missing on that VM. Put it back: on that VM, in ~/plartfom-enable/prelab-setup (the delegate types it, or you over SSH). *(On that VM)*
 
 ```bash
 ansible-playbook site.yml --tags golden_path -K

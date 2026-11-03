@@ -29,7 +29,7 @@ Deck: `Day3-Infrastructure-as-Code.pptx`. Delegates follow the handbook (Gitea `
 
 ## What you do yourself
 
-Each delegate built their own VM, and its passwords are on it. `ansible pelab ...` commands run from your machine, in `prelab-setup/`, after `export ANSIBLE_INVENTORY=inventory/all-vms.yml` (pelab05 instead of pelab reaches one VM). `ansible-playbook ...` commands run on the VM they are for, in `~/sarb/prelab-setup`, with `-K`. Without SSH to the VMs, the delegate runs the command on their VM with `sudo` in front.
+Each delegate built their own VM, and its passwords are on it. `ansible pelab ...` commands run from your machine, in `prelab-setup/`, after `export ANSIBLE_INVENTORY=inventory/all-vms.yml` (pelab05 instead of pelab reaches one VM). `ansible-playbook ...` commands run on the VM they are for, in `~/plartfom-enable/prelab-setup`, with `-K`. Without SSH to the VMs, the delegate runs the command on their VM with `sudo` in front.
 
 **Lab 2, step 4: before the delegates approve.** On your demo VM, show what the platform team checks before approving: Files Changed shows one new file, team01.tf, with the team's name in both places, environments ["staging", "prod"] and size "small"; the plan run says "Plan: 16 to add, 0 to change, 0 to destroy". If anything else changes, or the plan destroys something, the platform team chooses Request Changes and says why. *(Gitea on your demo VM, as platform-approver)*
 

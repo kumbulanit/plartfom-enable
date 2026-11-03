@@ -4,10 +4,10 @@
 module.exports = {
   // How to use the workspace terminal, for every lab that uses it.
   TERMINAL: [
-    'Your workspace is open in the browser (https://studentNN.<lab domain>, signed in with your password).',
-    'A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student07@student07:~$',
+    'Your workspace is open in the browser (https://student01.<lab domain>, signed in with your password).',
+    'A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$',
     'To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.',
-    'If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type your studentNN and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.',
+    'If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.',
   ],
   // Opening a link that a command printed in the terminal.
   OPEN_LINK: 'Hold Ctrl (on a Mac Cmd) and click the link in the terminal: it opens in a new browser tab.',

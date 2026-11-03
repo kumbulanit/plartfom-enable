@@ -729,7 +729,7 @@ Checked locally:
   have. Steps that need the whole platform (Argo CD, Harbor's pages, Backstage,
   the applier) are described from the configuration, not run.
 - **The move into one repository (2026-10-21, evening).** The course is now the
-  git repository `sarb` (history kept): `docs/`, `labs/` and `prelab-setup/` (this
+  git repository `plartfom-enable` (history kept): `docs/`, `labs/` and `prelab-setup/` (this
   project). The content the build puts in Gitea moved from the golden_path role to
   `labs/` (`golden_path_labs_dir`; `*.j2` files are rendered, the rest copied).
   Before and after the move, the role's own `repo-files.yml` wrote out every

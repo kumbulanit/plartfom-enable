@@ -29,7 +29,7 @@ Deck: `Day4-Containers-and-the-packaging-template.pptx`. Delegates follow the ha
 
 ## What you do yourself
 
-Each delegate built their own VM, and its passwords are on it. `ansible pelab ...` commands run from your machine, in `prelab-setup/`, after `export ANSIBLE_INVENTORY=inventory/all-vms.yml` (pelab05 instead of pelab reaches one VM). `ansible-playbook ...` commands run on the VM they are for, in `~/sarb/prelab-setup`, with `-K`. Without SSH to the VMs, the delegate runs the command on their VM with `sudo` in front.
+Each delegate built their own VM, and its passwords are on it. `ansible pelab ...` commands run from your machine, in `prelab-setup/`, after `export ANSIBLE_INVENTORY=inventory/all-vms.yml` (pelab05 instead of pelab reaches one VM). `ansible-playbook ...` commands run on the VM they are for, in `~/plartfom-enable/prelab-setup`, with `-K`. Without SSH to the VMs, the delegate runs the command on their VM with `sudo` in front.
 
 **Lab 1, step 1.** If builds cannot pull the base image, that VM's Harbor cache is cold and the VM has no internet. Fix the internet, or pull the image once through that VM's Harbor so the cache keeps it (the check in Before the day).
 

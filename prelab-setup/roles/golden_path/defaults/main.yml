@@ -10,7 +10,7 @@ golden_path_gitea_url: "https://{{ pelab_hosts.gitea }}"
 golden_path_gitea_api: "{{ golden_path_gitea_url }}/api/v1"
 golden_path_harbor_api: "https://{{ pelab_hosts.harbor }}/api/v2.0"
 
-# The course's lab content: sarb/labs, next to prelab-setup. Each day's folder holds
+# The course's lab content: plartfom-enable/labs, next to prelab-setup. Each day's folder holds
 # its instructions (README.md) and the code the platform puts in Gitea.
 golden_path_labs_dir: "{{ role_path }}/../../../labs"
 # The Gitea organisation that holds the platform's own repositories. Each one is

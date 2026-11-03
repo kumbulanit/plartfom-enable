@@ -640,7 +640,7 @@ Linux keeps everything in one tree of folders that starts at / (the root). A few
 | Folder | What is in it | You will meet it when |
 | --- | --- | --- |
 | / | The root: the top of the tree; every other folder is inside it | Every path starts here |
-| /home/studentNN  (~) | Your own folder: your files and your copy of the code | All week: ~/hello, ~/day1 |
+| /home/student01  (~) | Your own folder: your files and your copy of the code | All week: ~/hello, ~/day1 |
 | /etc | Settings (configuration files) for the system and its programs | Reading how a service is set up |
 | /var/log | Log files written by programs | Day 1 Lab 2: reading a log |
 | /usr/bin | The programs themselves: git, python3, curl... | When you type a command |
@@ -700,7 +700,7 @@ Everything you need is already inside it: Git, Docker, Python, OpenTofu, kubectl
 
 **In the lab**
 
-- Open https://studentNN.<lab domain> with the password from your logins file (/etc/pelab/logins.md on your VM).
+- Open https://student01.<lab domain> with the password from your logins file (/etc/pelab/logins.md on your VM).
 - Open a terminal: Menu, Terminal, New Terminal (or Ctrl + `).
 - The prompt shows your user and the current folder.
 - If the page will not load, tell the lab assistant; a spare workspace is ready.
@@ -747,8 +747,8 @@ If you have not yet, read [Start here](../start-here.md) first: it shows the scr
 
 - **Workspace:** Your own small Linux computer for the week, running on the lab server. You use it in the browser: an editor at the top, a terminal at the bottom.
 - **Terminal:** The window where you type commands and the computer answers in text.
-- **Prompt:** The text before the cursor, for example student07@student07:~/day1$. It says who you are (student07), on which computer (student07) and in which folder (~/day1). The $ means "ready for a command".
-- **Home folder (~):** Your own folder, /home/studentNN. ~ is its short name.
+- **Prompt:** The text before the cursor, for example student01@student01:~/day1$. It says who you are (student01), on which computer (student01) and in which folder (~/day1). The $ means "ready for a command".
+- **Home folder (~):** Your own folder, /home/student01. ~ is its short name.
 - **Permission:** Who may read, change or run a file.
 - **Process:** A program that is running right now.
 - **Service:** A program the system starts and keeps running for you, such as Docker.
@@ -757,8 +757,8 @@ If you have not yet, read [Start here](../start-here.md) first: it shows the scr
 
 **Before you start:**
 
-1. Open your workspace at https://studentNN.<lab domain> (your user name and password are in your logins file, /etc/pelab/logins.md on your VM: your instructor shows you how to open it). The first time, the browser shows a sign-in page: type the password and press Enter.
-2. Open a terminal: menu ☰ (top left) → Terminal → New Terminal. It appears at the bottom of the window, with a prompt like student07@student07:~$
+1. Open your workspace at https://student01.<lab domain> (your user name and password are in your logins file, /etc/pelab/logins.md on your VM: your instructor shows you how to open it). The first time, the browser shows a sign-in page: type the password and press Enter.
+2. Open a terminal: menu ☰ (top left) → Terminal → New Terminal. It appears at the bottom of the window, with a prompt like student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter.
 4. Do not worry about breaking anything: the workspace is yours alone, and the instructor can reset it.
 
@@ -787,7 +787,7 @@ If you have not yet, read [Start here](../start-here.md) first: it shows the scr
    **You should see:** Only the prompt changes:
 
    ```
-   student07@student07:~/day1$
+   student01@student01:~/day1$
    ```
 
 3. Create a file called notes.txt with the word hello in it. Again, nothing is printed.
@@ -806,9 +806,9 @@ If you have not yet, read [Start here](../start-here.md) first: it shows the scr
 
    ```
    total 4
-   drwxr-xr-x 2 student07 student07 4096 Nov  2 09:41 .
-   drwxr-x--- 9 student07 student07 4096 Nov  2 09:41 ..
-   -rw-r--r-- 1 student07 student07    6 Nov  2 09:41 notes.txt
+   drwxr-xr-x 2 student01 student01 4096 Nov  2 09:41 .
+   drwxr-x--- 9 student01 student01 4096 Nov  2 09:41 ..
+   -rw-r--r-- 1 student01 student01    6 Nov  2 09:41 notes.txt
    ```
 
 **What each line does:**
@@ -820,7 +820,7 @@ If you have not yet, read [Start here](../start-here.md) first: it shows the scr
 
 **How to read it:**
 
-- Look only at the last line, the one ending in notes.txt: that is your file. The rest of that line is detail: who may read it (-rw-r--r--, explained in step 2), who owns it (student07, you), how big it is (6: the five letters of hello and an invisible end-of-line), and when it was made.
+- Look only at the last line, the one ending in notes.txt: that is your file. The rest of that line is detail: who may read it (-rw-r--r--, explained in step 2), who owns it (student01, you), how big it is (6: the five letters of hello and an invisible end-of-line), and when it was made.
 - The lines ending in . and .. are the folder itself and the folder above it. Every folder lists them; you can ignore them.
 - If your file shows -rw-rw-r-- instead of -rw-r--r--, that is also normal.
 
@@ -838,10 +838,10 @@ echo "I am $ME, in $TEAM, on $DOMAIN"
 
 - `echo "I am $ME, in $TEAM, on $DOMAIN"`: print a sentence. $ME, $TEAM and $DOMAIN are filled in by the workspace with your user name, your team and the lab domain.
 
-**You should see:** Your own user name and team (here student07 in team03):
+**You should see:** Your own user name and team (here student01 in team01):
 
 ```
-I am student07, in team03, on <lab domain>
+I am student01, in team01, on <lab domain>
 ```
 
 **How to read it:**
@@ -891,7 +891,7 @@ So -rw-r--r-- means: the owner may read and write; the group may read; everyone 
    **You should see:** The start of the line has changed to -rw-------:
 
    ```
-   -rw------- 1 student07 student07 6 Nov  2 09:41 notes.txt
+   -rw------- 1 student01 student01 6 Nov  2 09:41 notes.txt
    ```
 
 **What each line does:**
@@ -942,7 +942,7 @@ So -rw-r--r-- means: the owner may read and write; the group may read; everyone 
 USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
 root           1  0.0  0.1  22048 12872 ?        Ss   08:01   0:02 /sbin/init
 root         312  0.1  0.9 1906540 74136 ?       Ssl  08:01   0:09 /usr/bin/dockerd ...
-student07    401  1.2  2.8 1196064 230412 ?      Ssl  08:01   1:02 /usr/lib/code-server/lib/node ...
+student01    401  1.2  2.8 1196064 230412 ?      Ssl  08:01   1:02 /usr/lib/code-server/lib/node ...
 ...
 ```
 
@@ -995,7 +995,7 @@ Docker, which you use on Day 4, runs as a service in your workspace. Reading the
    **You should see:** Ten lines, each starting with a date and time, then the computer's name and the program, then what happened. For example:
 
    ```
-   Nov 02 08:01:12 student07 dockerd[312]: time="2026-11-02T08:01:12Z" level=info msg="API listen on /run/docker.sock"
+   Nov 02 08:01:12 student01 dockerd[312]: time="2026-11-02T08:01:12Z" level=info msg="API listen on /run/docker.sock"
    ```
 
 **What each line does:**
@@ -1071,7 +1071,7 @@ content-type: text/html; charset=utf-8
    **You should see:** Your own user name:
 
    ```
-   student07
+   student01
    ```
 
 2. Ask the same question with sudo in front.
@@ -1098,7 +1098,7 @@ content-type: text/html; charset=utf-8
 
 **If you see something else:**
 
-- *sudo asks for a password*: type your studentNN password, from your logins file (nothing appears while you type).
+- *sudo asks for a password*: type the student01 password, from your logins file (nothing appears while you type).
 
 **Check before you go on:** whoami said your user name, and sudo whoami said root.
 
@@ -1161,7 +1161,7 @@ The "twelve-factor app" (2011) set out how a service should behave so a platform
 | Health checks | An address that says "I am alive", for the platform to ask | /healthz answers ok |
 | Metrics | Numbers the service publishes about itself | /metrics: requests, version, uptime |
 | Disposable | Starts fast and can be stopped and replaced at any time | Starts in a second; Ctrl+C stops it cleanly |
-| One codebase | One repository, many deployments | teamNN/hello runs as dev, staging and prod |
+| One codebase | One repository, many deployments | team01/hello runs as dev, staging and prod |
 
 ### One code, three environments
 
@@ -1220,7 +1220,7 @@ You will use two terminals at the same time: one runs the website and stays busy
 
 **Words you will meet:**
 
-- **Repository (repo):** A folder of code with its whole history, kept in Gitea. Your team's service lives in the repository teamNN/hello.
+- **Repository (repo):** A folder of code with its whole history, kept in Gitea. Your service lives in the repository team01/hello: on your own VM you are student01, in team01.
 - **Clone:** Copy a repository from Gitea to your workspace.
 - **Port:** A numbered door on a computer that a program listens on. hello listens on 8080 unless told otherwise.
 - **localhost:** "This computer": your own workspace.
@@ -1230,10 +1230,10 @@ You will use two terminals at the same time: one runs the website and stays busy
 
 **Before you start:**
 
-1. Your workspace is open in the browser (https://studentNN.<lab domain>, signed in with your password).
-2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student07@student07:~$
+1. Your workspace is open in the browser (https://student01.<lab domain>, signed in with your password).
+2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
-4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type your studentNN and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
+4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
 5. You will need two terminals at the same time: one runs the service, the other talks to it. Step 3 shows how to open the second.
 
 #### Step 1. Tell Git who you are, then copy your team's repository
@@ -1271,7 +1271,7 @@ You will use two terminals at the same time: one runs the website and stays busy
    git config --global credential.helper "cache --timeout=36000"
    ```
 
-4. Go to your home folder and copy (clone) your team's code from Gitea. Git asks for a Username: type your studentNN and press Enter. Then a Password: type your password (from your logins file, cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type a password: that is normal, keep typing.
+4. Go to your home folder and copy (clone) your team's code from Gitea. Git asks for a Username: type student01 and press Enter. Then a Password: type your password (from your logins file, cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type a password: that is normal, keep typing.
 
    ```bash
    cd ~
@@ -1282,8 +1282,8 @@ You will use two terminals at the same time: one runs the website and stays busy
 
    ```
    Cloning into 'hello'...
-   Username for 'https://gitea.<lab domain>': student07
-   Password for 'https://student07@gitea.<lab domain>':
+   Username for 'https://gitea.<lab domain>': student01
+   Password for 'https://student01@gitea.<lab domain>':
    remote: Enumerating objects: 31, done.
    remote: Counting objects: 100% (31/31), done.
    remote: Compressing objects: 100% (24/24), done.
@@ -1309,7 +1309,7 @@ You will use two terminals at the same time: one runs the website and stays busy
 
 - `read -p "Your full name: " NAME`: ask you a question (-p: the prompt) and keep your answer in NAME.
 - `git config --global user.name "$NAME"`: tell Git your name, for every repository (--global). The last part, git config --global user.name, prints it back so you can check it.
-- `git config --global user.email "$ME@$DOMAIN"`: tell Git your e-mail address in the lab, for example student07@<lab domain>.
+- `git config --global user.email "$ME@$DOMAIN"`: tell Git your e-mail address in the lab, for example student01@<lab domain>.
 - `git config --global credential.helper "cache --timeout=36000"`: make Git remember your password for 10 hours (36,000 seconds), so you type it once a day.
 - `cd ~`: go to your home folder.
 - `git clone https://gitea.$DOMAIN/$TEAM/hello`: copy your team's repository hello, with its whole history, into a new folder called hello.
@@ -1582,7 +1582,7 @@ For 25 people, three environments and a change every day, this would take:
 
 **If you are stuck**
 
-- git clone asks for a user name and password: studentNN and your password (cat /etc/pelab/logins.md).
+- git clone asks for a user name and password: student01 and your password (cat /etc/pelab/logins.md).
 - Address already in use: a copy is still running. Stop it with pkill -f app.main, or use another PORT.
 - curl: connection refused: the app is not running, or it runs on another port. Check the first terminal.
 

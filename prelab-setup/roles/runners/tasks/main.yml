@@ -55,18 +55,27 @@
   loop_control:
     index_var: idx
 
-- name: Read the container UID map base
+# The host ID that container root runs as. Read from the map the running
+# container uses: volatile.idmap.base reads 0 on some LXD 5.21 hosts (Ubuntu 22.04)
+# even though root is shifted to 1000000.
+- name: Read the container UID map
   ansible.builtin.command:
-    argv: [lxc, config, get, "{{ pelab_runner_names[0] }}", volatile.idmap.base]
-  register: runners_idmap_base
+    argv: [lxc, config, get, "{{ pelab_runner_names[0] }}", volatile.last_state.idmap]
+  register: runners_idmap
   changed_when: false
+
+- name: Work out the host ID of container root
+  ansible.builtin.set_fact:
+    runners_idmap_base: >-
+      {{ runners_idmap.stdout | from_json | selectattr('Isuid') | selectattr('Nsid', 'equalto', 0)
+         | map(attribute='Hostid') | first | int }}
 
 - name: Hand the mounted directories to container root
   ansible.builtin.file:
     path: "{{ runners_host_dir }}/{{ item.0 }}{{ item.1 }}"
     state: directory
-    owner: "{{ runners_idmap_base.stdout | int }}"
-    group: "{{ runners_idmap_base.stdout | int }}"
+    owner: "{{ runners_idmap_base | int }}"
+    group: "{{ runners_idmap_base | int }}"
     mode: "0755"
   loop: "{{ pelab_runner_names | product(['', '/runner']) | list }}"
   loop_control:
@@ -76,8 +85,8 @@
   ansible.builtin.template:
     src: config.yaml.j2
     dest: "{{ runners_host_dir }}/{{ item }}/runner/config.yaml"
-    owner: "{{ runners_idmap_base.stdout | int }}"
-    group: "{{ runners_idmap_base.stdout | int }}"
+    owner: "{{ runners_idmap_base | int }}"
+    group: "{{ runners_idmap_base | int }}"
     mode: "0640"
   loop: "{{ pelab_runner_names }}"
   loop_control:

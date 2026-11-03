@@ -26,7 +26,7 @@ step() { printf '\n==> %s\n' "$*"; }
 fail() { printf '\nERROR: %s\n' "$*" >&2; exit 1; }
 
 # 0. The right machine and user
-[ "$(id -u)" -ne 0 ] || fail "Run this as your own user, not as root (no sudo in front). It asks for your sudo password when it needs it."
+[ "$(id -u)" -ne 0 ] || fail "Run this as your own user, not as root (no sudo in front). It asks for your sudo password only if sudo needs one."
 . /etc/os-release
 [ "${ID:-}" = ubuntu ] || fail "This VM runs ${PRETTY_NAME:-an unknown system}; the lab needs Ubuntu 22.04 or later."
 dpkg --compare-versions "${VERSION_ID:-0}" ge 22.04 || fail "This is Ubuntu ${VERSION_ID:-?}; the lab needs Ubuntu 22.04 or later."
@@ -42,7 +42,7 @@ if ! python3 -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null; 
 fi
 
 # 1. Packages and Ansible
-step "Installing pipx, git and tmux (asks for your sudo password)"
+step "Installing pipx, git and tmux (with sudo)"
 sudo apt-get update -q
 sudo apt-get install -y -q pipx git tmux ${PY_PKGS[@]+"${PY_PKGS[@]}"}
 

@@ -5,7 +5,8 @@
 #
 #   bash ~/plartfom-enable/prelab-setup/check-lab.sh
 #
-# Run it on the lab VM, as your own user: it asks for your sudo password once.
+# Run it on the lab VM, as your own user. It uses sudo (for k3s and LXD), and asks
+# for your sudo password once only if sudo needs one.
 # Each check prints PASS, WARN (works, but look at it) or FAIL, and the summary
 # at the end says what to do. The exit code is the number of failures.
 #
@@ -35,7 +36,9 @@ http_get() { curl -s --max-time 15 ${CA_OPT[@]+"${CA_OPT[@]}"} "$@"; }
 json() { python3 -c "import json,sys; d=json.load(sys.stdin); $1" 2>/dev/null; }
 
 [ "$(id -u)" -ne 0 ] || { echo "Run this as your own user, not as root (no sudo in front)."; exit 1; }
-sudo -v || { echo "This check needs sudo (for k3s and LXD)."; exit 1; }
+# A real command, not sudo -v: -v asks for a password unless every sudo rule for
+# the user is NOPASSWD, while a passwordless rule is enough for the commands below.
+sudo -n true 2>/dev/null || sudo true || { echo "This check needs sudo (for k3s and LXD)."; exit 1; }
 CA_OPT=()
 [ -f "$CA" ] && CA_OPT=(--cacert "$CA")
 

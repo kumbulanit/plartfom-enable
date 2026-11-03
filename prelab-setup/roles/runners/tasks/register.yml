@@ -31,8 +31,8 @@
       ansible.builtin.copy:
         dest: "{{ runners_host_dir }}/{{ item.item }}/runner/registration-token"
         content: "{{ runners_token.stdout_lines | last }}\n"
-        owner: "{{ runners_idmap_base.stdout | int }}"
-        group: "{{ runners_idmap_base.stdout | int }}"
+        owner: "{{ runners_idmap_base | int }}"
+        group: "{{ runners_idmap_base | int }}"
         mode: "0600"
       loop: "{{ runners_registration.results | selectattr('rc', 'equalto', 1) | list }}"
       loop_control:

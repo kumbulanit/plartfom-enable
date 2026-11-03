@@ -1020,7 +1020,7 @@ sudo chown -R $ROOT:$ROOT /opt/pelab/workspaces/student01
 W=/opt/pelab/workspaces/student01
 printf 'ME=student01\nTEAM=team01\nDOMAIN=pelab.example.internal\n' | sudo tee $W/env
 sudo tee $W/code-server.yaml >/dev/null <<'EOF'
-bind-addr: 0.0.0.0:8080
+bind-addr: 0.0.0.0:13337
 auth: password
 password: "<STUDENT01_PASSWORD>"
 cert: false
@@ -1053,7 +1053,7 @@ kind: Service
 metadata: {name: student01, namespace: pelab-workspaces}
 spec:
   type: ClusterIP
-  ports: [{name: http, port: 8080, targetPort: 8080, protocol: TCP}]
+  ports: [{name: http, port: 13337, targetPort: 13337, protocol: TCP}]
 ---
 apiVersion: discovery.k8s.io/v1
 kind: EndpointSlice
@@ -1062,7 +1062,7 @@ metadata:
   namespace: pelab-workspaces
   labels: {kubernetes.io/service-name: student01}
 addressType: IPv4
-ports: [{name: http, port: 8080, protocol: TCP}]
+ports: [{name: http, port: 13337, protocol: TCP}]
 endpoints: [{addresses: ["10.120.0.101"], conditions: {ready: true}}]
 ---
 apiVersion: networking.k8s.io/v1
@@ -1074,7 +1074,7 @@ spec:
   rules:
     - host: student01.pelab.example.internal
       http:
-        paths: [{path: /, pathType: Prefix, backend: {service: {name: student01, port: {number: 8080}}}}]
+        paths: [{path: /, pathType: Prefix, backend: {service: {name: student01, port: {number: 13337}}}}]
 EOF
 ```
 

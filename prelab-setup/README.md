@@ -861,7 +861,7 @@ Checked locally:
 - **The GitOps path:** Argo CD's ApplicationSets finding the team repositories
   through Gitea's API, dev deploying each merge, staging and prod retrying until
   their environments exist and then syncing, promotion and rollback by pull
-  request, and self-heal. The rehearsal must cover Day 2 Lab 2, Day 3 Lab 2
+  request, and self-heal. The rehearsal must cover Day 2 Lab 3, Day 3 Lab 2
   step 6 and Day 6 Labs 1 and 4 for at least one team.
 - Runner registration on the lab's LXD runners, and jobs on amd64.
 - Gitea over the lab's TLS, and the real `k3s kubectl exec` token generation.

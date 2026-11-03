@@ -155,7 +155,7 @@ module.exports = {
       boldFirst: true,
       rows: [
         ['Security and resilience by design', 'Controls, recovery and monitoring are part of the product, not added later', 'Day 5 guardrails, Day 6 recovery'],
-        ['Platform as a product', 'Known users, an owner, a roadmap, service levels and feedback', 'Day 2 Lab 5: your charter'],
+        ['Platform as a product', 'Known users, an owner, a roadmap, service levels and feedback', 'Day 2 Lab 6: your charter'],
         ['Self-service with guardrails', 'Teams act alone, within approved patterns and automated rules', 'Days 3 and 4: templates'],
         ['Open standards and portability', 'No unjustified lock-in; data and workloads can move', 'Open-source tools throughout'],
         ['Evidence by default', 'Every pipeline run leaves traceable, tamper-evident evidence for audit', 'Day 5 evidence, Day 6 capstone pack'],

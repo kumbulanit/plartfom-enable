@@ -4,7 +4,8 @@
 
 By the end of the day you can:
 
-- Clone, branch, commit and push with Git
+- Explain what Git is, where a change lives, and read git status, a diff and the history
+- Branch, commit, push and undo safely with Git
 - Open a pull request, review it as a second person, approve and merge it
 - Explain why main is protected, and what the history proves to an auditor
 
@@ -14,33 +15,772 @@ Yesterday you ran hello by hand and counted the steps. Today every change goes t
 
 | Topic | Labs |
 | --- | --- |
-| Version control | [Lab 1: your first change, on a branch](#lab-1-your-first-change-on-a-branch)<br>[Lab 2: review, approve, merge, and watch it go live](#lab-2-review-approve-merge-and-watch-it-go-live) (on your own)<br>[Lab 3: try to break the rules](#lab-3-try-to-break-the-rules)<br>[Lab 4: resolve a merge conflict](#lab-4-resolve-a-merge-conflict) (on your own) |
-| Platform as a product | [Lab 5: write your one-page platform charter](#lab-5-write-your-one-page-platform-charter) (on your own) |
+| Git basics | [Lab 1: Git basics in a practice repository](#lab-1-git-basics-in-a-practice-repository) |
+| Working together | [Lab 2: your first change, on a branch](#lab-2-your-first-change-on-a-branch)<br>[Lab 3: review, approve, merge, and watch it go live](#lab-3-review-approve-merge-and-watch-it-go-live) (on your own)<br>[Lab 4: try to break the rules](#lab-4-try-to-break-the-rules) |
+| Merging and conflicts | [Lab 5: resolve a merge conflict](#lab-5-resolve-a-merge-conflict) (on your own) |
+| Platform as a product | [Lab 6: write your one-page platform charter](#lab-6-write-your-one-page-platform-charter) (on your own) |
 
-## Version control
+## Git basics
 
-### Version control in plain words
+*What Git is, where a change lives, and the commands you will type all day. Then Lab 1: every command, tried in a practice folder where nothing can go wrong.*
 
-A repository is a folder with its complete history: every version of every file, who changed it, when, and why.
+### What Git is, and why the platform runs on it
 
-A commit is a saved snapshot with a message. A branch is a parallel copy where you make a change without disturbing anyone. Merging brings the change back into the main line.
+Git is a version-control system: it keeps every version of every file in a folder, with who changed it, when and why. Think of tracked changes in a Word document, but for a whole folder, for ever, with a name on every change.
 
-Git keeps this on your machine; Gitea keeps the shared copy everyone pushes to. The shared copy is the one the platform deploys from.
+Git is distributed: when you clone, you get the whole history, not only the latest files. You work on your own copy, and share your work when it is ready by pushing it to a server the team uses. Here that server is Gitea (GitHub and GitLab are others).
 
-> **In one sentence:** Git records every change with who, when and why; a branch lets you work without disturbing the main line.
+On this platform Git holds more than code. The service, its environments (Day 3), its pipeline (Day 5) and its releases (Day 6) are all files in Git, so every change to any of them is recorded and reviewed the same way.
+
+> **In one sentence:** Git keeps the full history of a folder; Gitea keeps the shared copy that the team, and the platform, work from.
 
 **In the lab**
 
-- Gitea at https://gitea.<lab domain> holds one organisation per team.
-- teamNN/hello is the service you ran yesterday.
-- main is the line that gets deployed. It is protected: no direct pushes.
-- Your own branches are yours; nobody else sees them until you push.
+- On Day 1 you cloned team01/hello into ~/hello: your own copy, history included.
+- https://gitea.<lab domain>/team01/hello is the shared copy, and the one the platform deploys from.
+- git log in ~/hello and the Commits page in Gitea show the same history.
+- Lab 1 tries every command in a practice folder first, where nothing can break.
+
+### A repository: a folder with a memory
+
+A repository (repo) is an ordinary folder plus a hidden folder called .git. Your files are the current version; .git holds every earlier version, every branch and every commit message. You never edit .git by hand: Git commands do that.
+
+Git only follows files you tell it about. A new file is untracked until you git add it; from then on Git notices every change to it. A file called .gitignore lists what Git must never record, such as the __pycache__ folders Python leaves behind.
+
+git init turns an empty folder into a repository; git clone copies an existing one from a server, with its whole history. Lab 1 does the first, Day 1 did the second.
+
+> **In one sentence:** A repository is a folder plus its .git history; Git only records the files you add.
+
+**In the lab**
+
+```
+$ cd ~/hello && ls -a
+.  ..  .dockerignore  .git
+.gitea  .gitignore  Dockerfile
+README.md  app  catalog-info.yaml
+deploy  pyproject.toml  tests
+```
+
+- .git is the history. Everything else is the service.
+- app/main.py is the code you change today.
+- .gitea/workflows/ci.yaml is the pipeline and .gitea/CODEOWNERS names who reviews: they are files too, versioned like the code.
+
+### Where a change lives: four places
+
+![Each command moves a change one place to the right. git pull brings what others merged back to you.](../images/git-areas.svg)
+
+*Each command moves a change one place to the right. git pull brings what others merged back to you.*
+
+- Working folder: the files as they are now. You edit app/main.py here.
+- Staging area: the changes you chose for the next commit, with git add. You can commit one file and keep another for later.
+- Your repository: git commit saves the staged changes as a commit, in .git. Still only on your workspace.
+- Gitea: git push sends your commits there. The platform, the reviewer and the pipeline only see what is in Gitea.
+
+### git status: where is my change?
+
+```
+$ git status
+On branch greeting-student01
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   app/main.py
+
+$ git add -A
+$ git status
+On branch greeting-student01
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	modified:   app/main.py
+
+$ git commit -m "Change the greeting for team01"
+$ git push -u origin greeting-student01
+$ git status
+On branch greeting-student01
+Your branch is up to date with 'origin/greeting-student01'.
+
+nothing to commit, working tree clean
+```
+
+- On branch: which branch you are on. Check it before every commit.
+- Changes not staged: edited, not yet added. In red on screen.
+- Changes to be committed: added, waiting for git commit. In green.
+- up to date with origin: Gitea has everything you committed.
+- ahead of origin by 1 commit: committed, not pushed yet.
+- working tree clean: nothing left to add or commit.
+- The lines in brackets tell you the next command. Read them.
+
+### Reading a difference (diff)
+
+```
+$ git diff
+diff --git a/app/main.py b/app/main.py
+index dbb26d3..b376c02 100644
+--- a/app/main.py
++++ b/app/main.py
+@@ -19,7 +19,7 @@ from http.server import ...
+ APP_NAME = os.environ.get("APP_NAME", "hello")
+ APP_VERSION = os.environ.get("APP_VERSION", "dev")
+ APP_ENV = os.environ.get("APP_ENV", "local")
+-GREETING = os.environ.get("GREETING", "Hello from the PE Lab golden path")
++GREETING = os.environ.get("GREETING", "Hello from team01")
+ 
+ STARTED_AT = time.time()
+```
+
+- --- a/ is the file before, +++ b/ the file after.
+- @@ -19,7 +19,7 @@: the part shown starts at line 19 and is 7 lines long, before and after.
+- A line starting with - was removed; with + it was added. A changed line is one of each.
+- Lines with a space in front did not change: they are there so you can see where you are.
+- Gitea shows the same thing on a pull request, under Files Changed: red for -, green for +.
+
+### A commit, up close
+
+```
+$ git commit -m "Change the greeting for team01"
+[greeting-student01 8aad367] Change the greeting for team01
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+$ git log
+commit 8aad367e1ce02ea035584de2aa8468e66b016d86
+Author: Thandi Nkosi <student01@<lab domain>>
+Date:   Tue Nov 3 11:23:43 2026 +0000
+
+    Change the greeting for team01
+
+commit 278f9e4951fe0489da5ecac4800088a4c19e7cb7
+Author: Thandi Nkosi <student01@<lab domain>>
+Date:   Tue Nov 3 11:23:43 2026 +0000
+
+    Initial commit
+```
+
+- A commit is a snapshot of every file, plus who, when and why.
+- The id (8aad367e...) is a fingerprint of the content and of the commit before it. Change one letter and the id changes: history cannot be altered quietly.
+- The first 7 characters are enough to name it: git show 8aad367.
+- Author is the name and e-mail you set on Day 1 with git config.
+- Each commit points to the one before it: newest at the top.
+
+### A good commit message says why
+
+**Hard to use later**
+
+- "update", "fix", "changes"
+- "edit main.py": the diff already shows which file
+- "stuff from Tuesday"
+- One commit with five unrelated changes: hard to review, impossible to undo one of them
+
+**Useful for years**
+
+- "Change the greeting for team01"
+- "Show the team name on the dev page"
+- Starts with a verb and finishes the sentence "This change will..."
+- One idea per commit: quick to review, easy to revert
+- Short (about 60 characters). More detail goes in the pull request description
+
+### Branches: a label on a commit
+
+![main points at the last reviewed commit; your branch moves on with each commit you make; HEAD marks the branch you are on.](../images/git-branches.svg)
+
+*main points at the last reviewed commit; your branch moves on with each commit you make; HEAD marks the branch you are on.*
+
+- git switch -c greeting-student01 puts a new label on the commit you are on, and moves HEAD to it.
+- git commit adds a commit and moves the label HEAD is on. main does not move.
+- git switch main moves HEAD back: your files change to main's version. Your branch keeps your work.
+- Branches cost nothing: make one for every change, and delete it after the merge.
+
+### Your copy and Gitea's: origin, push and pull
+
+When you clone, Git remembers where from, under the name origin. origin/main is your copy's memory of Gitea's main, as it was the last time you talked to Gitea.
+
+git push sends your branch's new commits to origin. git pull does the opposite: it downloads new commits (git fetch) and adds them to your branch. Neither happens by itself: Git talks to Gitea only when you ask.
+
+git status compares your branch with origin: "up to date", "ahead by 1 commit" (push it), or "behind by 2 commits" (pull first). Gitea refuses a push when it has commits you do not have: pull, then push again.
+
+> **In one sentence:** Nothing moves between your workspace and Gitea until you push or pull.
+
+**In the lab**
+
+```
+$ git remote -v
+origin  .../team01/hello (fetch)
+origin  .../team01/hello (push)
+```
+
+- Git asks for your password the first time each day, then remembers it for 10 hours (set on Day 1).
+- Start every change with git switch main and git pull: your branch then starts from the newest main.
+- Push your branch, never main: main is protected (Lab 4 proves it).
+
+### Undo safely: which command for which mistake
+
+| The situation | The command | What it does |
+| --- | --- | --- |
+| You changed a file and want it back as it was at the last commit | git restore app/main.py | Throws the change away. It cannot be got back. |
+| You added (staged) a file by mistake | git restore --staged app/main.py | Takes it out of the staging area; your change stays in the file. |
+| The last commit's message is wrong, and you have not pushed it | git commit --amend -m "Better message" | Replaces the last commit. Only before pushing. |
+| A commit is already pushed or merged, and it is wrong | git revert &lt;commit id> | Adds a new commit that undoes it. The history keeps both: the safe undo on a shared branch. |
+| Your main has a commit Gitea refused | git reset --hard origin/main | Makes your main exactly like Gitea's, dropping local commits and changes (Lab 4). |
+| A merge went wrong half-way | git merge --abort | Puts everything back as it was before the merge (Lab 5). |
+
+### The Git commands you need
+
+| Command | What it does | When |
+| --- | --- | --- |
+| git clone &lt;url> | Take a full copy of a repository, history included | Once per repository |
+| git status | Which branch you are on, and where each change is | Before and after everything |
+| git switch main && git pull | Go to main and get the latest merged changes | Start of every change |
+| git switch -c &lt;branch> | Create a branch for your change and move onto it | Start of every change |
+| git diff | Show your changes, line by line | Before you add |
+| git add -A | Stage all changed files for the next commit | Before each commit |
+| git commit -m "message" | Save a snapshot with a message that says why | Small, often |
+| git push -u origin &lt;branch> | Send your branch to Gitea | When ready for review |
+| git log --oneline | Read the history, one line per commit | Any time |
+| git show &lt;id> | One commit: who, when, why and its diff | Any time |
+| git branch | List your branches; \* marks the one you are on | Any time |
+
+## Lab 1: Git basics
+
+### Lab 1: Git basics in a practice repository
+
+**This lab puts into practice:** [A repository: a folder with a memory](#a-repository-a-folder-with-a-memory) · [Where a change lives: four places](#where-a-change-lives-four-places) · [git status: where is my change?](#git-status-where-is-my-change) · [Reading a difference (diff)](#reading-a-difference-diff) · [A commit, up close](#a-commit-up-close) · [Branches: a label on a commit](#branches-a-label-on-a-commit) · [Undo safely: which command for which mistake](#undo-safely-which-command-for-which-mistake)
+
+#### The idea, in plain words
+
+Before you change the real service, you try every Git command in a folder of your own that nobody else sees. If something goes wrong there, you delete the folder and start again: nothing is lost and nobody is affected.
+
+Think of Git as a camera for a folder. You arrange what goes into the picture (git add), take the picture with a caption (git commit), and later send your album to the shared library, Gitea (git push). Every picture is kept, with who took it, when, and the caption saying why.
+
+At the end you open your real copy of hello and recognise the same things: the history, the branch you are on, and Gitea as the shared copy.
+
+**What you do:** Try every Git command of the day in a practice folder of your own, where nothing can go wrong, and then recognise the same things in your real repository, ~/hello.
+
+**At the end you will have:** A practice repository with four commits, a branch you merged, a change you undid, and the same history seen in ~/hello and in Gitea.
+
+**You will learn:**
+
+- The four places a change lives (working folder, staging area, your repository, Gitea), and the command that moves it between them.
+- How to read git status, a diff and the history.
+- How to make a branch, merge it, and undo a change safely.
+
+**Words you will meet:**
+
+- **Repository:** A folder whose whole history Git keeps, in a hidden folder called .git.
+- **Working folder:** The files as they are now, which you edit.
+- **Staging area:** The changes you chose, with git add, to go into the next commit.
+- **Commit:** A saved snapshot of the files, with your name, the time and a message that says why.
+- **Commit id:** A unique fingerprint of a commit, such as 8dcb232. Yours are different from the ones on this page.
+- **Diff:** The difference between two versions, line by line: - for a removed line, + for an added one.
+- **Branch:** A name that points at the newest commit of a line of work. It moves forward when you commit.
+- **HEAD:** Where you are: the branch (and commit) your files come from.
+- **Merge:** Bring the commits of one branch into another.
+- **Revert:** A new commit that undoes an earlier one, keeping both in the history.
+
+**Before you start:**
+
+1. Your workspace is open in the browser (https://student01.<lab domain>, signed in with your password).
+2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
+3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
+4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
+5. This lab works in a new folder, ~/git-practice, which only you have: it is never pushed to Gitea. If you get lost at any point, run cd ~ && rm -rf ~/git-practice and start again at step 2.
+6. Run git status whenever you are unsure what happened: it always says which branch you are on and where each change is.
+
+#### Step 1. Check that Git knows who you are
+
+> **In plain words:** Check that Git knows your name and e-mail address, which it writes on every commit.
+
+*Where: Workspace terminal*
+
+**Why:** Git writes your name and e-mail address on every commit. You set them on Day 1; check them before you make your first commit today.
+
+```bash
+git --version
+git config --global --list
+```
+
+**What each line does:**
+
+- `git --version`: show which version of Git is installed.
+- `git config --global --list`: list your Git settings for every repository (--global): your name, your e-mail address and the password cache.
+
+**You should see:** The version, then your three settings:
+
+```
+git version 2.43.0
+user.name=Thandi Nkosi
+user.email=student01@<lab domain>
+credential.helper=cache --timeout=36000
+```
+
+**If you see something else:**
+
+- *No user.name or user.email line*: set them now, with your own name: git config --global user.name "Your Name", then git config --global user.email "$ME@$DOMAIN".
+
+**Check before you go on:** git config --global --list shows user.name and user.email.
+
+#### Step 2. Make a practice repository
+
+> **In plain words:** Make a new, empty repository to practise in.
+
+*Where: Workspace terminal*
+
+**Why:** git init turns an ordinary folder into a repository by adding the .git folder, where Git keeps the history. On Day 1, git clone did this for you and also filled in hello's history.
+
+```bash
+mkdir -p ~/git-practice && cd ~/git-practice
+git init -b main
+ls -a
+git status
+```
+
+**What each line does:**
+
+- `mkdir -p ~/git-practice && cd ~/git-practice`: make a new folder and go into it.
+- `git init -b main`: make it a repository, whose first branch is called main (-b: branch).
+- `ls -a`: list everything, hidden files included (-a: all). Names that start with a dot are hidden.
+- `git status`: ask Git what is going on.
+
+**You should see:** An empty repository: only the hidden .git folder, and no commits yet:
+
+```
+Initialized empty Git repository in /home/student01/git-practice/.git/
+.
+..
+.git
+On branch main
+
+No commits yet
+
+nothing to commit (create/copy files and use "git add" to track)
+```
+
+**How to read it:**
+
+- . is this folder and .. the one above it: every folder has both.
+- .git is the repository's memory. Never edit or delete it by hand: Git commands do that.
+
+**Check before you go on:** git status says "No commits yet", and ls -a shows a .git folder.
+
+#### Step 3. Your first commit: from working folder to repository
+
+> **In plain words:** Create a file, tell Git about it, and save it as your first commit.
+
+*Where: Workspace terminal*
+
+**Why:** A change goes through three places on your workspace: the working folder (you edit), the staging area (git add) and the repository (git commit). git status shows where it is at each moment.
+
+```bash
+echo "Hello from $TEAM" > greeting.txt
+git status
+```
+
+**What each line does:**
+
+- `echo "Hello from $TEAM" > greeting.txt`: create the file greeting.txt with one line in it. $TEAM becomes your team, team01.
+- `git status`: Git sees a new file it does not follow yet.
+
+**You should see:** The new file is untracked: Git sees it, but does not record it:
+
+```
+On branch main
+
+No commits yet
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	greeting.txt
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+
+Now stage it, check again, and commit it:
+
+```bash
+git add greeting.txt
+git status
+git commit -m "Add the team greeting"
+git log
+```
+
+**What each line does:**
+
+- `git add greeting.txt`: put the file in the staging area: it goes into the next commit.
+- `git status`: the file is now under "Changes to be committed".
+- `git commit -m "Add the team greeting"`: save the staged changes as a commit, with a message (-m) that says why.
+- `git log`: show the history: every commit, newest first.
+
+**You should see:** Staged, then committed, then your first commit in the history:
+
+```
+On branch main
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+	new file:   greeting.txt
+
+[main (root-commit) 8dcb232] Add the team greeting
+ 1 file changed, 1 insertion(+)
+ create mode 100644 greeting.txt
+commit 8dcb2323e356112fde90624d1d774d5230894302 (HEAD -> main)
+Author: Thandi Nkosi <student01@<lab domain>>
+Date:   Tue Nov 3 11:21:05 2026 +0000
+
+    Add the team greeting
+```
+
+**How to read it:**
+
+- root-commit: the first commit of the repository; it has no commit before it.
+- 8dcb232 is the start of the commit id. Yours is different: it depends on your name, the time and the content.
+- (HEAD -> main): you are on main, and main points at this commit.
+- git log opens a viewer when the history is longer than the screen: press q to leave it.
+
+**Check before you go on:** git log shows one commit, "Add the team greeting", with your name.
+
+#### Step 4. Change the file, and read the difference
+
+> **In plain words:** Change the file, see exactly what changed, and save it as a second commit.
+
+*Where: Workspace terminal*
+
+**Why:** Before you commit, look at what you changed. A diff is also what a reviewer reads in a pull request, so reading one here is practice for reviewing in Lab 3.
+
+```bash
+sed -i "s/Hello/Good morning/" greeting.txt
+echo "Owner: $ME" >> greeting.txt
+git diff
+```
+
+**What each line does:**
+
+- `sed -i "s/Hello/Good morning/" greeting.txt`: change Hello into Good morning, in the file itself (-i). s/old/new/ means substitute.
+- `echo "Owner: $ME" >> greeting.txt`: add a line at the end (>> adds; > would replace the whole file).
+- `git diff`: show the changes that are not staged yet, line by line.
+
+**You should see:** One line removed (-) and two added (+):
+
+```
+diff --git a/greeting.txt b/greeting.txt
+index f42170f..ab65d5d 100644
+--- a/greeting.txt
++++ b/greeting.txt
+@@ -1 +1,2 @@
+-Hello from team01
++Good morning from team01
++Owner: student01
+```
+
+**How to read it:**
+
+- --- a/ is the file before your change, +++ b/ the file after.
+- @@ -1 +1,2 @@: line 1 before, lines 1 to 2 after.
+- A changed line shows as one line removed and one added: Git compares whole lines.
+
+Stage and commit it, and look at the history:
+
+```bash
+git add -A
+git commit -m "Say good morning and name the owner"
+git log --oneline
+```
+
+**What each line does:**
+
+- `git add -A`: stage every change (-A: all).
+- `git commit -m "..."`: commit it.
+- `git log --oneline`: the history, one line per commit: the short id and the message.
+
+**You should see:** Two commits, newest at the top:
+
+```
+[main 9267ee9] Say good morning and name the owner
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+9267ee9 (HEAD -> main) Say good morning and name the owner
+8dcb232 Add the team greeting
+```
+
+**Check before you go on:** git log --oneline shows two commits.
+
+#### Step 5. Look inside a commit
+
+> **In plain words:** Look at everything a commit records.
+
+*Where: Workspace terminal*
+
+**Why:** Every commit keeps who, when, why and exactly what changed. This is the record an auditor reads, and anyone can read it again years later.
+
+```bash
+git show HEAD
+```
+
+**What each line does:**
+
+- `git show HEAD`: show one commit in full: here HEAD, the newest commit on the branch you are on. git show 8dcb232 would show the first one (with your own id).
+
+**You should see:** The commit's full id, author, date and message, then its diff:
+
+```
+commit 9267ee9d97b2ab97c1164331660fd6b6c182680e (HEAD -> main)
+Author: Thandi Nkosi <student01@<lab domain>>
+Date:   Tue Nov 3 11:21:05 2026 +0000
+
+    Say good morning and name the owner
+
+diff --git a/greeting.txt b/greeting.txt
+index f42170f..ab65d5d 100644
+--- a/greeting.txt
++++ b/greeting.txt
+@@ -1 +1,2 @@
+-Hello from team01
++Good morning from team01
++Owner: student01
+```
+
+**How to read it:**
+
+- Gitea shows the same page when you click a commit on the Commits page of a repository.
+
+**Check before you go on:** git show printed the author, the date, the message and the change.
+
+#### Step 6. Make a mistake, and undo it
+
+> **In plain words:** Make a change by mistake, and take it back before it is saved.
+
+*Where: Workspace terminal*
+
+**Why:** Before a commit, a change can be undone without leaving a trace. git restore takes a change out of the staging area, or throws it away entirely.
+
+```bash
+echo "A mistake" >> greeting.txt
+git add greeting.txt
+git status --short
+git restore --staged greeting.txt
+git status --short
+git restore greeting.txt
+git status --short
+cat greeting.txt
+```
+
+**What each line does:**
+
+- `echo "A mistake" >> greeting.txt, git add greeting.txt`: make a bad change and stage it.
+- `git status --short`: a short status: one line per file. M in the first column: staged. M in the second: changed, not staged.
+- `git restore --staged greeting.txt`: take the change out of the staging area. It stays in the file.
+- `git restore greeting.txt`: throw the change away: the file goes back to the last commit. This cannot be undone.
+- `cat greeting.txt`: show the file.
+
+**You should see:** Staged (M in the first column), then only changed (M in the second), then nothing, and the file as it was committed:
+
+```
+M  greeting.txt
+ M greeting.txt
+Good morning from team01
+Owner: student01
+```
+
+**How to read it:**
+
+- The third git status --short prints nothing: there is nothing left to commit.
+- After a commit has been pushed, you undo it differently: with git revert, in step 8.
+
+**Check before you go on:** The last git status --short prints nothing, and the file has no "A mistake" line.
+
+#### Step 7. Work on a branch
+
+> **In plain words:** Make a branch, save a change on it, and see that main does not have it.
+
+*Where: Workspace terminal*
+
+**Why:** A branch lets you work without touching main. Every change you make this week starts on a branch; main only changes when a reviewed change is merged.
+
+```bash
+git switch -c add-farewell
+echo "Goodbye from $TEAM" >> greeting.txt
+git commit -am "Add a farewell"
+git log --oneline --graph --all
+```
+
+**What each line does:**
+
+- `git switch -c add-farewell`: create (-c) a branch called add-farewell where you are, and switch to it.
+- `git commit -am "Add a farewell"`: stage every changed file (-a) and commit it (-m), in one go. It works for files Git already follows, not for new ones.
+- `git log --oneline --graph --all`: the history of every branch (--all), drawn as a line (--graph).
+
+**You should see:** The new commit, on add-farewell; main still points at the commit before:
+
+```
+Switched to a new branch 'add-farewell'
+[add-farewell 9f22cfd] Add a farewell
+ 1 file changed, 1 insertion(+)
+* 9f22cfd (HEAD -> add-farewell) Add a farewell
+* 9267ee9 (main) Say good morning and name the owner
+* 8dcb232 Add the team greeting
+```
+
+Go back to main and look at the file:
+
+```bash
+git switch main
+cat greeting.txt
+git branch
+```
+
+**What each line does:**
+
+- `git switch main`: move to main. Git changes your files to main's version.
+- `cat greeting.txt`: show the file: no farewell on main.
+- `git branch`: list your branches; \* marks the one you are on.
+
+**You should see:** main's version of the file, and two branches:
+
+```
+Switched to branch 'main'
+Good morning from team01
+Owner: student01
+  add-farewell
+* main
+```
+
+**How to read it:**
+
+- The farewell is not lost: it is on add-farewell. git switch add-farewell would bring it back into the file.
+
+**Check before you go on:** On main, greeting.txt has no "Goodbye" line; git branch lists add-farewell and main.
+
+#### Step 8. Merge the branch, then undo it with a revert
+
+> **In plain words:** Bring the branch into main, then undo that change with a new commit that keeps the record.
+
+*Where: Workspace terminal*
+
+**Why:** Merging brings a branch's work into main; in the team, Gitea does this for you after the review (Lab 3). A revert undoes a commit by adding a new one, so the history keeps both: that is how a change already shared is undone on this platform.
+
+```bash
+git merge add-farewell
+git log --oneline --graph
+git branch -d add-farewell
+```
+
+**What each line does:**
+
+- `git merge add-farewell`: bring the commits of add-farewell into the branch you are on, main.
+- `git log --oneline --graph`: main's history now.
+- `git branch -d add-farewell`: delete the branch (-d): its work is in main now.
+
+**You should see:** A fast-forward: main had not moved, so Git only moved main forward to the branch's commit:
+
+```
+Updating 9267ee9..9f22cfd
+Fast-forward
+ greeting.txt | 1 +
+ 1 file changed, 1 insertion(+)
+* 9f22cfd (HEAD -> main, add-farewell) Add a farewell
+* 9267ee9 Say good morning and name the owner
+* 8dcb232 Add the team greeting
+Deleted branch add-farewell (was 9f22cfd).
+```
+
+Now suppose the farewell was a mistake. Undo it, and keep the record:
+
+```bash
+git revert --no-edit HEAD
+git log --oneline
+cat greeting.txt
+```
+
+**What each line does:**
+
+- `git revert --no-edit HEAD`: add a new commit that undoes the newest one (HEAD). --no-edit keeps the message Git suggests.
+- `git log --oneline, cat greeting.txt`: the history and the file.
+
+**You should see:** Four commits: the farewell and its revert are both in the history, and the file is back as before:
+
+```
+[main 8cb387a] Revert "Add a farewell"
+ Date: Tue Nov 3 11:21:05 2026 +0000
+ 1 file changed, 1 deletion(-)
+8cb387a (HEAD -> main) Revert "Add a farewell"
+9f22cfd Add a farewell
+9267ee9 Say good morning and name the owner
+8dcb232 Add the team greeting
+Good morning from team01
+Owner: student01
+```
+
+**How to read it:**
+
+- Nothing was deleted: anyone can see that the farewell was added, then taken out, by whom and when. On Day 6 a rollback in prod is exactly this, through a pull request.
+
+**Check before you go on:** git log --oneline shows four commits, the newest "Revert "Add a farewell"".
+
+#### Step 9. The same things in your real repository
+
+> **In plain words:** Look at your real copy of hello the same way, and find the same history in Gitea.
+
+*Where: Workspace terminal, then Gitea*
+
+**Why:** Your copy of hello is a repository like the practice one, with one difference: it was cloned from Gitea, so it knows a remote, origin, to push to and pull from.
+
+```bash
+cd ~/hello
+git status
+git remote -v
+git log --oneline
+git branch -a
+```
+
+**What each line does:**
+
+- `cd ~/hello`: go into your copy of hello, from Day 1.
+- `git status`: where you are, and whether your copy is in step with Gitea.
+- `git remote -v`: the remote this copy talks to: origin, the address you cloned from.
+- `git log --oneline`: hello's history.
+- `git branch -a`: every branch (-a: all), yours and the ones Git remembers from Gitea (remotes/origin/...).
+
+**You should see:** main, in step with Gitea; origin is Gitea; one commit so far:
+
+```
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+origin	https://gitea.<lab domain>/team01/hello (fetch)
+origin	https://gitea.<lab domain>/team01/hello (push)
+e448d09 (HEAD -> main, origin/main, origin/HEAD) Initial commit
+* main
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/main
+```
+
+**How to read it:**
+
+- Initial commit was made by the platform when it created hello from its template. Your id is different.
+- origin/main is your copy's memory of Gitea's main. It only changes when you talk to Gitea (git pull or git fetch).
+- In Gitea, open team01/hello and click Commits (above the file list): the same commit, with the same id. Click it: the same page as git show.
+
+**If you see something else:**
+
+- *cd: no such file or directory*: you have no copy yet: do step 1 of Day 1 Lab 3 first.
+- *Changes not staged, or untracked files*: something changed in ~/hello since Day 1. git restore . puts the files back as they were committed (you lose those changes, which is what you want here).
+
+**Check before you go on:** git status says "up to date with 'origin/main'", and Gitea's Commits page lists the same commit.
+
+**Done when:** Your practice repository has four commits, you have merged and reverted a change, and you have seen the same history in ~/hello and in Gitea.
+
+**If you are stuck**
+
+- Lost in the practice repository? cd ~ && rm -rf ~/git-practice, then start again at step 2: nothing there is shared.
+- git log or git show fills the screen and waits: it is a viewer. Press q to leave it.
+- Not sure what happened? git status says which branch you are on and where each change is.
+
+## Working together
 
 ### The pull-request loop you will use every day
 
-![main only takes a reviewed change with a green pipeline. The three shortcuts of Lab 3 stop at the merge gate.](../images/pr-loop.svg)
+![main only takes a reviewed change with a green pipeline. The three shortcuts of Lab 4 stop at the merge gate.](../images/pr-loop.svg)
 
-*main only takes a reviewed change with a green pipeline. The three shortcuts of Lab 3 stop at the merge gate.*
+*main only takes a reviewed change with a green pipeline. The three shortcuts of Lab 4 stop at the merge gate.*
 
 1. Branch
 2. Change
@@ -70,28 +810,15 @@ Protection is enforced by the tool, not by a rule in a document. A push to main 
 - CODEOWNERS sends every review to your team's developers group.
 - The pipeline also runs on every pull request; Day 5 explains what it checks.
 
-### The Git commands you need
+## Lab 2: your first change
 
-| Command | What it does | When |
-| --- | --- | --- |
-| git clone &lt;url> | Take a full copy of the repository, history included | Once per repository |
-| git switch -c &lt;branch> | Create a branch for your change and move onto it | Start of every change |
-| git status | What has changed since the last commit | Any time |
-| git add -A | Stage all changed files for the next commit | Before each commit |
-| git commit -m "message" | Save a snapshot with a message that says why | Small, often |
-| git push -u origin &lt;branch> | Send your branch to Gitea | When ready for review |
-| git switch main && git pull | Go back to main and get the latest merged changes | After a merge |
-| git log --oneline | Read the history, one line per commit | Any time |
-
-## Lab 1: your first change
-
-### Lab 1: your first change, on a branch
+### Lab 2: your first change, on a branch
 
 #### The idea, in plain words
 
 Git keeps the whole history of a folder of code: every change, who made it, when and why. Think of "track changes" in Word, but for a whole folder, kept for ever, with a way back to any earlier version.
 
-Three ideas carry the whole lab. A \*\*branch\*\* is your own private copy of the code to work in: whatever you do there disturbs nobody. A \*\*commit\*\* is saving your work in Git with a short note saying what you changed, like signing and dating a page. A \*\*push\*\* is uploading your branch to Gitea, so your team can see it.
+Three ideas from Lab 1 carry the whole lab. A \*\*branch\*\* is your own private copy of the code to work in: whatever you do there disturbs nobody. A \*\*commit\*\* is saving your work in Git with a short note saying what you changed, like signing and dating a page. A \*\*push\*\* is uploading your branch to Gitea, so your team can see it.
 
 Here you change one sentence of the website, the greeting, and take it through all three.
 
@@ -119,8 +846,9 @@ Here you change one sentence of the website, the greeting, and take it through a
 2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
 4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
-5. Your copy of hello from Day 1, in ~/hello. If you do not have it, do step 1 of Day 1 Lab 3 first.
-6. The file list on the left of the workspace (the Explorer, the two-pages icon at the top of the left bar) shows your home folder. If it says "You have not yet opened a folder": click Open Folder, type /home/ followed by your user name (for example /home/student07), and click OK.
+5. The Git in this lab is what you practised in Lab 1: git switch, git status, git diff, git add and git commit, and then git push to send your branch to Gitea for the first time.
+6. Your copy of hello from Day 1, in ~/hello. If you do not have it, do step 1 of Day 1 Lab 3 first.
+7. The file list on the left of the workspace (the Explorer, the two-pages icon at the top of the left bar) shows your home folder. If it says "You have not yet opened a folder": click Open Folder, type /home/ followed by your user name (for example /home/student01), and click OK.
 
 #### Step 1. Go to main and get the latest version
 
@@ -171,7 +899,7 @@ Here you change one sentence of the website, the greeting, and take it through a
 
 **If you see something else:**
 
-- *Password prompt*: type your studentNN password, from cat /etc/pelab/logins.md (nothing appears while you type).
+- *Password prompt*: type your student01 password, from cat /etc/pelab/logins.md (nothing appears while you type).
 - *cd: no such file or directory*: you have no copy yet: do step 1 of Day 1 Lab 3, then come back.
 
 **Check before you go on:** Your prompt ends in ~/hello$, and git pull has finished without an error.
@@ -195,7 +923,7 @@ git switch -c greeting-$ME
 **You should see:** Git confirms the new branch:
 
 ```
-Switched to a new branch 'greeting-student07'
+Switched to a new branch 'greeting-student01'
 ```
 
 **How to read it:**
@@ -231,7 +959,7 @@ git branch
 
 2. Find line 22, which starts with GREETING. The line numbers are on the left of the editor.
 
-3. Change only the text in the second pair of quotes, for example to Hello from team 3. Keep the quotes.
+3. Change only the text in the second pair of quotes, for example to Hello from team01. Keep the quotes.
 
 4. Save with Ctrl+S (on a Mac Cmd+S). The dot next to the file name at the top disappears when it is saved.
 
@@ -259,7 +987,7 @@ GREETING = os.environ.get("GREETING", "Hello from the PE Lab golden path")
 After:
 
 ```
-GREETING = os.environ.get("GREETING", "Hello from team 3")
+GREETING = os.environ.get("GREETING", "Hello from team01")
 ```
 
 **What each line does:**
@@ -269,7 +997,7 @@ GREETING = os.environ.get("GREETING", "Hello from team 3")
 **You should see:** One modified file, in red:
 
 ```
-On branch greeting-student07
+On branch greeting-student01
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git restore <file>..." to discard changes in working directory)
@@ -315,7 +1043,7 @@ Changes not staged for commit:
 **You should see:** In the second terminal, your text in "message":
 
 ```
-{"app": "hello", "version": "dev", "environment": "local", "message": "Hello from team 3"}
+{"app": "hello", "version": "dev", "environment": "local", "message": "Hello from team01"}
 ```
 
 **If you see something else:**
@@ -403,18 +1131,18 @@ git push -u origin greeting-$ME
 
 ```
 remote:
-remote: Create a new pull request for 'greeting-student07':
-remote:   https://gitea.<lab domain>/team03/hello/pulls/new/greeting-student07
+remote: Create a new pull request for 'greeting-student01':
+remote:   https://gitea.<lab domain>/team01/hello/pulls/new/greeting-student01
 remote:
-To https://gitea.<lab domain>/team03/hello
- * [new branch]      greeting-student07 -> greeting-student07
-branch 'greeting-student07' set up to track 'origin/greeting-student07'.
+To https://gitea.<lab domain>/team01/hello
+ * [new branch]      greeting-student01 -> greeting-student01
+branch 'greeting-student01' set up to track 'origin/greeting-student01'.
 ```
 
 **How to read it:**
 
-- Keep this terminal open: in Lab 2 you open that link. Hold Ctrl (on a Mac Cmd) and click the link in the terminal: it opens in a new browser tab.
-- Check in Gitea: open teamNN/hello and click Branches (above the file list). Your branch is in the list.
+- Keep this terminal open: in Lab 3 you open that link. Hold Ctrl (on a Mac Cmd) and click the link in the terminal: it opens in a new browser tab.
+- Check in Gitea: open team01/hello and click Branches (above the file list). Your branch is in the list.
 
 **If you see something else:**
 
@@ -422,14 +1150,14 @@ branch 'greeting-student07' set up to track 'origin/greeting-student07'.
 
 **Check before you go on:** In Gitea, team01/hello → Branches lists greeting-student01.
 
-**Done when:** Your branch is in Gitea (teamNN/hello → Branches shows greeting-studentNN).
+**Done when:** Your branch is in Gitea (team01/hello → Branches shows greeting-student01).
 
 **If you are stuck**
 
 - Author identity unknown: run git config --global user.name "Your Name" and git config --global user.email student01@<lab domain>.
 - rejected (non-fast-forward): someone pushed first. Run git pull --rebase, then push again.
 
-## Lab 2: review and merge
+## Lab 3: review and merge
 
 ### Pull requests and reviews: what good looks like
 
@@ -448,7 +1176,7 @@ Merging is the decision to put the change on the main line. From then on the pla
 - Merge needs one approval from your team and a green pipeline. Until the check called pipeline is green, Gitea says "Some checks are pending" (or "failed") and does not merge.
 - Squash merge keeps the history tidy: one commit per change.
 
-### Lab 2: review, approve, merge, and watch it go live
+### Lab 3: review, approve, merge, and watch it go live
 
 *on your own*
 
@@ -481,9 +1209,10 @@ You play both people: the author, in your normal browser window, and the colleag
 
 **Before you start:**
 
-1. Lab 1 done: your branch is pushed.
-2. You play two people: the author, in your normal browser window, and the reviewer, in a private window. The reviewer's login is in your logins file (cat /etc/pelab/logins.md).
-3. Gitea is open in your browser and you are signed in as yourself: https://gitea.<lab domain> → Sign In, with your studentNN and password.
+1. Lab 2 done: your branch is pushed.
+2. The Git in this lab: after the merge, git switch main and git pull bring Gitea's new main into your copy, and git log shows it (Lab 1, steps 4 and 9).
+3. You play two people: the author, in your normal browser window, and the reviewer, in a private window. The reviewer's login is in your logins file (cat /etc/pelab/logins.md).
+4. Gitea is open in your browser and you are signed in as yourself: https://gitea.<lab domain> → Sign In, with your student01 and password.
 
 #### Step 1. Open the pull request
 
@@ -495,7 +1224,7 @@ You play both people: the author, in your normal browser window, and the colleag
 
 **Do this:**
 
-1. In the terminal from Lab 1, find the line remote:   https://gitea.<lab domain>/team01/hello/pulls/new/greeting-student01. Hold Ctrl (on a Mac Cmd) and click the link in the terminal: it opens in a new browser tab.
+1. In the terminal from Lab 2, find the line remote:   https://gitea.<lab domain>/team01/hello/pulls/new/greeting-student01. Hold Ctrl (on a Mac Cmd) and click the link in the terminal: it opens in a new browser tab.
 
 2. Gitea shows your change and a form under it. The title is already your commit message ("Change the greeting for team01"): keep it or make it clearer. It should say what changes.
 
@@ -520,8 +1249,8 @@ You play both people: the author, in your normal browser window, and the colleag
 
 **If you see something else:**
 
-- *The link does not open*: in Gitea open teamNN/hello → Pull Requests → New Pull Request; on the right (pull from) choose your branch greeting-studentNN, then fill in the form as above.
-- *"These branches are equal"*: your commit was not pushed. Go back to Lab 1, step 6.
+- *The link does not open*: in Gitea open team01/hello → Pull Requests → New Pull Request; on the right (pull from) choose your branch greeting-student01, then fill in the form as above.
+- *"These branches are equal"*: your commit was not pushed. Go back to Lab 2, step 6.
 
 **Check before you go on:** Your pull request page is open, with your title, your two lines of why, and the checks starting at the bottom.
 
@@ -551,7 +1280,7 @@ You play both people: the author, in your normal browser window, and the colleag
 
 **How to read it:**
 
-- A good comment is about the change, not the person: "Should this say team 3 or Team 3?" rather than "This is wrong".
+- A good comment is about the change, not the person: "Should this say team01 or Team 01?" rather than "This is wrong".
 - You, the author, can answer under the comment, and change the code if the comment is right.
 
 **Check before you go on:** A comment is attached to your changed line, and in your normal window you can see it in the Conversation tab.
@@ -683,15 +1412,15 @@ You play both people: the author, in your normal browser window, and the colleag
 
 **Do this:**
 
-1. In Gitea, open teamNN/hello → Actions. The newest run (your merge, on main) builds the image and pushes it to Harbor. Wait for its green tick, a few minutes.
+1. In Gitea, open team01/hello → Actions. The newest run (your merge, on main) builds the image and pushes it to Harbor. Wait for its green tick, a few minutes.
 
-2. Open https://argocd.<lab domain> in a new tab and sign in as delegate, with its password from cat /etc/pelab/logins.md (a read-only login; not your studentNN password).
+2. Open https://argocd.<lab domain> in a new tab and sign in as delegate, with its password from cat /etc/pelab/logins.md (a read-only login; not your student01 password).
 
-3. In the search box at the top, type your team. Your service has one box per environment: dev, staging and prod. Click the application teamNN-hello-dev.
+3. In the search box at the top, type team01. Your service has one box per environment: dev, staging and prod. Click the application team01-hello-dev.
 
-   ![Argo CD's application list, searched for the team: one box per environment of hello (dev, prod, staging), each with its health (Healthy) and sync state (Synced: it runs what Git says). On Day 2 only dev runs; staging and prod come on Day 3 and are released on Day 6. In your lab the repository is https://gitea.<lab domain>/teamNN/hello.git, and the names, ids and times are your own.](../images/argocd-apps.png)
+   ![Argo CD's application list, searched for the team: one box per environment of hello (dev, prod, staging), each with its health (Healthy) and sync state (Synced: it runs what Git says). On Day 2 only dev runs; staging and prod come on Day 3 and are released on Day 6. In your lab the repository is https://gitea.<lab domain>/team01/hello.git, and the names, ids and times are your own.](../images/argocd-apps.png)
 
-   *Argo CD's application list, searched for the team: one box per environment of hello (dev, prod, staging), each with its health (Healthy) and sync state (Synced: it runs what Git says). On Day 2 only dev runs; staging and prod come on Day 3 and are released on Day 6. In your lab the repository is https://gitea.<lab domain>/teamNN/hello.git, and the names, ids and times are your own.*
+   *Argo CD's application list, searched for the team: one box per environment of hello (dev, prod, staging), each with its health (Healthy) and sync state (Synced: it runs what Git says). On Day 2 only dev runs; staging and prod come on Day 3 and are released on Day 6. In your lab the repository is https://gitea.<lab domain>/team01/hello.git, and the names, ids and times are your own.*
 
 **You should see:** Within a few minutes of the green pipeline: Synced and Healthy, with your commit id under Last Sync.
 
@@ -699,9 +1428,9 @@ You play both people: the author, in your normal browser window, and the colleag
 
 - Synced: the cluster runs what main says. Healthy: it answers its health check.
 - Argo CD checks main every minute, and the pipeline takes a few minutes before that: a short wait is normal.
-- The pipeline is not something you wrote: it is the file .gitea/workflows/ci.yaml in teamNN/hello, copied from the platform team's template, platform/golden-path. Open it in Gitea to see every step. On Day 4 you look inside the template itself.
+- The pipeline is not something you wrote: it is the file .gitea/workflows/ci.yaml in team01/hello, copied from the platform team's template, platform/golden-path. Open it in Gitea to see every step. On Day 4 you look inside the template itself.
 
-> **Tip:** If your instructor has switched on the safety net, Argo CD is paused. Look at your merge commit in Gitea instead (Commits → the tick next to it): safety-net/dev says "Deployed to teamNN-dev" with your commit.
+> **Tip:** If your instructor has switched on the safety net, Argo CD is paused. Look at your merge commit in Gitea instead (Commits → the tick next to it): safety-net/dev says "Deployed to team01-dev" with your commit.
 
 **Check before you go on:** Argo CD shows team01-hello-dev as Synced and Healthy.
 
@@ -715,7 +1444,7 @@ You play both people: the author, in your normal browser window, and the colleag
 
 **Do this:**
 
-1. Open https://hello-teamNN-dev.<lab domain>/ in a new tab (your team instead of teamNN).
+1. Open https://hello-team01-dev.<lab domain>/ in a new tab.
 
 **You should see:** DEV in big red letters, your new greeting under it, and the version: the commit id of your merge.
 
@@ -739,7 +1468,7 @@ curl -s https://hello-$TEAM-dev.$DOMAIN/
 **You should see:** "environment": "dev" and your new greeting:
 
 ```
-{"app": "hello", "version": "b70e47f...", "environment": "dev", "message": "Hello from team 3"}
+{"app": "hello", "version": "b70e47f...", "environment": "dev", "message": "Hello from team01"}
 ```
 
 **How to read it:**
@@ -755,7 +1484,7 @@ curl -s https://hello-$TEAM-dev.$DOMAIN/
 
 **Check before you go on:** The dev page shows DEV in big red letters and your greeting.
 
-**Done when:** Your greeting answers on https://hello-teamNN-dev.<lab domain>/ and the pull request shows who approved it.
+**Done when:** Your greeting answers on https://hello-team01-dev.<lab domain>/ and the pull request shows who approved it.
 
 **If you are stuck**
 
@@ -781,9 +1510,9 @@ That is GitOps: Git is the single source of truth for what runs. A rollback is a
 - Staging and prod wait for an approved promotion (Day 6).
 - If someone changes dev by hand, Argo CD puts it back (Day 6 shows this).
 
-## Lab 3: try to break the rules
+## Lab 4: try to break the rules
 
-### Lab 3: try to break the rules
+### Lab 4: try to break the rules
 
 #### The idea, in plain words
 
@@ -812,7 +1541,8 @@ Each time, the platform should say no. Here a "no" is a success: it is proof tha
 2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
 4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
-5. Have a notes file or a sheet ready: you will copy three messages.
+5. The Git in this lab: git push (refused on main), git reset --hard origin/main to undo a local commit (the "Undo safely" slide), and git commit -am (Lab 1, step 7).
+6. Have a notes file or a sheet ready: you will copy three messages.
 
 #### Step 1. Push straight to main
 
@@ -966,16 +1696,16 @@ Each time, the platform should say no. Here a "no" is a success: it is proof tha
 **You should see:** In the terminal, the commit and the pulls/new link (above). Then in Gitea, in the Submit review box, Approve and Request changes are greyed out. Hover over Approve: "Pull request authors can't approve their own pull request". Copy that into your notes.
 
 ```
-Switched to a new branch 'self-approve-student07'
-[self-approve-student07 ba23b3f] Try to approve my own change
+Switched to a new branch 'self-approve-student01'
+[self-approve-student01 ba23b3f] Try to approve my own change
  1 file changed, 1 insertion(+)
 remote:
-remote: Create a new pull request for 'self-approve-student07':
-remote:   https://gitea.<lab domain>/team03/hello/pulls/new/self-approve-student07
+remote: Create a new pull request for 'self-approve-student01':
+remote:   https://gitea.<lab domain>/team01/hello/pulls/new/self-approve-student01
 remote:
-To https://gitea.<lab domain>/team03/hello
- * [new branch]      self-approve-student07 -> self-approve-student07
-branch 'self-approve-student07' set up to track 'origin/self-approve-student07'.
+To https://gitea.<lab domain>/team01/hello
+ * [new branch]      self-approve-student01 -> self-approve-student01
+branch 'self-approve-student01' set up to track 'origin/self-approve-student01'.
 ```
 
 > **Tip:** Signing in as reviewer gets an approval through: the tool checks accounts, not people. That is why at work every account is personal and never shared. In this lab you use a second login only to play the reviewer.
@@ -992,7 +1722,7 @@ branch 'self-approve-student07' set up to track 'origin/self-approve-student07'.
 
 **Do this:**
 
-1. Approve your self-approve pull request as reviewer, in a private window, as in Lab 2. The page now shows one approval.
+1. Approve your self-approve pull request as reviewer, in a private window, as in Lab 3. The page now shows one approval.
 
 2. Paste the box: it adds one more commit to the same branch.
 
@@ -1016,14 +1746,14 @@ branch 'self-approve-student07' set up to track 'origin/self-approve-student07'.
 **You should see:** In the terminal, the push to the existing pull request (above). Then in Gitea, after the reload: "New commits pushed, approval review dismissed automatically according to repository settings", and the merge box says "This pull request doesn't have enough required approvals yet. 0 of 1 official approvals granted." Copy both into your notes.
 
 ```
-[self-approve-student07 6987239] Change after approval
+[self-approve-student01 6987239] Change after approval
  1 file changed, 1 insertion(+)
 remote:
 remote: Visit the existing pull request:
-remote:   https://gitea.<lab domain>/team03/hello/pulls/2
+remote:   https://gitea.<lab domain>/team01/hello/pulls/2
 remote:
-To https://gitea.<lab domain>/team03/hello
-   ba23b3f..6987239  self-approve-student07 -> self-approve-student07
+To https://gitea.<lab domain>/team01/hello
+   ba23b3f..6987239  self-approve-student01 -> self-approve-student01
 ```
 
 > **Tip:** Close this pull request without merging when you are done (Close Pull Request at the bottom of the Conversation tab), and delete the branch.
@@ -1066,7 +1796,7 @@ To https://gitea.<lab domain>/team03/hello
 **You should see:** The file, with your name and today's date, then Git back on main:
 
 ```
-# Day 2: three refusals, seen by student07 on 2026-10-29
+# Day 2: three refusals, seen by student01 on 2026-10-29
 1. Push straight to main: "Not allowed to push to protected branch main"
 2. Approve my own pull request: "Pull request authors can't approve their own pull request"
 3. Change after approval: "approval review dismissed automatically according to repository settings"
@@ -1086,9 +1816,28 @@ Your branch is up to date with 'origin/main'.
 
 - If any of these pushes or approvals succeeds, tell the instructor straight away: a control is missing.
 
-## Lab 4: a merge conflict
+## Merging and conflicts
 
-### Lab 4: resolve a merge conflict
+### How Git joins two branches: merge, squash and conflicts
+
+Merging brings the commits of one branch into another. If main has not moved since you made your branch, Git only moves main's label forward to your last commit: a fast-forward (you did one in Lab 1).
+
+If both have moved, Git combines them: different files, or different lines of one file, it joins by itself. Gitea's squash merge (Lab 3) also turns all the commits of a branch into one commit on main, so main reads one line per change.
+
+If both changed the same line, Git cannot know which one you want: that is a conflict. Git stops, writes both versions into the file between markers, and waits for a person to choose. Nothing is lost.
+
+> **In one sentence:** Git merges different lines by itself; when two changes touch the same line, a person decides.
+
+**In the lab**
+
+- Lab 5 makes a conflict on purpose: two branches change line 22 of app/main.py.
+- Between &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD and ======= is your branch's version; between ======= and >>>>>>> main is main's.
+- Keep one, delete the other and all three marker lines, then git add and git commit.
+- Small changes merged often rarely conflict.
+
+## Lab 5: a merge conflict
+
+### Lab 5: resolve a merge conflict
 
 ![Two branches changed the same line: Git marks both versions, and you choose.](../images/merge-conflict.svg)
 
@@ -1121,7 +1870,8 @@ A conflict is normal and safe: nothing is lost, both versions are kept until you
 
 1. At work, a conflict happens when two colleagues change the same line. Here you play both: you make two branches, A and B, from the same main, and change the same line differently on each.
 2. hello is on main and up to date (cd ~/hello && git switch main && git pull).
-3. The reviewer approves in a private window, as in Lab 2 (logins: cat /etc/pelab/logins.md).
+3. The Git in this lab: git merge (Lab 1, step 8), the conflict markers (the slide "How Git joins two branches"), and git merge --abort if you get lost.
+4. The reviewer approves in a private window, as in Lab 3 (logins: cat /etc/pelab/logins.md).
 
 #### Step 1. Change the same line on two branches
 
@@ -1175,17 +1925,17 @@ A conflict is normal and safe: nothing is lost, both versions are kept until you
 Already on 'main'
 Your branch is up to date with 'origin/main'.
 Already up to date.
-Switched to a new branch 'conflict-a-student07'
+Switched to a new branch 'conflict-a-student01'
 22:GREETING = os.environ.get("GREETING", "Hello from branch A")
-[conflict-a-student07 a348b70] Greeting from branch A
+[conflict-a-student01 a348b70] Greeting from branch A
  1 file changed, 1 insertion(+), 1 deletion(-)
 remote:
-remote: Create a new pull request for 'conflict-a-student07':
-remote:   https://gitea.<lab domain>/team03/hello/pulls/new/conflict-a-student07
+remote: Create a new pull request for 'conflict-a-student01':
+remote:   https://gitea.<lab domain>/team01/hello/pulls/new/conflict-a-student01
 remote:
-To https://gitea.<lab domain>/team03/hello
- * [new branch]      conflict-a-student07 -> conflict-a-student07
-branch 'conflict-a-student07' set up to track 'origin/conflict-a-student07'.
+To https://gitea.<lab domain>/team01/hello
+ * [new branch]      conflict-a-student01 -> conflict-a-student01
+branch 'conflict-a-student01' set up to track 'origin/conflict-a-student01'.
 ```
 
 **Then, after the second box, you should see:** Branch B, its line 22, the commit and its pulls/new link:
@@ -1193,22 +1943,22 @@ branch 'conflict-a-student07' set up to track 'origin/conflict-a-student07'.
 ```
 Switched to branch 'main'
 Your branch is up to date with 'origin/main'.
-Switched to a new branch 'conflict-b-student07'
+Switched to a new branch 'conflict-b-student01'
 22:GREETING = os.environ.get("GREETING", "Hello from branch B")
-[conflict-b-student07 b6f652b] Greeting from branch B
+[conflict-b-student01 b6f652b] Greeting from branch B
  1 file changed, 1 insertion(+), 1 deletion(-)
 remote:
-remote: Create a new pull request for 'conflict-b-student07':
-remote:   https://gitea.<lab domain>/team03/hello/pulls/new/conflict-b-student07
+remote: Create a new pull request for 'conflict-b-student01':
+remote:   https://gitea.<lab domain>/team01/hello/pulls/new/conflict-b-student01
 remote:
-To https://gitea.<lab domain>/team03/hello
- * [new branch]      conflict-b-student07 -> conflict-b-student07
-branch 'conflict-b-student07' set up to track 'origin/conflict-b-student07'.
+To https://gitea.<lab domain>/team01/hello
+ * [new branch]      conflict-b-student01 -> conflict-b-student01
+branch 'conflict-b-student01' set up to track 'origin/conflict-b-student01'.
 ```
 
 **How to read it:**
 
-- When you have opened both pull requests: teamNN/hello → Pull Requests shows two, both changing line 22.
+- When you have opened both pull requests: team01/hello → Pull Requests shows two, both changing line 22.
 
 **Check before you go on:** team01/hello → Pull Requests shows two pull requests, A's and B's.
 
@@ -1224,7 +1974,7 @@ branch 'conflict-b-student07' set up to track 'origin/conflict-b-student07'.
 
 1. In a private window, as reviewer, open A's pull request: Files Changed → Review → Approve. Close the private window.
 
-2. When the checks are green, merge A as yourself (as in Lab 2, step 4).
+2. When the checks are green, merge A as yourself (as in Lab 3, step 4).
 
 3. Open B's pull request and read the box above the merge button.
 
@@ -1375,13 +2125,13 @@ GREETING = os.environ.get("GREETING", "Hello from branch A and branch B")
 **You should see:** In the terminal, the merge commit and the push to the existing pull request (above). In Gitea, the conflict message is gone from B's pull request. Approve it as reviewer in a private window, merge it as yourself, and a few minutes later dev shows the greeting you kept.
 
 ```
-[conflict-b-student07 bce9e43] Resolve conflict with main
+[conflict-b-student01 bce9e43] Resolve conflict with main
 remote:
 remote: Visit the existing pull request:
-remote:   https://gitea.<lab domain>/team03/hello/pulls/4
+remote:   https://gitea.<lab domain>/team01/hello/pulls/4
 remote:
-To https://gitea.<lab domain>/team03/hello
-   b6f652b..bce9e43  conflict-b-student07 -> conflict-b-student07
+To https://gitea.<lab domain>/team01/hello
+   b6f652b..bce9e43  conflict-b-student01 -> conflict-b-student01
 ```
 
 **If you see something else:**
@@ -1400,7 +2150,7 @@ To https://gitea.<lab domain>/team03/hello
 
 ## Platform as a product
 
-*A platform has users, an owner, a roadmap and measures of success. This afternoon you write your own one-page charter for the mini platform (Lab 5).*
+*A platform has users, an owner, a roadmap and measures of success. This afternoon you write your own one-page charter for the mini platform (Lab 6).*
 
 ### What makes a platform a product
 
@@ -1412,7 +2162,7 @@ The brief: "Capabilities must have identified users, product ownership, funded r
 - **Measures:** Lead time for a change, how often teams deploy, how long a new team takes to ship, how satisfied users are. The brief's "flow and productivity" outcome area.
 - **Feedback:** A way for users to ask for things and report problems, and a visible backlog of what is coming next.
 
-### Lab 5: write your one-page platform charter
+### Lab 6: write your one-page platform charter
 
 *on your own*
 
@@ -1576,6 +2326,10 @@ A charter writes this on one page. It is the platform team's contract with its u
 
 **Done when:** A one-page charter with users, jobs, two promises, two measures and three next steps.
 
+**If you are stuck**
+
+- A promise needs a number and a unit: "within 15 minutes", not "fast".
+
 ### Scenario: straight to production
 
 | Scenario | What happens | What the platform does | The rule |
@@ -1586,17 +2340,19 @@ A charter writes this on one page. It is the platform team's contract with its u
 
 ### Check your understanding
 
-1. What is the difference between a commit and a push?
-2. Why can you not approve your own pull request, and what does that give the bank?
-3. What happened in the platform between "Merge" and the new greeting appearing in dev?
-4. A change in dev is wrong. Name two ways to undo it on this platform, and which one leaves a record.
-5. What are the five parts of a platform charter?
+1. Name the four places a change can be, and the command that moves it from one to the next.
+2. What is the difference between a commit and a push?
+3. Why can you not approve your own pull request, and what does that give the bank?
+4. What happened in the platform between "Merge" and the new greeting appearing in dev?
+5. A change in dev is wrong. Name two ways to undo it on this platform, and which one leaves a record.
+6. What are the five parts of a platform charter?
 
 ### What we built today
 
 You can now:
 
-- Branch, commit, push, open a pull request
+- Explain where a change lives, and read git status, a diff and the history
+- Branch, commit, push, open a pull request, and undo safely
 - Review, approve and merge a change as a second person
 - Explain protected main, four eyes and the audit trail
 - Resolve a merge conflict without fear

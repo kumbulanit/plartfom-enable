@@ -3,6 +3,10 @@
 # (with passlib and bcrypt), git and tmux, the course project, and its Ansible
 # collections. Safe to run again.
 #
+# It also makes sudo passwordless for you on this lab VM (the build and
+# check-lab.sh use sudo all the time), so it asks for your password once, the
+# first time. Lab VMs only: never do this on a real server.
+#
 # From a copy of the project:
 #   bash ~/plartfom-enable/prelab-setup/install-prerequisites.sh
 # Before you have a copy (the script clones it into ~/plartfom-enable):
@@ -17,7 +21,7 @@ BUILD=false
 for arg in "$@"; do
   case "$arg" in
     --build) BUILD=true ;;
-    -h | --help) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h | --help) sed -n '2,/^set /{/^set /!p;}' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) REPO="$arg" ;;
   esac
 done
@@ -26,7 +30,7 @@ step() { printf '\n==> %s\n' "$*"; }
 fail() { printf '\nERROR: %s\n' "$*" >&2; exit 1; }
 
 # 0. The right machine and user
-[ "$(id -u)" -ne 0 ] || fail "Run this as your own user, not as root (no sudo in front). It asks for your sudo password only if sudo needs one."
+[ "$(id -u)" -ne 0 ] || fail "Run this as your own user, not as root (no sudo in front). It asks for your sudo password once, the first time."
 . /etc/os-release
 [ "${ID:-}" = ubuntu ] || fail "This VM runs ${PRETTY_NAME:-an unknown system}; the lab needs Ubuntu 22.04 or later."
 dpkg --compare-versions "${VERSION_ID:-0}" ge 22.04 || fail "This is Ubuntu ${VERSION_ID:-?}; the lab needs Ubuntu 22.04 or later."
@@ -41,7 +45,24 @@ if ! python3 -c 'import sys; sys.exit(sys.version_info < (3, 11))' 2>/dev/null; 
   PIPX_PY=(--python python3.11)
 fi
 
-# 1. Packages and Ansible
+# 1. Passwordless sudo for this user, checked with visudo before it is installed.
+SUDOERS="/etc/sudoers.d/90-${USER}-nopasswd"
+if sudo -n true 2>/dev/null && sudo -n test -f "$SUDOERS"; then
+  echo "sudo needs no password for $USER."
+else
+  step "Making sudo passwordless for $USER (type your password once)"
+  RULE=$(mktemp)
+  echo "$USER ALL=(ALL) NOPASSWD:ALL" > "$RULE"
+  sudo visudo -cf "$RULE" >/dev/null || { rm -f "$RULE"; fail "The sudo rule did not pass visudo; nothing was changed."; }
+  sudo install -m 0440 -o root -g root "$RULE" "$SUDOERS"
+  rm -f "$RULE"
+  sudo visudo -c >/dev/null || fail "sudo's settings do not check out: sudo visudo -c"
+  sudo -k
+  sudo -n true 2>/dev/null || fail "sudo still asks for a password: sudo -n -l shows your rules."
+  echo "sudo needs no password for $USER now ($SUDOERS)."
+fi
+
+# 2. Packages and Ansible
 step "Installing pipx, git and tmux (with sudo)"
 sudo apt-get update -q
 sudo apt-get install -y -q pipx git tmux ${PY_PKGS[@]+"${PY_PKGS[@]}"}
@@ -73,7 +94,7 @@ pipx runpip ansible install -q 'bcrypt<4.1'
 pipx ensurepath >/dev/null
 ansible --version | head -1
 
-# 2. The course project
+# 3. The course project
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$SELF_DIR/site.yml" ]; then
   SETUP="$SELF_DIR"
@@ -92,10 +113,10 @@ step "Installing the Ansible collections"
 cd "$SETUP"
 ansible-galaxy collection install -r requirements.yml
 
-# 3. The build, or what to type next
+# 4. The build, or what to type next
 if $BUILD; then
   step "Starting the build in tmux (session 'build'). If your connection drops: tmux attach -t build"
-  exec tmux new-session -A -s build "cd '$SETUP' && ansible-playbook site.yml -K; echo; echo 'The build stopped. Read the lines above, then press Enter to close.'; read -r _"
+  exec tmux new-session -A -s build "cd '$SETUP' && ansible-playbook site.yml; echo; echo 'The build stopped. Read the lines above, then press Enter to close.'; read -r _"
 fi
 
 cat <<EOF
@@ -105,7 +126,7 @@ All prerequisites are installed.
 Next, start the build inside tmux, so a dropped connection does not stop it:
 
   tmux
-  cd $SETUP && ansible-playbook site.yml -K
+  cd $SETUP && ansible-playbook site.yml
 
 Or run this script again with --build, and it starts the build for you.
 In a new terminal, Ansible is found by itself; in this one, type first:

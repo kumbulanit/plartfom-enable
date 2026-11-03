@@ -34,4 +34,5 @@ workspaces_jump_keys_dir: /etc/ssh/pelab-jump
 # Browser access: https://studentNN.<pelab_domain> -> Traefik -> code-server in the container.
 workspaces_manage_ingress: true
 workspaces_ingress_namespace: "{{ pelab_workspaces_namespace }}"
-workspaces_code_server_port: 8080
+# Not 8080: the labs run hello on 8080 (and 8081-8083) inside the workspace.
+workspaces_code_server_port: 13337

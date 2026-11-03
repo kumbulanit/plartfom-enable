@@ -398,7 +398,7 @@ The FMD brief sets these principles for every platform product. Each one becomes
 | Principle | What it means | Where you do it this week |
 | --- | --- | --- |
 | Security and resilience by design | Controls, recovery and monitoring are part of the product, not added later | Day 5 guardrails, Day 6 recovery |
-| Platform as a product | Known users, an owner, a roadmap, service levels and feedback | Day 2 Lab 5: your charter |
+| Platform as a product | Known users, an owner, a roadmap, service levels and feedback | Day 2 Lab 6: your charter |
 | Self-service with guardrails | Teams act alone, within approved patterns and automated rules | Days 3 and 4: templates |
 | Open standards and portability | No unjustified lock-in; data and workloads can move | Open-source tools throughout |
 | Evidence by default | Every pipeline run leaves traceable, tamper-evident evidence for audit | Day 5 evidence, Day 6 capstone pack |
@@ -1406,6 +1406,20 @@ python3 -m app.main
    ok
    ```
 
+4. Now open the same website in your browser. Your browser runs on your laptop, where localhost means your laptop, not this workspace, so the browser uses your workspace's own address instead, and code-server (your editor) passes anything under /proxy/8080/ on to port 8080 in the workspace. Print your address, then hold Ctrl (Cmd on a Mac) and click it.
+
+   ```bash
+   echo "https://$ME.$DOMAIN/proxy/8080/"
+   ```
+
+   **You should see:** Your own address, built from two settings every workspace terminal has: ME (your user name) and DOMAIN (the lab's domain):
+
+   ```
+   https://student01.<lab domain>/proxy/8080/
+   ```
+
+   A new browser tab shows a big LOCAL and the greeting: the same website as a page, because a browser asks for a page and curl asks for data. The first terminal logs this visit too.
+
 **What each line does:**
 
 - `curl -s localhost:8080/`: ask the service on this computer (localhost), port 8080, for its main page (/). -s hides curl's progress messages.
@@ -1419,8 +1433,10 @@ python3 -m app.main
 **If you see something else:**
 
 - *curl: (7) Failed to connect to localhost port 8080*: the service is not running. Look at the first terminal: start it again with python3 -m app.main.
+- *The browser tab shows an error instead of the page*: the service is not running, or the address has another port. Check the first terminal, and that the address ends in /proxy/8080/.
+- *The browser asks for a password*: it is your workspace's sign-in: type your workspace password (from your logins file) and press Enter.
 
-**Check before you go on:** You saw the greeting, then ok, and the first terminal shows a log line for each visit.
+**Check before you go on:** You saw the greeting, then ok, the page opened in your browser, and the first terminal shows a log line for each visit.
 
 #### Step 4. Stop it and start it again as "staging"
 
@@ -1444,6 +1460,12 @@ python3 -m app.main
 
    ```bash
    curl -s localhost:8081/
+   ```
+
+4. See it in your browser too: print the address for port 8081 and Ctrl+click it (Cmd+click on a Mac). The page now says STAGING.
+
+   ```bash
+   echo "https://$ME.$DOMAIN/proxy/8081/"
    ```
 
 **What each line does:**

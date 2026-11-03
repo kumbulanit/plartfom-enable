@@ -17,24 +17,29 @@ module.exports = {
     'Address already in use: a copy is still running. Stop it with pkill -f app.main, or use another PORT.',
     'curl: connection refused: the app is not running, or it runs on another port. Check the first terminal.',
   ],
-  'Lab 1: your first change, on a branch': [
+  'Lab 1: Git basics in a practice repository': [
+    'Lost in the practice repository? cd ~ && rm -rf ~/git-practice, then start again at step 2: nothing there is shared.',
+    'git log or git show fills the screen and waits: it is a viewer. Press q to leave it.',
+    'Not sure what happened? git status says which branch you are on and where each change is.',
+  ],
+  'Lab 2: your first change, on a branch': [
     'Author identity unknown: run git config --global user.name "Your Name" and git config --global user.email student01@<lab domain>.',
     'rejected (non-fast-forward): someone pushed first. Run git pull --rebase, then push again.',
   ],
-  'Lab 2: review, approve, merge, and watch it go live': [
+  'Lab 3: review, approve, merge, and watch it go live': [
     'Argo CD asks for a user name and password: delegate, with its password from cat /etc/pelab/logins.md. Your student01 password does not work there.',
     'Merge stays grey: it needs one approval from a second person. Your own approval does not count. Approve as reviewer in a private window, with its password from cat /etc/pelab/logins.md.',
     '"Some checks are pending" or "Some required checks failed" although approved: the required check called pipeline is not green yet. Wait for the run to finish; if it is red, fix it on the branch and push again (Day 5 shows how to read the failure). The "When checks succeed" button only queues the merge: nothing merges while the check is red.',
     'Argo CD still shows the old commit: the pipeline must finish first (Actions tab). Argo CD checks Git every minute, so it notices within a minute or two.',
   ],
-  'Lab 3: try to break the rules': [
+  'Lab 4: try to break the rules': [
     'If any of these pushes or approvals succeeds, tell the instructor straight away: a control is missing.',
   ],
-  'Lab 4: resolve a merge conflict': [
+  'Lab 5: resolve a merge conflict': [
     'Lost in the conflict? git merge --abort puts everything back; start step 3 again.',
     'Look for the markers <<<<<<<, ======= and >>>>>>>: delete all three lines, not only the text between them.',
   ],
-  "Lab 5: write your team's one-page platform charter": [
+  'Lab 6: write your one-page platform charter': [
     'A promise needs a number and a unit: "within 15 minutes", not "fast".',
   ],
   'Lab 1: plan, apply, change, destroy': [

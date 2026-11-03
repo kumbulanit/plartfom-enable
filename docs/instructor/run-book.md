@@ -144,7 +144,7 @@ ansible-playbook teardown.yml -e pelab_teardown_confirm=<pelab_domain>
 - [ ] Full build of one delegate VM (and then of all of them at once); build time recorded. During a pipeline: `free -h` shows more than 3 GB available and `df -h /` below 75 %, to confirm 8 vCPU, 23 GB, 100 GB is enough (setup guide, Part 9).
 - [ ] Every lab of all six days done once from a thin client, following the handbook exactly.
 - [ ] Day 3 Lab 2 and Lab 3, and Day 5 Lab 5, done once end to end (they involve the platform applier).
-- [ ] The GitOps path, which could only be tested here: a merge goes live in dev (Day 2 Lab 2);
+- [ ] The GitOps path, which could only be tested here: a merge goes live in dev (Day 2 Lab 3);
   staging and prod sync after the environment request (Day 3 Lab 2, step 6); promotion,
   a bad release and its revert, and self-heal (Day 6 Labs 1 and 4).
 - [ ] A reset of the same cohort, and a reset for a new cohort; times recorded.

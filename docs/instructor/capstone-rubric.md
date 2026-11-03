@@ -26,7 +26,7 @@ screenshots in one place (a shared page or a folder).
 **Change control**
 
 - [ ] The pull request for the capstone change, with its review and approval
-- [ ] The three refusal messages from Day 2 Lab 3 (push to main, own approval, stale approval)
+- [ ] The three refusal messages from Day 2 Lab 4 (push to main, own approval, stale approval)
 
 **Pipeline and supply chain**
 

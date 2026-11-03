@@ -640,7 +640,7 @@ needs it. Then work through the checklist at the end of the
 
 **Check that the VM is big enough.** The VM size (8 vCPU, 23 GB RAM, 100 GB
 disk) is an estimate. Once during the rehearsal, while a pipeline is running
-(Day 2 Lab 2 or Day 4), run these on the VM:
+(Day 2 Lab 3 or Day 4), run these on the VM:
 
 ```bash
 free -h

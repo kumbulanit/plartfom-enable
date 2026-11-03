@@ -92,8 +92,8 @@ def golden_path():
 
 def pr_loop():
     s = Svg(1000, 330, 'The pull-request loop: main only takes a reviewed change with a green pipeline')
-    s.box(20, 60, 150, 60, 'Your branch', 'greeting-studentNN')
-    s.box(230, 60, 150, 60, 'Pull request', 'teamNN/hello')
+    s.box(20, 60, 150, 60, 'Your branch', 'greeting-student01')
+    s.box(230, 60, 150, 60, 'Pull request', 'team01/hello')
     s.box(440, 20, 170, 56, 'Pipeline', 'posts status "pipeline"', kind='accent')
     s.box(440, 104, 170, 56, 'Reviewer', 'Review → Approve')
     s.box(680, 60, 130, 60, 'Merge gate', 'protected main', kind='bad')
@@ -109,7 +109,7 @@ def pr_loop():
     s.box(20, 220, 190, 56, 'git push to main', 'refused', kind='bad')
     s.box(250, 220, 190, 56, 'Approve your own PR', 'refused', kind='bad')
     s.box(480, 220, 230, 56, 'New commit after approval', 'approval dismissed', kind='bad')
-    s.arrow([(115, 220), (115, 180), (745, 180), (745, 120)], 'what Day 2 Lab 3 tries: each one stops at the gate', at=1, kind='bad', dashed=True)
+    s.arrow([(115, 220), (115, 180), (745, 180), (745, 120)], 'what Day 2 Lab 4 tries: each one stops at the gate', at=1, kind='bad', dashed=True)
     s.note(760, 240, 'After the merge, the pipeline on main\npushes the image and Argo CD\nrolls it out to dev.')
     s.save('pr-loop.svg')
 
@@ -495,10 +495,51 @@ def config_envs():
     s.save('config-envs.svg')
 
 
+def git_areas():
+    s = Svg(1000, 300, 'Where a change lives: the four places, and the command that moves it')
+    places = [('Working folder', 'the files you edit\n~/hello', ''), ('Staging area', 'what goes into\nthe next commit', 'accent'),
+              ('Your repository', 'every commit, in\n~/hello/.git', 'accent'), ('Gitea', 'the shared copy (origin)\nteam01/hello', 'ok')]
+    xs = [20, 275, 530, 785]
+    for x, (a, b, k) in zip(xs, places):
+        s.box(x, 50, 195, 76, a, b, kind=k)
+    for i, c in enumerate(['git add', 'git commit', 'git push']):
+        s.arrow([(xs[i] + 195, 78), (xs[i + 1], 78)], c, kind='accent')
+    s.arrow([(882, 126), (882, 175), (117, 175), (117, 126)], 'git pull: fetch what others merged, and update your files', at=1, kind='ok', below=True)
+    s.text(117, 34, 'on your workspace', size=11, color=MUTED)
+    s.text(627, 34, 'on your workspace', size=11, color=MUTED)
+    s.text(882, 34, 'on the server', size=11, color=MUTED)
+    s.note(20, 235, 'git status tells you which place each changed file is in: "Untracked" or "Changes not staged" (working folder),\n'
+                    '"Changes to be committed" (staging area), "Your branch is ahead of origin/main by 1 commit" (committed, not pushed).\n'
+                    'Nothing leaves your workspace until you push; nothing others did reaches you until you pull.', size=12)
+    s.save('git-areas.svg')
+
+
+def git_branches():
+    s = Svg(1000, 350, 'A branch is a label on a commit; HEAD is where you are')
+    s.note(40, 30, 'Each commit points back to the one before it: the history is a chain.\n'
+                   'A branch is only a name that points at the newest commit of its line, and moves forward when you commit.\n'
+                   'git switch moves HEAD (you) from one branch to another, and changes your files to match.', size=12)
+    s.box(40, 200, 170, 56, 'e448d09', 'Initial commit')
+    s.box(250, 200, 170, 56, 'b70e47f', 'Change the greeting (#1)')
+    s.arrow([(250, 228), (210, 228)])
+    s.box(480, 110, 160, 56, '91ab3f0', 'your commit', kind='accent')
+    s.box(690, 110, 160, 56, 'd37e6c2', 'your next commit', kind='accent')
+    s.arrow([(480, 138), (335, 138), (335, 200)])
+    s.arrow([(690, 138), (640, 138)])
+    s.box(265, 290, 140, 38, 'main', None, kind='ok')
+    s.arrow([(335, 290), (335, 256)], None, kind='ok')
+    s.box(680, 210, 180, 38, 'greeting-student01', None, kind='accent')
+    s.arrow([(770, 210), (770, 166)], None, kind='accent')
+    s.box(890, 210, 90, 38, 'HEAD', None, kind='bad')
+    s.arrow([(890, 229), (860, 229)], None, kind='bad')
+    s.note(450, 290, 'main stays where it is until a reviewed pull request is merged.\nYour branch moves on with every commit you make on it.', size=12)
+    s.save('git-branches.svg')
+
+
 if __name__ == '__main__':
     for draw in (golden_path, pr_loop, merge_conflict, iac_loop, env_request, container_build, new_service,
                  pipeline, guardrails, promotion, observability, recovery,
                  before_after, platform_architecture, team_topologies, golden_path_contents, value_stream,
-                 linux_layers, linux_tree, web_request, config_envs):
+                 linux_layers, linux_tree, web_request, config_envs, git_areas, git_branches):
         draw()
     print('wrote', len([f for f in os.listdir(HERE) if f.endswith('.svg')]), 'diagrams to', HERE)

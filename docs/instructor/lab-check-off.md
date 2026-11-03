@@ -10,11 +10,12 @@ Delegate: ____________________    VM: __________
 | Day 1 | Lab 1: map how a change reaches production today | [ ] |  |
 | Day 1 | Lab 2: Linux warm-up in your workspace | [ ] |  |
 | Day 1 | Lab 3: run hello by hand, and count the steps | [ ] |  |
-| Day 2 | Lab 1: your first change, on a branch | [ ] |  |
-| Day 2 | Lab 2: review, approve, merge, and watch it go live | [ ] |  |
-| Day 2 | Lab 3: try to break the rules | [ ] |  |
-| Day 2 | Lab 4: resolve a merge conflict | [ ] |  |
-| Day 2 | Lab 5: write your one-page platform charter | [ ] |  |
+| Day 2 | Lab 1: Git basics in a practice repository | [ ] |  |
+| Day 2 | Lab 2: your first change, on a branch | [ ] |  |
+| Day 2 | Lab 3: review, approve, merge, and watch it go live | [ ] |  |
+| Day 2 | Lab 4: try to break the rules | [ ] |  |
+| Day 2 | Lab 5: resolve a merge conflict | [ ] |  |
+| Day 2 | Lab 6: write your one-page platform charter | [ ] |  |
 | Day 3 | Lab 1: plan, apply, change, destroy | [ ] |  |
 | Day 3 | Lab 2: request staging and prod from the template | [ ] |  |
 | Day 3 | Lab 3: drift, and destroy and recreate | [ ] |  |

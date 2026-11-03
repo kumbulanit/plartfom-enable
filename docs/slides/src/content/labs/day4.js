@@ -105,6 +105,7 @@ module.exports = {
         out: '{"app": "hello", "version": "dev", "environment": "local", "message": "Hello from the PE Lab golden path"}\nHTTP/1.0 200 OK\nServer: hello Python/3.12.15\n...\nok',
         read: [
           'The Server line shows the Python inside the image (yours may be a slightly different 3.12), not your workspace\'s: the container brings its own.',
+          'To see it in your browser, as on Day 1: echo "https://$ME.$DOMAIN/proxy/8080/", then Ctrl+click the address (Cmd+click on a Mac).',
         ],
       },
       {
@@ -182,6 +183,9 @@ module.exports = {
         explain: [
           ['docker run ... -e APP_ENV=prod ... hello:1', 'a third copy, as prod, on port 8082.'],
           ['docker ps', 'both are running, from the same image.'],
+        ],
+        read: [
+          'Side by side in your browser: echo "https://$ME.$DOMAIN/proxy/8081/" for staging and echo "https://$ME.$DOMAIN/proxy/8082/" for prod, then Ctrl+click each (Cmd+click on a Mac). Same image, two colours, two names.',
         ],
         see: 'prod answers, and docker ps lists two containers, both from hello:1:',
         out: '{"app": "hello", "version": "dev", "environment": "prod", "message": "Hello from prod"}\nCONTAINER ID   IMAGE     ...   PORTS                    NAMES\n...            hello:1   ...   0.0.0.0:8082->8080/tcp   hello-prod\n...            hello:1   ...   0.0.0.0:8081->8080/tcp   hello-staging',

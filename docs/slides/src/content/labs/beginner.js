@@ -114,12 +114,13 @@ module.exports = {
           'Open a second terminal: click the + at the top right of the terminal panel. A new terminal opens with its own prompt. The list on the right of the panel shows both terminals; click one to switch to it.',
           { text: 'In the new terminal, visit the website\'s front page.', cmd: 'curl -s localhost:8080/', see: 'The website describes itself in one line:', out: '{"app": "hello", "version": "dev", "environment": "local", "message": "Hello from the PE Lab golden path"}', note: 'Now click the first terminal and look: a new line appeared there, saying what was asked and how it was answered. That is the website\'s log.' },
           { text: 'Back in the second terminal, ask the website whether it is healthy.', cmd: 'curl -i localhost:8080/healthz', see: 'The status line HTTP/1.0 200 OK, a few details, and the answer ok:', out: 'HTTP/1.0 200 OK\nServer: hello Python/3.12.3\nDate: Mon, 02 Nov 2026 10:12:41 GMT\nContent-Type: text/plain\nContent-Length: 3\n\nok' },
+          { text: 'Now open the same website in your browser. Your browser runs on your laptop, where localhost means your laptop, not this workspace, so the browser uses your workspace\'s own address instead, and code-server (your editor) passes anything under /proxy/8080/ on to port 8080 in the workspace. Print your address, then hold Ctrl (Cmd on a Mac) and click it.', cmd: 'echo "https://$ME.$DOMAIN/proxy/8080/"', see: 'Your own address, built from two settings every workspace terminal has: ME (your user name) and DOMAIN (the lab\'s domain):', out: 'https://student01.<lab domain>/proxy/8080/', note: 'A new browser tab shows a big LOCAL and the greeting: the same website as a page, because a browser asks for a page and curl asks for data. The first terminal logs this visit too.' },
         ],
         read: [
           'The first answer is written in JSON, a common way to write data: "name": value pairs between curly brackets. app, version and environment are what the website says about itself. environment is local because you started it by hand.',
           '200 OK and ok: the website is alive. The platform asks exactly this question, all the time, to know whether a service is healthy.',
         ],
-        check: 'You saw the greeting, then ok, and the first terminal shows a log line for each visit.',
+        check: 'You saw the greeting, then ok, the page opened in your browser, and the first terminal shows a log line for each visit.',
       },
       3: {
         plain: 'Restart the same website with three different settings, so it behaves as "staging" instead of "local".',
@@ -137,10 +138,30 @@ module.exports = {
   },
 
   // ---------------------------------------------------------------- Day 2
-  'Lab 1: your first change, on a branch': {
+  'Lab 1: Git basics in a practice repository': {
+    story: [
+      'Before you change the real service, you try every Git command in a folder of your own that nobody else sees. If something goes wrong there, you delete the folder and start again: nothing is lost and nobody is affected.',
+      'Think of Git as a camera for a folder. You arrange what goes into the picture (git add), take the picture with a caption (git commit), and later send your album to the shared library, Gitea (git push). Every picture is kept, with who took it, when, and the caption saying why.',
+      'At the end you open your real copy of hello and recognise the same things: the history, the branch you are on, and Gitea as the shared copy.',
+    ],
+    end: 'A practice repository with four commits, a branch you merged, a change you undid, and the same history seen in ~/hello and in Gitea.',
+    steps: {
+      0: { plain: 'Check that Git knows your name and e-mail address, which it writes on every commit.', check: 'git config --global --list shows user.name and user.email.' },
+      1: { plain: 'Make a new, empty repository to practise in.', check: 'git status says "No commits yet", and ls -a shows a .git folder.' },
+      2: { plain: 'Create a file, tell Git about it, and save it as your first commit.', check: 'git log shows one commit, "Add the team greeting", with your name.' },
+      3: { plain: 'Change the file, see exactly what changed, and save it as a second commit.', check: 'git log --oneline shows two commits.' },
+      4: { plain: 'Look at everything a commit records.', check: 'git show printed the author, the date, the message and the change.' },
+      5: { plain: 'Make a change by mistake, and take it back before it is saved.', check: 'The last git status --short prints nothing, and the file has no "A mistake" line.' },
+      6: { plain: 'Make a branch, save a change on it, and see that main does not have it.', check: 'On main, greeting.txt has no "Goodbye" line; git branch lists add-farewell and main.' },
+      7: { plain: 'Bring the branch into main, then undo that change with a new commit that keeps the record.', check: 'git log --oneline shows four commits, the newest "Revert \"Add a farewell\"".' },
+      8: { plain: 'Look at your real copy of hello the same way, and find the same history in Gitea.', check: 'git status says "up to date with \'origin/main\'", and Gitea\'s Commits page lists the same commit.' },
+    },
+  },
+
+  'Lab 2: your first change, on a branch': {
     story: [
       'Git keeps the whole history of a folder of code: every change, who made it, when and why. Think of "track changes" in Word, but for a whole folder, kept for ever, with a way back to any earlier version.',
-      'Three ideas carry the whole lab. A **branch** is your own private copy of the code to work in: whatever you do there disturbs nobody. A **commit** is saving your work in Git with a short note saying what you changed, like signing and dating a page. A **push** is uploading your branch to Gitea, so your team can see it.',
+      'Three ideas from Lab 1 carry the whole lab. A **branch** is your own private copy of the code to work in: whatever you do there disturbs nobody. A **commit** is saving your work in Git with a short note saying what you changed, like signing and dating a page. A **push** is uploading your branch to Gitea, so your team can see it.',
       'Here you change one sentence of the website, the greeting, and take it through all three.',
     ],
     end: 'Your own branch in Gitea with one saved change: a new greeting, checked on your workspace first.',
@@ -183,7 +204,7 @@ module.exports = {
     },
   },
 
-  'Lab 2: review, approve, merge, and watch it go live': {
+  'Lab 3: review, approve, merge, and watch it go live': {
     story: [
       'A pull request is like sending a document for sign-off. You say "here is my change, and here is why". A colleague reads it, may comment, and approves. Then it is filed: merged into main, the line that gets deployed.',
       'Two rules protect main, and Gitea enforces both: someone other than you must approve, and the automatic checks (the pipeline) must pass. After the merge you do nothing: the platform notices main has changed and puts your change live in dev by itself. That is called GitOps.',
@@ -194,7 +215,7 @@ module.exports = {
       0: {
         plain: 'Ask for your change to be accepted into main, and say why.',
         do: [
-          'In the terminal from Lab 1, find the line remote:   https://gitea.<lab domain>/team01/hello/pulls/new/greeting-student01. Hold Ctrl (on a Mac Cmd) and click the link in the terminal: it opens in a new browser tab.',
+          'In the terminal from Lab 2, find the line remote:   https://gitea.<lab domain>/team01/hello/pulls/new/greeting-student01. Hold Ctrl (on a Mac Cmd) and click the link in the terminal: it opens in a new browser tab.',
           'Gitea shows your change and a form under it. The title is already your commit message ("Change the greeting for team01"): keep it or make it clearer. It should say what changes.',
           { text: 'In the box under the title, write two lines on why: for example "Shows our team\'s name on the dev page, so we can see our own release."', shot: { src: 'gitea-02-new-pr-form.png', caption: 'The new pull request form: at the top, which branch goes into which (pull from your branch, merge into main); the title, already filled in; and the box where you write why. Your names, team and numbers are your own.' } },
           { text: 'Click Create Pull Request (the blue button under the form).', shot: { src: 'gitea-03-pr-created.png', caption: 'Your pull request is created: its number (#1), your description, your commit, and at the bottom the checks starting. The yellow dot means "still running". Your names, team and numbers are your own.' } },
@@ -237,7 +258,7 @@ module.exports = {
     },
   },
 
-  'Lab 3: try to break the rules': {
+  'Lab 4: try to break the rules': {
     story: [
       'A control at a bank is only real if it stops people, including well-meaning people in a hurry. In this lab you deliberately try three shortcuts: changing main directly, approving your own change, and changing your change after it was approved.',
       'Each time, the platform should say no. Here a "no" is a success: it is proof that the control works. You copy each refusal into a file, as evidence for Day 6.',
@@ -274,7 +295,7 @@ module.exports = {
       3: {
         plain: 'Approve it as reviewer, then change your change, and watch the approval disappear.',
         do: [
-          'Approve your self-approve pull request as reviewer, in a private window, as in Lab 2. The page now shows one approval.',
+          'Approve your self-approve pull request as reviewer, in a private window, as in Lab 3. The page now shows one approval.',
           'Paste the box: it adds one more commit to the same branch.',
           { text: 'Reload the pull request page.', shot: { src: 'gitea-10-approval-dismissed.png', caption: 'Refusal 3: the approval is marked Dismissed, the reason says "New commits pushed, approval review dismissed automatically according to repository settings", and the merge box is back to "0 of 1 official approvals granted". Your names, team and numbers are your own.' } },
         ],
@@ -284,7 +305,7 @@ module.exports = {
     },
   },
 
-  'Lab 4: resolve a merge conflict': {
+  'Lab 5: resolve a merge conflict': {
     story: [
       'Imagine two colleagues editing the same sentence of the same document at the same time, each in their own copy. When the copies come together, nobody can say automatically which sentence wins. Git is in the same position: when two branches change the same line, it stops and asks a person to choose. That is a merge conflict.',
       'A conflict is normal and safe: nothing is lost, both versions are kept until you decide. Here you make one on purpose, playing both colleagues with two branches, A and B, so that the first real one does not frighten you.',
@@ -296,7 +317,7 @@ module.exports = {
         plain: 'Merge A\'s pull request first. B\'s pull request then no longer fits.',
         do: [
           'In a private window, as reviewer, open A\'s pull request: Files Changed → Review → Approve. Close the private window.',
-          'When the checks are green, merge A as yourself (as in Lab 2, step 4).',
+          'When the checks are green, merge A as yourself (as in Lab 3, step 4).',
           { text: 'Open B\'s pull request and read the box above the merge button.', shot: { src: 'gitea-11-conflict.png', caption: 'B\'s pull request after A\'s was merged: "This pull request has changes conflicting with the target branch", the file that conflicts (app/main.py), and no merge button. Steps 3 to 5 fix it. Your names, team and numbers are your own.' } },
         ],
         check: 'B\'s pull request says "This pull request has changes conflicting with the target branch."',
@@ -318,7 +339,7 @@ module.exports = {
     },
   },
 
-  'Lab 5: write your one-page platform charter': {
+  'Lab 6: write your one-page platform charter': {
     story: [
       'A platform is a product, and its customers are the teams who use it. Like any product, it needs to know who its users are, what they need, what it promises them, and how it will know whether it keeps those promises.',
       'A charter writes this on one page. It is the platform team\'s contract with its users: short enough to read in two minutes, precise enough to check.',

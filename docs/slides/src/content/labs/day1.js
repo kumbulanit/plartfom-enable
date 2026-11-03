@@ -367,6 +367,7 @@ module.exports = {
         do: [
           'Open a second terminal: click the + at the top right of the terminal panel. A new terminal opens; the list on the right of the panel shows both, and you can click to switch between them.',
           'In the new terminal, paste the box and press Enter.',
+          { text: 'Then open it in your browser: print your address and Ctrl+click it (Cmd+click on a Mac).', cmd: 'echo "https://$ME.$DOMAIN/proxy/8080/"' },
         ],
         run: 'curl -s localhost:8080/\ncurl -i localhost:8080/healthz',
         explain: [
@@ -379,9 +380,12 @@ module.exports = {
           'app, version and environment are what the service says about itself. environment is local because you started it by hand.',
           'Look back at the first terminal: every request wrote one new line there. That is the log.',
           'The health check answers ok with 200 OK: the service is alive. The platform asks exactly this, all the time.',
+          'curl uses localhost because curl runs in the workspace, next to the service. Your browser runs on your laptop, so it uses your workspace\'s address, https://$ME.$DOMAIN, and code-server passes /proxy/8080/ on to port 8080. Any port works the same way: /proxy/8081/ for 8081.',
         ],
         ifnot: [
           ['curl: (7) Failed to connect to localhost port 8080', 'the service is not running. Look at the first terminal: start it again with python3 -m app.main.'],
+          ['The browser tab shows an error instead of the page', 'the service is not running, or the address has another port. Check the first terminal, and that the address ends in /proxy/8080/.'],
+          ['The browser asks for a password', 'it is your workspace\'s sign-in: type your workspace password (from your logins file) and press Enter.'],
         ],
       },
       {
@@ -392,6 +396,7 @@ module.exports = {
           'Click in the first terminal (the one running the service) and press Ctrl+C. The service stops and the prompt comes back.',
           'In the same first terminal, paste the box below and press Enter. The service starts again, now as staging, on port 8081.',
           { text: 'Switch to the second terminal and run:', cmd: 'curl -s localhost:8081/' },
+          { text: 'See it in your browser too: print the address for port 8081 and Ctrl+click it (Cmd+click on a Mac). The page now says STAGING.', cmd: 'echo "https://$ME.$DOMAIN/proxy/8081/"' },
         ],
         run: 'APP_ENV=staging GREETING="Hello from staging" PORT=8081 python3 -m app.main',
         explain: [

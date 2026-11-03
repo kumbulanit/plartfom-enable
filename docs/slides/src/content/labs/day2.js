@@ -5,7 +5,232 @@
 const { TERMINAL, OPEN_LINK, PRIVATE_WINDOW } = require('./common');
 
 module.exports = {
-  'Lab 1: your first change, on a branch': {
+  'Lab 1: Git basics in a practice repository': {
+    goal: 'Try every Git command of the day in a practice folder of your own, where nothing can go wrong, and then recognise the same things in your real repository, ~/hello.',
+    learn: [
+      'The four places a change lives (working folder, staging area, your repository, Gitea), and the command that moves it between them.',
+      'How to read git status, a diff and the history.',
+      'How to make a branch, merge it, and undo a change safely.',
+    ],
+    words: [
+      ['Repository', 'A folder whose whole history Git keeps, in a hidden folder called .git.'],
+      ['Working folder', 'The files as they are now, which you edit.'],
+      ['Staging area', 'The changes you chose, with git add, to go into the next commit.'],
+      ['Commit', 'A saved snapshot of the files, with your name, the time and a message that says why.'],
+      ['Commit id', 'A unique fingerprint of a commit, such as 8dcb232. Yours are different from the ones on this page.'],
+      ['Diff', 'The difference between two versions, line by line: - for a removed line, + for an added one.'],
+      ['Branch', 'A name that points at the newest commit of a line of work. It moves forward when you commit.'],
+      ['HEAD', 'Where you are: the branch (and commit) your files come from.'],
+      ['Merge', 'Bring the commits of one branch into another.'],
+      ['Revert', 'A new commit that undoes an earlier one, keeping both in the history.'],
+    ],
+    start: [
+      ...TERMINAL,
+      'This lab works in a new folder, ~/git-practice, which only you have: it is never pushed to Gitea. If you get lost at any point, run cd ~ && rm -rf ~/git-practice and start again at step 2.',
+      'Run git status whenever you are unsure what happened: it always says which branch you are on and where each change is.',
+    ],
+    steps: [
+      {
+        title: 'Check that Git knows who you are',
+        where: 'Workspace terminal',
+        why: 'Git writes your name and e-mail address on every commit. You set them on Day 1; check them before you make your first commit today.',
+        run: 'git --version\ngit config --global --list',
+        explain: [
+          ['git --version', 'show which version of Git is installed.'],
+          ['git config --global --list', 'list your Git settings for every repository (--global): your name, your e-mail address and the password cache.'],
+        ],
+        see: 'The version, then your three settings:',
+        out: 'git version 2.43.0\nuser.name=Thandi Nkosi\nuser.email=student01@<lab domain>\ncredential.helper=cache --timeout=36000',
+        ifnot: [
+          ['No user.name or user.email line', 'set them now, with your own name: git config --global user.name "Your Name", then git config --global user.email "$ME@$DOMAIN".'],
+        ],
+      },
+      {
+        title: 'Make a practice repository',
+        where: 'Workspace terminal',
+        why: 'git init turns an ordinary folder into a repository by adding the .git folder, where Git keeps the history. On Day 1, git clone did this for you and also filled in hello\'s history.',
+        run: 'mkdir -p ~/git-practice && cd ~/git-practice\ngit init -b main\nls -a\ngit status',
+        explain: [
+          ['mkdir -p ~/git-practice && cd ~/git-practice', 'make a new folder and go into it.'],
+          ['git init -b main', 'make it a repository, whose first branch is called main (-b: branch).'],
+          ['ls -a', 'list everything, hidden files included (-a: all). Names that start with a dot are hidden.'],
+          ['git status', 'ask Git what is going on.'],
+        ],
+        see: 'An empty repository: only the hidden .git folder, and no commits yet:',
+        out: 'Initialized empty Git repository in /home/student01/git-practice/.git/\n.\n..\n.git\nOn branch main\n\nNo commits yet\n\nnothing to commit (create/copy files and use "git add" to track)',
+        read: [
+          '. is this folder and .. the one above it: every folder has both.',
+          '.git is the repository\'s memory. Never edit or delete it by hand: Git commands do that.',
+        ],
+      },
+      {
+        title: 'Your first commit: from working folder to repository',
+        where: 'Workspace terminal',
+        why: 'A change goes through three places on your workspace: the working folder (you edit), the staging area (git add) and the repository (git commit). git status shows where it is at each moment.',
+        run: 'echo "Hello from $TEAM" > greeting.txt\ngit status',
+        explain: [
+          ['echo "Hello from $TEAM" > greeting.txt', 'create the file greeting.txt with one line in it. $TEAM becomes your team, team01.'],
+          ['git status', 'Git sees a new file it does not follow yet.'],
+        ],
+        see: 'The new file is untracked: Git sees it, but does not record it:',
+        out: 'On branch main\n\nNo commits yet\n\nUntracked files:\n  (use "git add <file>..." to include in what will be committed)\n\tgreeting.txt\n\nnothing added to commit but untracked files present (use "git add" to track)',
+        then: {
+          say: 'Now stage it, check again, and commit it:',
+          run: 'git add greeting.txt\ngit status\ngit commit -m "Add the team greeting"\ngit log',
+          explain: [
+            ['git add greeting.txt', 'put the file in the staging area: it goes into the next commit.'],
+            ['git status', 'the file is now under "Changes to be committed".'],
+            ['git commit -m "Add the team greeting"', 'save the staged changes as a commit, with a message (-m) that says why.'],
+            ['git log', 'show the history: every commit, newest first.'],
+          ],
+          see: 'Staged, then committed, then your first commit in the history:',
+          out: 'On branch main\n\nNo commits yet\n\nChanges to be committed:\n  (use "git rm --cached <file>..." to unstage)\n\tnew file:   greeting.txt\n\n[main (root-commit) 8dcb232] Add the team greeting\n 1 file changed, 1 insertion(+)\n create mode 100644 greeting.txt\ncommit 8dcb2323e356112fde90624d1d774d5230894302 (HEAD -> main)\nAuthor: Thandi Nkosi <student01@<lab domain>>\nDate:   Tue Nov 3 11:21:05 2026 +0000\n\n    Add the team greeting',
+          read: [
+            'root-commit: the first commit of the repository; it has no commit before it.',
+            '8dcb232 is the start of the commit id. Yours is different: it depends on your name, the time and the content.',
+            '(HEAD -> main): you are on main, and main points at this commit.',
+            'git log opens a viewer when the history is longer than the screen: press q to leave it.',
+          ],
+        },
+      },
+      {
+        title: 'Change the file, and read the difference',
+        where: 'Workspace terminal',
+        why: 'Before you commit, look at what you changed. A diff is also what a reviewer reads in a pull request, so reading one here is practice for reviewing in Lab 3.',
+        run: 'sed -i "s/Hello/Good morning/" greeting.txt\necho "Owner: $ME" >> greeting.txt\ngit diff',
+        explain: [
+          ['sed -i "s/Hello/Good morning/" greeting.txt', 'change Hello into Good morning, in the file itself (-i). s/old/new/ means substitute.'],
+          ['echo "Owner: $ME" >> greeting.txt', 'add a line at the end (>> adds; > would replace the whole file).'],
+          ['git diff', 'show the changes that are not staged yet, line by line.'],
+        ],
+        see: 'One line removed (-) and two added (+):',
+        out: 'diff --git a/greeting.txt b/greeting.txt\nindex f42170f..ab65d5d 100644\n--- a/greeting.txt\n+++ b/greeting.txt\n@@ -1 +1,2 @@\n-Hello from team01\n+Good morning from team01\n+Owner: student01',
+        read: [
+          '--- a/ is the file before your change, +++ b/ the file after.',
+          '@@ -1 +1,2 @@: line 1 before, lines 1 to 2 after.',
+          'A changed line shows as one line removed and one added: Git compares whole lines.',
+        ],
+        then: {
+          say: 'Stage and commit it, and look at the history:',
+          run: 'git add -A\ngit commit -m "Say good morning and name the owner"\ngit log --oneline',
+          explain: [
+            ['git add -A', 'stage every change (-A: all).'],
+            ['git commit -m "..."', 'commit it.'],
+            ['git log --oneline', 'the history, one line per commit: the short id and the message.'],
+          ],
+          see: 'Two commits, newest at the top:',
+          out: '[main 9267ee9] Say good morning and name the owner\n 1 file changed, 2 insertions(+), 1 deletion(-)\n9267ee9 (HEAD -> main) Say good morning and name the owner\n8dcb232 Add the team greeting',
+        },
+      },
+      {
+        title: 'Look inside a commit',
+        where: 'Workspace terminal',
+        why: 'Every commit keeps who, when, why and exactly what changed. This is the record an auditor reads, and anyone can read it again years later.',
+        run: 'git show HEAD',
+        explain: [
+          ['git show HEAD', 'show one commit in full: here HEAD, the newest commit on the branch you are on. git show 8dcb232 would show the first one (with your own id).'],
+        ],
+        see: 'The commit\'s full id, author, date and message, then its diff:',
+        out: 'commit 9267ee9d97b2ab97c1164331660fd6b6c182680e (HEAD -> main)\nAuthor: Thandi Nkosi <student01@<lab domain>>\nDate:   Tue Nov 3 11:21:05 2026 +0000\n\n    Say good morning and name the owner\n\ndiff --git a/greeting.txt b/greeting.txt\nindex f42170f..ab65d5d 100644\n--- a/greeting.txt\n+++ b/greeting.txt\n@@ -1 +1,2 @@\n-Hello from team01\n+Good morning from team01\n+Owner: student01',
+        read: ['Gitea shows the same page when you click a commit on the Commits page of a repository.'],
+      },
+      {
+        title: 'Make a mistake, and undo it',
+        where: 'Workspace terminal',
+        why: 'Before a commit, a change can be undone without leaving a trace. git restore takes a change out of the staging area, or throws it away entirely.',
+        run: 'echo "A mistake" >> greeting.txt\ngit add greeting.txt\ngit status --short\ngit restore --staged greeting.txt\ngit status --short\ngit restore greeting.txt\ngit status --short\ncat greeting.txt',
+        explain: [
+          ['echo "A mistake" >> greeting.txt, git add greeting.txt', 'make a bad change and stage it.'],
+          ['git status --short', 'a short status: one line per file. M in the first column: staged. M in the second: changed, not staged.'],
+          ['git restore --staged greeting.txt', 'take the change out of the staging area. It stays in the file.'],
+          ['git restore greeting.txt', 'throw the change away: the file goes back to the last commit. This cannot be undone.'],
+          ['cat greeting.txt', 'show the file.'],
+        ],
+        see: 'Staged (M in the first column), then only changed (M in the second), then nothing, and the file as it was committed:',
+        out: 'M  greeting.txt\n M greeting.txt\nGood morning from team01\nOwner: student01',
+        read: [
+          'The third git status --short prints nothing: there is nothing left to commit.',
+          'After a commit has been pushed, you undo it differently: with git revert, in step 8.',
+        ],
+      },
+      {
+        title: 'Work on a branch',
+        where: 'Workspace terminal',
+        why: 'A branch lets you work without touching main. Every change you make this week starts on a branch; main only changes when a reviewed change is merged.',
+        run: 'git switch -c add-farewell\necho "Goodbye from $TEAM" >> greeting.txt\ngit commit -am "Add a farewell"\ngit log --oneline --graph --all',
+        explain: [
+          ['git switch -c add-farewell', 'create (-c) a branch called add-farewell where you are, and switch to it.'],
+          ['git commit -am "Add a farewell"', 'stage every changed file (-a) and commit it (-m), in one go. It works for files Git already follows, not for new ones.'],
+          ['git log --oneline --graph --all', 'the history of every branch (--all), drawn as a line (--graph).'],
+        ],
+        see: 'The new commit, on add-farewell; main still points at the commit before:',
+        out: 'Switched to a new branch \'add-farewell\'\n[add-farewell 9f22cfd] Add a farewell\n 1 file changed, 1 insertion(+)\n* 9f22cfd (HEAD -> add-farewell) Add a farewell\n* 9267ee9 (main) Say good morning and name the owner\n* 8dcb232 Add the team greeting',
+        then: {
+          say: 'Go back to main and look at the file:',
+          run: 'git switch main\ncat greeting.txt\ngit branch',
+          explain: [
+            ['git switch main', 'move to main. Git changes your files to main\'s version.'],
+            ['cat greeting.txt', 'show the file: no farewell on main.'],
+            ['git branch', 'list your branches; * marks the one you are on.'],
+          ],
+          see: 'main\'s version of the file, and two branches:',
+          out: 'Switched to branch \'main\'\nGood morning from team01\nOwner: student01\n  add-farewell\n* main',
+          read: ['The farewell is not lost: it is on add-farewell. git switch add-farewell would bring it back into the file.'],
+        },
+      },
+      {
+        title: 'Merge the branch, then undo it with a revert',
+        where: 'Workspace terminal',
+        why: 'Merging brings a branch\'s work into main; in the team, Gitea does this for you after the review (Lab 3). A revert undoes a commit by adding a new one, so the history keeps both: that is how a change already shared is undone on this platform.',
+        run: 'git merge add-farewell\ngit log --oneline --graph\ngit branch -d add-farewell',
+        explain: [
+          ['git merge add-farewell', 'bring the commits of add-farewell into the branch you are on, main.'],
+          ['git log --oneline --graph', 'main\'s history now.'],
+          ['git branch -d add-farewell', 'delete the branch (-d): its work is in main now.'],
+        ],
+        see: 'A fast-forward: main had not moved, so Git only moved main forward to the branch\'s commit:',
+        out: 'Updating 9267ee9..9f22cfd\nFast-forward\n greeting.txt | 1 +\n 1 file changed, 1 insertion(+)\n* 9f22cfd (HEAD -> main, add-farewell) Add a farewell\n* 9267ee9 Say good morning and name the owner\n* 8dcb232 Add the team greeting\nDeleted branch add-farewell (was 9f22cfd).',
+        then: {
+          say: 'Now suppose the farewell was a mistake. Undo it, and keep the record:',
+          run: 'git revert --no-edit HEAD\ngit log --oneline\ncat greeting.txt',
+          explain: [
+            ['git revert --no-edit HEAD', 'add a new commit that undoes the newest one (HEAD). --no-edit keeps the message Git suggests.'],
+            ['git log --oneline, cat greeting.txt', 'the history and the file.'],
+          ],
+          see: 'Four commits: the farewell and its revert are both in the history, and the file is back as before:',
+          out: '[main 8cb387a] Revert "Add a farewell"\n Date: Tue Nov 3 11:21:05 2026 +0000\n 1 file changed, 1 deletion(-)\n8cb387a (HEAD -> main) Revert "Add a farewell"\n9f22cfd Add a farewell\n9267ee9 Say good morning and name the owner\n8dcb232 Add the team greeting\nGood morning from team01\nOwner: student01',
+          read: ['Nothing was deleted: anyone can see that the farewell was added, then taken out, by whom and when. On Day 6 a rollback in prod is exactly this, through a pull request.'],
+        },
+      },
+      {
+        title: 'The same things in your real repository',
+        where: 'Workspace terminal, then Gitea',
+        why: 'Your copy of hello is a repository like the practice one, with one difference: it was cloned from Gitea, so it knows a remote, origin, to push to and pull from.',
+        run: 'cd ~/hello\ngit status\ngit remote -v\ngit log --oneline\ngit branch -a',
+        explain: [
+          ['cd ~/hello', 'go into your copy of hello, from Day 1.'],
+          ['git status', 'where you are, and whether your copy is in step with Gitea.'],
+          ['git remote -v', 'the remote this copy talks to: origin, the address you cloned from.'],
+          ['git log --oneline', 'hello\'s history.'],
+          ['git branch -a', 'every branch (-a: all), yours and the ones Git remembers from Gitea (remotes/origin/...).'],
+        ],
+        see: 'main, in step with Gitea; origin is Gitea; one commit so far:',
+        out: 'On branch main\nYour branch is up to date with \'origin/main\'.\n\nnothing to commit, working tree clean\norigin\thttps://gitea.<lab domain>/team01/hello (fetch)\norigin\thttps://gitea.<lab domain>/team01/hello (push)\ne448d09 (HEAD -> main, origin/main, origin/HEAD) Initial commit\n* main\n  remotes/origin/HEAD -> origin/main\n  remotes/origin/main',
+        read: [
+          'Initial commit was made by the platform when it created hello from its template. Your id is different.',
+          'origin/main is your copy\'s memory of Gitea\'s main. It only changes when you talk to Gitea (git pull or git fetch).',
+          'In Gitea, open team01/hello and click Commits (above the file list): the same commit, with the same id. Click it: the same page as git show.',
+        ],
+        ifnot: [
+          ['cd: no such file or directory', 'you have no copy yet: do step 1 of Day 1 Lab 3 first.'],
+          ['Changes not staged, or untracked files', 'something changed in ~/hello since Day 1. git restore . puts the files back as they were committed (you lose those changes, which is what you want here).'],
+        ],
+      },
+    ],
+    done: 'Your practice repository has four commits, you have merged and reverted a change, and you have seen the same history in ~/hello and in Gitea.',
+  },
+
+  'Lab 2: your first change, on a branch': {
     goal: 'Change the greeting of your team\'s service on a branch of your own, check it, save it as a commit and send it to Gitea.',
     learn: [
       'The everyday Git loop: get the latest version, make a branch, change, check, commit, push.',
@@ -21,8 +246,9 @@ module.exports = {
     ],
     start: [
       ...TERMINAL,
+      'The Git in this lab is what you practised in Lab 1: git switch, git status, git diff, git add and git commit, and then git push to send your branch to Gitea for the first time.',
       'Your copy of hello from Day 1, in ~/hello. If you do not have it, do step 1 of Day 1 Lab 3 first.',
-      'The file list on the left of the workspace (the Explorer, the two-pages icon at the top of the left bar) shows your home folder. If it says "You have not yet opened a folder": click Open Folder, type /home/ followed by your user name (for example /home/student07), and click OK.',
+      'The file list on the left of the workspace (the Explorer, the two-pages icon at the top of the left bar) shows your home folder. If it says "You have not yet opened a folder": click Open Folder, type /home/ followed by your user name (for example /home/student01), and click OK.',
     ],
     steps: [
       {
@@ -38,7 +264,7 @@ module.exports = {
         see: 'Either "Already up to date." or a short list of the files that changed:',
         out: 'Already on \'main\'\nYour branch is up to date with \'origin/main\'.\nAlready up to date.',
         ifnot: [
-          ['Password prompt', 'type your studentNN password, from cat /etc/pelab/logins.md (nothing appears while you type).'],
+          ['Password prompt', 'type your student01 password, from cat /etc/pelab/logins.md (nothing appears while you type).'],
           ['cd: no such file or directory', 'you have no copy yet: do step 1 of Day 1 Lab 3, then come back.'],
         ],
       },
@@ -51,7 +277,7 @@ module.exports = {
           ['git switch -c greeting-$ME', 'create (-c) a new branch called greeting- followed by your user name, and switch to it. $ME is filled in for you.'],
         ],
         see: 'Git confirms the new branch:',
-        out: 'Switched to a new branch \'greeting-student07\'',
+        out: 'Switched to a new branch \'greeting-student01\'',
         read: [
           'From now on, every commit goes onto your branch, not onto main. git branch lists your branches; the one with * is the one you are on.',
         ],
@@ -63,7 +289,7 @@ module.exports = {
         do: [
           'In the Explorer on the left, click hello, then app, then main.py. The file opens in the editor.',
           'Find line 22, which starts with GREETING. The line numbers are on the left of the editor.',
-          'Change only the text in the second pair of quotes, for example to Hello from team 3. Keep the quotes.',
+          'Change only the text in the second pair of quotes, for example to Hello from team01. Keep the quotes.',
           'Save with Ctrl+S (on a Mac Cmd+S). The dot next to the file name at the top disappears when it is saved.',
           { text: 'Editor not working for you? Instead of the four instructions above, paste this in the terminal: it makes the same change (a greeting with your team and your name) and shows the new line.', cmd: 'sed -i "s/^GREETING = .*/GREETING = os.environ.get(\\"GREETING\\", \\"Hello from $TEAM, by $ME\\")/" app/main.py\ngrep -n "^GREETING" app/main.py' },
           { text: 'Back in the terminal, run this to see that Git noticed:', cmd: 'git status' },
@@ -72,14 +298,14 @@ module.exports = {
           file: 'app/main.py',
           how: 'line 22, only the text in the second pair of quotes.',
           before: 'GREETING = os.environ.get("GREETING", "Hello from the PE Lab golden path")',
-          after: 'GREETING = os.environ.get("GREETING", "Hello from team 3")',
+          after: 'GREETING = os.environ.get("GREETING", "Hello from team01")',
         },
         run: 'git status',
         explain: [
           ['git status', 'show which files changed since the last commit.'],
         ],
         see: 'One modified file, in red:',
-        out: 'On branch greeting-student07\nChanges not staged for commit:\n  (use "git add <file>..." to update what will be committed)\n  (use "git restore <file>..." to discard changes in working directory)\n\tmodified:   app/main.py',
+        out: 'On branch greeting-student01\nChanges not staged for commit:\n  (use "git add <file>..." to update what will be committed)\n  (use "git restore <file>..." to discard changes in working directory)\n\tmodified:   app/main.py',
         ifnot: [
           ['nothing to commit, working tree clean', 'the file was not saved. Click in the editor and press Ctrl+S (Mac Cmd+S), then run git status again.'],
         ],
@@ -99,7 +325,7 @@ module.exports = {
           ['python3 -m app.main', 'run the service from your changed code, as on Day 1.'],
         ],
         see: 'In the second terminal, your text in "message":',
-        out: '{"app": "hello", "version": "dev", "environment": "local", "message": "Hello from team 3"}',
+        out: '{"app": "hello", "version": "dev", "environment": "local", "message": "Hello from team01"}',
         ifnot: [
           ['SyntaxError when it starts', 'a quote went missing in the GREETING line. Fix the line so it looks like the After box in step 3, save, and start again.'],
           ['Address already in use', 'a copy from Day 1 is still running: pkill -f "python3 -m app.main", then start again.'],
@@ -115,7 +341,7 @@ module.exports = {
           ['git commit -m "Change the greeting for $TEAM"', 'save the commit, with a message (-m). A good message finishes the sentence "This change will..."'],
         ],
         see: 'One line with your branch and the commit\'s short id, then a count of what changed:',
-        out: '[greeting-student07 6514a43] Change the greeting for team03\n 1 file changed, 1 insertion(+), 1 deletion(-)',
+        out: '[greeting-student01 6514a43] Change the greeting for team01\n 1 file changed, 1 insertion(+), 1 deletion(-)',
         read: [
           '6514a43 is the start of the commit\'s id, a unique fingerprint. Yours is different.',
           '1 insertion, 1 deletion: Git sees a changed line as one line removed and one added.',
@@ -133,20 +359,20 @@ module.exports = {
           ['git push -u origin greeting-$ME', 'send your branch to Gitea (origin is Git\'s name for where you cloned from). -u links your branch to Gitea\'s, so next time just git push is enough.'],
         ],
         see: 'Gitea answers with a link to open a pull request:',
-        out: 'remote:\nremote: Create a new pull request for \'greeting-student07\':\nremote:   https://gitea.<lab domain>/team03/hello/pulls/new/greeting-student07\nremote:\nTo https://gitea.<lab domain>/team03/hello\n * [new branch]      greeting-student07 -> greeting-student07\nbranch \'greeting-student07\' set up to track \'origin/greeting-student07\'.',
+        out: 'remote:\nremote: Create a new pull request for \'greeting-student01\':\nremote:   https://gitea.<lab domain>/team01/hello/pulls/new/greeting-student01\nremote:\nTo https://gitea.<lab domain>/team01/hello\n * [new branch]      greeting-student01 -> greeting-student01\nbranch \'greeting-student01\' set up to track \'origin/greeting-student01\'.',
         read: [
-          'Keep this terminal open: in Lab 2 you open that link. ' + OPEN_LINK,
-          'Check in Gitea: open teamNN/hello and click Branches (above the file list). Your branch is in the list.',
+          'Keep this terminal open: in Lab 3 you open that link. ' + OPEN_LINK,
+          'Check in Gitea: open team01/hello and click Branches (above the file list). Your branch is in the list.',
         ],
         ifnot: [
           ['rejected (non-fast-forward)', 'someone pushed to a branch with the same name first, which should not happen with $ME in the name. Run git pull --rebase, then git push again.'],
         ],
       },
     ],
-    done: 'Your branch is in Gitea (teamNN/hello → Branches shows greeting-studentNN).',
+    done: 'Your branch is in Gitea (team01/hello → Branches shows greeting-student01).',
   },
 
-  'Lab 2: review, approve, merge, and watch it go live': {
+  'Lab 3: review, approve, merge, and watch it go live': {
     goal: 'Turn your change into a reviewed decision: a pull request, a review and approval by a second person, a merge, and the change running in dev by itself.',
     learn: [
       'How to propose a change with a pull request, and how to review one.',
@@ -162,9 +388,10 @@ module.exports = {
       ['Argo CD', 'The tool that watches main and makes the cluster run what main says, in dev by itself.'],
     ],
     start: [
-      'Lab 1 done: your branch is pushed.',
+      'Lab 2 done: your branch is pushed.',
+      'The Git in this lab: after the merge, git switch main and git pull bring Gitea\'s new main into your copy, and git log shows it (Lab 1, steps 4 and 9).',
       'You play two people: the author, in your normal browser window, and the reviewer, in a private window. The reviewer\'s login is in your logins file (cat /etc/pelab/logins.md).',
-      'Gitea is open in your browser and you are signed in as yourself: https://gitea.<lab domain> → Sign In, with your studentNN and password.',
+      'Gitea is open in your browser and you are signed in as yourself: https://gitea.<lab domain> → Sign In, with your student01 and password.',
     ],
     steps: [
       {
@@ -172,8 +399,8 @@ module.exports = {
         where: 'Browser: Gitea',
         why: 'A pull request turns your change into a proposal that others can read, discuss and approve. Nothing reaches main without one.',
         do: [
-          'In the terminal from Lab 1, find the line remote:   https://gitea.<lab domain>/teamNN/hello/pulls/new/greeting-studentNN. ' + OPEN_LINK,
-          'Gitea shows your change and a form under it. The title is already your commit message ("Change the greeting for teamNN"): keep it or make it clearer. It should say what changes.',
+          'In the terminal from Lab 2, find the line remote:   https://gitea.<lab domain>/team01/hello/pulls/new/greeting-student01. ' + OPEN_LINK,
+          'Gitea shows your change and a form under it. The title is already your commit message ("Change the greeting for team01"): keep it or make it clearer. It should say what changes.',
           'In the box under the title, write two lines on why: for example "Shows our team\'s name on the dev page, so we can see our own release."',
           'Click Create Pull Request.',
         ],
@@ -183,8 +410,8 @@ module.exports = {
           'Under the checks Gitea says what still stands between the change and main, for example that it needs an approval.',
         ],
         ifnot: [
-          ['The link does not open', 'in Gitea open teamNN/hello → Pull Requests → New Pull Request; on the right (pull from) choose your branch greeting-studentNN, then fill in the form as above.'],
-          ['"These branches are equal"', 'your commit was not pushed. Go back to Lab 1, step 6.'],
+          ['The link does not open', 'in Gitea open team01/hello → Pull Requests → New Pull Request; on the right (pull from) choose your branch greeting-student01, then fill in the form as above.'],
+          ['"These branches are equal"', 'your commit was not pushed. Go back to Lab 2, step 6.'],
         ],
       },
       {
@@ -193,13 +420,13 @@ module.exports = {
         why: 'A review is a second pair of eyes. Small changes make reviews quick: one line takes a minute to read.',
         do: [
           PRIVATE_WINDOW + ' Sign in as reviewer.',
-          'As the reviewer, open your pull request (teamNN/hello → Pull Requests → yours) and click the Files Changed tab.',
+          'As the reviewer, open your pull request (team01/hello → Pull Requests → yours) and click the Files Changed tab.',
           'The old line is shown in red with -, the new line in green with +.',
           'Move the mouse over the green line: a blue + appears at its left. Click it, write a short comment (a question or a suggestion) and click Add single comment.',
         ],
         see: 'A comment attached to a line of your change, by reviewer. In your normal window you see it too, in the Conversation tab.',
         read: [
-          'A good comment is about the change, not the person: "Should this say team 3 or Team 3?" rather than "This is wrong".',
+          'A good comment is about the change, not the person: "Should this say team01 or Team 01?" rather than "This is wrong".',
           'You, the author, can answer under the comment, and change the code if the comment is right.',
         ],
       },
@@ -227,7 +454,7 @@ module.exports = {
         do: [
           'On the Conversation tab, click the small arrow to the right of the merge button and choose Create squash commit.',
           'Click the merge button, which now reads Create squash commit. A small form opens: the title of the commit (your pull request\'s title with its number, for example (#1)) and a message that already says who reviewed it (Reviewed-by: ...).',
-          'Tick Delete Branch "greeting-studentNN" (your branch has done its job) and click Create squash commit.',
+          'Tick Delete Branch "greeting-student01" (your branch has done its job) and click Create squash commit.',
           'In the workspace terminal, paste the box to bring main up to date.',
         ],
         run: 'cd ~/hello\ngit switch main\ngit pull\ngit log --oneline -3',
@@ -238,7 +465,7 @@ module.exports = {
           ['git log --oneline -3', 'show the last three commits, one line each.'],
         ],
         see: 'Your change at the top of the history, as one commit:',
-        out: 'b70e47f (HEAD -> main, origin/main, origin/HEAD) Change the greeting for team03 (#1)\ne448d09 Initial commit',
+        out: 'b70e47f (HEAD -> main, origin/main, origin/HEAD) Change the greeting for team01 (#1)\ne448d09 Initial commit',
         read: [
           'The (#1) is the number of your pull request: anyone can open it later to see the review and the approval. The commit message also records who reviewed it (git log -1 shows the Reviewed-by line).',
         ],
@@ -248,24 +475,24 @@ module.exports = {
         where: 'Browser: Gitea, then Argo CD',
         why: 'This is GitOps: the platform runs what main says. Nobody logs in to a server; the merge is the instruction.',
         do: [
-          'In Gitea, open teamNN/hello → Actions. The newest run (your merge, on main) builds the image and pushes it to Harbor. Wait for its green tick, a few minutes.',
-          'Open https://argocd.<lab domain> in a new tab and sign in as delegate, with its password from cat /etc/pelab/logins.md (a read-only login; not your studentNN password).',
-          { text: 'In the search box at the top, type your team. Your service has one box per environment: dev, staging and prod. Click the application teamNN-hello-dev.', shot: { src: 'argocd-apps.png', caption: 'Argo CD\'s application list, searched for the team: one box per environment of hello (dev, prod, staging), each with its health (Healthy) and sync state (Synced: it runs what Git says). On Day 2 only dev runs; staging and prod come on Day 3 and are released on Day 6. In your lab the repository is https://gitea.<lab domain>/teamNN/hello.git, and the names, ids and times are your own.' } },
+          'In Gitea, open team01/hello → Actions. The newest run (your merge, on main) builds the image and pushes it to Harbor. Wait for its green tick, a few minutes.',
+          'Open https://argocd.<lab domain> in a new tab and sign in as delegate, with its password from cat /etc/pelab/logins.md (a read-only login; not your student01 password).',
+          { text: 'In the search box at the top, type team01. Your service has one box per environment: dev, staging and prod. Click the application team01-hello-dev.', shot: { src: 'argocd-apps.png', caption: 'Argo CD\'s application list, searched for the team: one box per environment of hello (dev, prod, staging), each with its health (Healthy) and sync state (Synced: it runs what Git says). On Day 2 only dev runs; staging and prod come on Day 3 and are released on Day 6. In your lab the repository is https://gitea.<lab domain>/team01/hello.git, and the names, ids and times are your own.' } },
         ],
         see: 'Within a few minutes of the green pipeline: Synced and Healthy, with your commit id under Last Sync.',
         read: [
           'Synced: the cluster runs what main says. Healthy: it answers its health check.',
           'Argo CD checks main every minute, and the pipeline takes a few minutes before that: a short wait is normal.',
-          'The pipeline is not something you wrote: it is the file .gitea/workflows/ci.yaml in teamNN/hello, copied from the platform team\'s template, platform/golden-path. Open it in Gitea to see every step. On Day 4 you look inside the template itself.',
+          'The pipeline is not something you wrote: it is the file .gitea/workflows/ci.yaml in team01/hello, copied from the platform team\'s template, platform/golden-path. Open it in Gitea to see every step. On Day 4 you look inside the template itself.',
         ],
-        tip: 'If your instructor has switched on the safety net, Argo CD is paused. Look at your merge commit in Gitea instead (Commits → the tick next to it): safety-net/dev says "Deployed to teamNN-dev" with your commit.',
+        tip: 'If your instructor has switched on the safety net, Argo CD is paused. Look at your merge commit in Gitea instead (Commits → the tick next to it): safety-net/dev says "Deployed to team01-dev" with your commit.',
       },
       {
         title: 'See your change in dev',
         why: 'The proof: your text, answering from dev, put there by the platform.',
         browser: {
           where: 'Browser',
-          do: ['Open https://hello-teamNN-dev.<lab domain>/ in a new tab (your team instead of teamNN).'],
+          do: ['Open https://hello-team01-dev.<lab domain>/ in a new tab.'],
           see: 'DEV in big red letters, your new greeting under it, and the version: the commit id of your merge.',
           shot: { src: 'hello-dev.png', caption: 'hello in dev: the environment\'s name in big letters (red for dev), then the greeting and the version (the commit id the platform built). Your greeting and version are your own.' },
         },
@@ -275,7 +502,7 @@ module.exports = {
           ['curl -s https://hello-$TEAM-dev.$DOMAIN/', 'call your team\'s service in dev, at its dev address. A program (like curl) gets the facts as data (JSON); a browser gets the coloured page.'],
         ],
         see: '"environment": "dev" and your new greeting:',
-        out: '{"app": "hello", "version": "b70e47f...", "environment": "dev", "message": "Hello from team 3"}',
+        out: '{"app": "hello", "version": "b70e47f...", "environment": "dev", "message": "Hello from team01"}',
         read: [
           'version is now the commit id of your merge: the platform built that exact commit.',
           'Nobody logged in to a server: the merge did it.',
@@ -285,10 +512,10 @@ module.exports = {
         ],
       },
     ],
-    done: 'Your greeting answers on https://hello-teamNN-dev.<lab domain>/ and the pull request shows who approved it.',
+    done: 'Your greeting answers on https://hello-team01-dev.<lab domain>/ and the pull request shows who approved it.',
   },
 
-  'Lab 3: try to break the rules': {
+  'Lab 4: try to break the rules': {
     goal: 'Try the three shortcuts the platform refuses, and keep the refusal messages as evidence that the controls work.',
     learn: [
       'Which shortcuts the platform blocks: pushing straight to main, approving your own change, and changing a change after it was approved.',
@@ -301,6 +528,7 @@ module.exports = {
     ],
     start: [
       ...TERMINAL,
+      'The Git in this lab: git push (refused on main), git reset --hard origin/main to undo a local commit (the "Undo safely" slide), and git commit -am (Lab 1, step 7).',
       'Have a notes file or a sheet ready: you will copy three messages.',
     ],
     steps: [
@@ -316,7 +544,7 @@ module.exports = {
           ['git push', 'try to send main to Gitea.'],
         ],
         see: 'Refused. Copy the message into your notes:',
-        out: 'remote:\nremote: error:\nremote: error: Not allowed to push to protected branch main\nremote: error:\nTo https://gitea.<lab domain>/team03/hello\n ! [remote rejected] main -> main (pre-receive hook declined)\nerror: failed to push some refs to \'https://gitea.<lab domain>/team03/hello\'',
+        out: 'remote:\nremote: error:\nremote: error: Not allowed to push to protected branch main\nremote: error:\nTo https://gitea.<lab domain>/team01/hello\n ! [remote rejected] main -> main (pre-receive hook declined)\nerror: failed to push some refs to \'https://gitea.<lab domain>/team01/hello\'',
       },
       {
         title: 'Undo it',
@@ -328,7 +556,7 @@ module.exports = {
           ['git status', 'check.'],
         ],
         see: 'Back in step with Gitea:',
-        out: 'HEAD is now at b70e47f Change the greeting for team03 (#1)\nOn branch main\nYour branch is up to date with \'origin/main\'.\n\nnothing to commit, working tree clean',
+        out: 'HEAD is now at b70e47f Change the greeting for team01 (#1)\nOn branch main\nYour branch is up to date with \'origin/main\'.\n\nnothing to commit, working tree clean',
       },
       {
         title: 'Approve your own pull request',
@@ -345,7 +573,7 @@ module.exports = {
           ['git commit -am "..."', 'commit every changed file in one go (-a: all changed files, -m: the message).'],
           ['git push -u origin self-approve-$ME', 'send it to Gitea.'],
         ],
-        out: 'Switched to a new branch \'self-approve-student07\'\n[self-approve-student07 ba23b3f] Try to approve my own change\n 1 file changed, 1 insertion(+)\nremote:\nremote: Create a new pull request for \'self-approve-student07\':\nremote:   https://gitea.<lab domain>/team03/hello/pulls/new/self-approve-student07\nremote:\nTo https://gitea.<lab domain>/team03/hello\n * [new branch]      self-approve-student07 -> self-approve-student07\nbranch \'self-approve-student07\' set up to track \'origin/self-approve-student07\'.',
+        out: 'Switched to a new branch \'self-approve-student01\'\n[self-approve-student01 ba23b3f] Try to approve my own change\n 1 file changed, 1 insertion(+)\nremote:\nremote: Create a new pull request for \'self-approve-student01\':\nremote:   https://gitea.<lab domain>/team01/hello/pulls/new/self-approve-student01\nremote:\nTo https://gitea.<lab domain>/team01/hello\n * [new branch]      self-approve-student01 -> self-approve-student01\nbranch \'self-approve-student01\' set up to track \'origin/self-approve-student01\'.',
         see: 'In the terminal, the commit and the pulls/new link (above). Then in Gitea, in the Submit review box, Approve and Request changes are greyed out. Hover over Approve: "Pull request authors can\'t approve their own pull request". Copy that into your notes.',
         tip: 'Signing in as reviewer gets an approval through: the tool checks accounts, not people. That is why at work every account is personal and never shared. In this lab you use a second login only to play the reviewer.',
       },
@@ -354,7 +582,7 @@ module.exports = {
         where: 'Gitea, then the workspace terminal',
         why: 'An approval is for what the reviewer read. If the change changes afterwards, the old approval must not count.',
         do: [
-          'Approve your self-approve pull request as reviewer, in a private window, as in Lab 2. The page now shows one approval.',
+          'Approve your self-approve pull request as reviewer, in a private window, as in Lab 3. The page now shows one approval.',
           'Paste the box: it adds one more commit to the same branch.',
           'Reload the pull request page.',
         ],
@@ -363,7 +591,7 @@ module.exports = {
           ['echo "One more line" >> README.md', 'change the file again.'],
           ['git commit -am "...", git push', 'commit and push to the same branch: the pull request updates itself. git push now prints "Visit the existing pull request" with its link, instead of a new one.'],
         ],
-        out: '[self-approve-student07 6987239] Change after approval\n 1 file changed, 1 insertion(+)\nremote:\nremote: Visit the existing pull request:\nremote:   https://gitea.<lab domain>/team03/hello/pulls/2\nremote:\nTo https://gitea.<lab domain>/team03/hello\n   ba23b3f..6987239  self-approve-student07 -> self-approve-student07',
+        out: '[self-approve-student01 6987239] Change after approval\n 1 file changed, 1 insertion(+)\nremote:\nremote: Visit the existing pull request:\nremote:   https://gitea.<lab domain>/team01/hello/pulls/2\nremote:\nTo https://gitea.<lab domain>/team01/hello\n   ba23b3f..6987239  self-approve-student01 -> self-approve-student01',
         see: 'In the terminal, the push to the existing pull request (above). Then in Gitea, after the reload: "New commits pushed, approval review dismissed automatically according to repository settings", and the merge box says "This pull request doesn\'t have enough required approvals yet. 0 of 1 official approvals granted." Copy both into your notes.',
         tip: 'Close this pull request without merging when you are done (Close Pull Request at the bottom of the Conversation tab), and delete the branch.',
       },
@@ -383,14 +611,14 @@ module.exports = {
           ['cd ~/hello && git switch main', 'go back to main, ready for the next lab.'],
         ],
         see: 'The file, with your name and today\'s date, then Git back on main:',
-        out: '# Day 2: three refusals, seen by student07 on 2026-10-29\n1. Push straight to main: "Not allowed to push to protected branch main"\n2. Approve my own pull request: "Pull request authors can\'t approve their own pull request"\n3. Change after approval: "approval review dismissed automatically according to repository settings"\nSwitched to branch \'main\'\nYour branch is up to date with \'origin/main\'.',
+        out: '# Day 2: three refusals, seen by student01 on 2026-10-29\n1. Push straight to main: "Not allowed to push to protected branch main"\n2. Approve my own pull request: "Pull request authors can\'t approve their own pull request"\n3. Change after approval: "approval review dismissed automatically according to repository settings"\nSwitched to branch \'main\'\nYour branch is up to date with \'origin/main\'.',
         read: ['Three lines of proof that segregation of duties is enforced by the tool, not by trust.'],
       },
     ],
     done: 'Three refusals written down, and main unchanged.',
   },
 
-  'Lab 4: resolve a merge conflict': {
+  'Lab 5: resolve a merge conflict': {
     goal: 'See what happens when two changes touch the same line, and resolve it calmly.',
     learn: [
       'Why conflicts happen: two changes to the same line, and Git cannot know which one you want.',
@@ -404,7 +632,8 @@ module.exports = {
     start: [
       'At work, a conflict happens when two colleagues change the same line. Here you play both: you make two branches, A and B, from the same main, and change the same line differently on each.',
       'hello is on main and up to date (cd ~/hello && git switch main && git pull).',
-      'The reviewer approves in a private window, as in Lab 2 (logins: cat /etc/pelab/logins.md).',
+      'The Git in this lab: git merge (Lab 1, step 8), the conflict markers (the slide "How Git joins two branches"), and git merge --abort if you get lost.',
+      'The reviewer approves in a private window, as in Lab 3 (logins: cat /etc/pelab/logins.md).',
     ],
     steps: [
       {
@@ -425,7 +654,7 @@ module.exports = {
           ['git commit -am "...", git push -u origin conflict-a-$ME', 'commit the changed file and send branch A to Gitea.'],
         ],
         see: 'main up to date, branch A, its new line 22, the commit and the pulls/new link:',
-        out: 'Already on \'main\'\nYour branch is up to date with \'origin/main\'.\nAlready up to date.\nSwitched to a new branch \'conflict-a-student07\'\n22:GREETING = os.environ.get("GREETING", "Hello from branch A")\n[conflict-a-student07 a348b70] Greeting from branch A\n 1 file changed, 1 insertion(+), 1 deletion(-)\nremote:\nremote: Create a new pull request for \'conflict-a-student07\':\nremote:   https://gitea.<lab domain>/team03/hello/pulls/new/conflict-a-student07\nremote:\nTo https://gitea.<lab domain>/team03/hello\n * [new branch]      conflict-a-student07 -> conflict-a-student07\nbranch \'conflict-a-student07\' set up to track \'origin/conflict-a-student07\'.',
+        out: 'Already on \'main\'\nYour branch is up to date with \'origin/main\'.\nAlready up to date.\nSwitched to a new branch \'conflict-a-student01\'\n22:GREETING = os.environ.get("GREETING", "Hello from branch A")\n[conflict-a-student01 a348b70] Greeting from branch A\n 1 file changed, 1 insertion(+), 1 deletion(-)\nremote:\nremote: Create a new pull request for \'conflict-a-student01\':\nremote:   https://gitea.<lab domain>/team01/hello/pulls/new/conflict-a-student01\nremote:\nTo https://gitea.<lab domain>/team01/hello\n * [new branch]      conflict-a-student01 -> conflict-a-student01\nbranch \'conflict-a-student01\' set up to track \'origin/conflict-a-student01\'.',
         then: {
           say: 'Then branch B, from the same main:',
           run: 'git switch main\ngit switch -c conflict-b-$ME\nsed -i "s/^GREETING = .*/GREETING = os.environ.get(\\"GREETING\\", \\"Hello from branch B\\")/" app/main.py\ngrep -n "^GREETING" app/main.py\ngit commit -am "Greeting from branch B"\ngit push -u origin conflict-b-$ME',
@@ -435,8 +664,8 @@ module.exports = {
             ['sed ..., grep ..., git commit ..., git push ...', 'the same as for A, with Hello from branch B.'],
           ],
           see: 'Branch B, its line 22, the commit and its pulls/new link:',
-          out: 'Switched to branch \'main\'\nYour branch is up to date with \'origin/main\'.\nSwitched to a new branch \'conflict-b-student07\'\n22:GREETING = os.environ.get("GREETING", "Hello from branch B")\n[conflict-b-student07 b6f652b] Greeting from branch B\n 1 file changed, 1 insertion(+), 1 deletion(-)\nremote:\nremote: Create a new pull request for \'conflict-b-student07\':\nremote:   https://gitea.<lab domain>/team03/hello/pulls/new/conflict-b-student07\nremote:\nTo https://gitea.<lab domain>/team03/hello\n * [new branch]      conflict-b-student07 -> conflict-b-student07\nbranch \'conflict-b-student07\' set up to track \'origin/conflict-b-student07\'.',
-          read: ['When you have opened both pull requests: teamNN/hello → Pull Requests shows two, both changing line 22.'],
+          out: 'Switched to branch \'main\'\nYour branch is up to date with \'origin/main\'.\nSwitched to a new branch \'conflict-b-student01\'\n22:GREETING = os.environ.get("GREETING", "Hello from branch B")\n[conflict-b-student01 b6f652b] Greeting from branch B\n 1 file changed, 1 insertion(+), 1 deletion(-)\nremote:\nremote: Create a new pull request for \'conflict-b-student01\':\nremote:   https://gitea.<lab domain>/team01/hello/pulls/new/conflict-b-student01\nremote:\nTo https://gitea.<lab domain>/team01/hello\n * [new branch]      conflict-b-student01 -> conflict-b-student01\nbranch \'conflict-b-student01\' set up to track \'origin/conflict-b-student01\'.',
+          read: ['When you have opened both pull requests: team01/hello → Pull Requests shows two, both changing line 22.'],
         },
       },
       {
@@ -444,9 +673,9 @@ module.exports = {
         where: 'Browser: Gitea (the reviewer in a private window, then you)',
         why: 'Once A\'s change is in main, B no longer fits: B was made from the old main.',
         do: [
-          'In a private window, as reviewer, open A\'s pull request (conflict-a-studentNN): Files Changed → Review → Approve. Close the private window.',
-          'When the checks are green, merge A as yourself (as in Lab 2, step 4).',
-          'Open B\'s pull request (conflict-b-studentNN) and read the box above the merge button.',
+          'In a private window, as reviewer, open A\'s pull request (conflict-a-student01): Files Changed → Review → Approve. Close the private window.',
+          'When the checks are green, merge A as yourself (as in Lab 3, step 4).',
+          'Open B\'s pull request (conflict-b-student01) and read the box above the merge button.',
         ],
         see: 'B\'s pull request now says "This pull request has changes conflicting with the target branch." and cannot be merged.',
       },
@@ -507,7 +736,7 @@ module.exports = {
           ['git commit -m "Resolve conflict with main"', 'finish the merge with a commit.'],
           ['git push', 'send it to Gitea: B\'s pull request updates itself (git push prints "Visit the existing pull request" and its link).'],
         ],
-        out: '[conflict-b-student07 bce9e43] Resolve conflict with main\nremote:\nremote: Visit the existing pull request:\nremote:   https://gitea.<lab domain>/team03/hello/pulls/4\nremote:\nTo https://gitea.<lab domain>/team03/hello\n   b6f652b..bce9e43  conflict-b-student07 -> conflict-b-student07',
+        out: '[conflict-b-student01 bce9e43] Resolve conflict with main\nremote:\nremote: Visit the existing pull request:\nremote:   https://gitea.<lab domain>/team01/hello/pulls/4\nremote:\nTo https://gitea.<lab domain>/team01/hello\n   b6f652b..bce9e43  conflict-b-student01 -> conflict-b-student01',
         see: 'In the terminal, the merge commit and the push to the existing pull request (above). In Gitea, the conflict message is gone from B\'s pull request. Approve it as reviewer in a private window, merge it as yourself, and a few minutes later dev shows the greeting you kept.',
         ifnot: [
           ['STOP: conflict markers are still in app/main.py', 'nothing was saved. Go back to step 4, remove the marker lines, save, and paste this box again.'],
@@ -518,7 +747,7 @@ module.exports = {
     done: 'Both pull requests are merged, and app/main.py on main has one greeting and no markers.',
   },
 
-  'Lab 5: write your one-page platform charter': {
+  'Lab 6: write your one-page platform charter': {
     goal: 'Write what a platform for your part of FMD must do and promise: a one-page charter.',
     learn: [
       'That a platform is a product: it has users, promises and measures, like any service.',

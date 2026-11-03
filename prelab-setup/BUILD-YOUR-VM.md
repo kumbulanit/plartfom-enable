@@ -53,7 +53,9 @@ git clone <repository address> ~/plartfom-enable
 ## Step 3. Install the prerequisites
 
 One script installs everything the build needs: pipx, git, tmux, Ansible (with
-passlib and bcrypt) and Ansible's collections. You can run it again safely.
+passlib and bcrypt) and Ansible's collections. It also makes `sudo` stop asking
+for your password on this VM, so the build and the checks never ask: type your
+password once, the first time. You can run it again safely.
 
 ```bash
 bash ~/plartfom-enable/prelab-setup/install-prerequisites.sh
@@ -93,11 +95,11 @@ Start `tmux` first. If your connection drops, the build keeps running, and
 ```bash
 tmux
 cd ~/plartfom-enable/prelab-setup
-ansible-playbook site.yml -K
+ansible-playbook site.yml
 ```
 
-`-K` makes Ansible ask for your sudo password once (`BECOME password:`). Type
-the password you use for `sudo`.
+It asks for no password: the script in Step 3 made `sudo` passwordless. (If you
+skipped the script, add `-K`, and Ansible asks for your sudo password once.)
 
 *Or, in one command:* `bash ~/plartfom-enable/prelab-setup/install-prerequisites.sh --build`
 starts tmux and the build for you (`tmux attach -t build` brings it back after a

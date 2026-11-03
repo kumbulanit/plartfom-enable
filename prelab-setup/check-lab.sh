@@ -115,7 +115,7 @@ for kind in student runner; do
     [ "$state" = RUNNING ] && pass "$name is running" || fail "$name is $state: sudo lxc start $name"
   done <<< "$found"
 done
-[ -f /etc/pelab/logins.md ] && pass "Logins file /etc/pelab/logins.md is there" || fail "No /etc/pelab/logins.md: ansible-playbook site.yml -K --tags workspaces"
+sudo test -f /etc/pelab/logins.md && pass "Logins file /etc/pelab/logins.md is there" || fail "No /etc/pelab/logins.md: ansible-playbook site.yml -K --tags workspaces"
 
 # ---------------------------------------------------------------- Gitea
 section "Gitea"

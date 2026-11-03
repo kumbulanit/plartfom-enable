@@ -247,6 +247,7 @@ ok
 **How to read it:**
 
 - The Server line shows the Python inside the image (yours may be a slightly different 3.12), not your workspace's: the container brings its own.
+- To see it in your browser, as on Day 1: echo "https://$ME.$DOMAIN/proxy/8080/", then Ctrl+click the address (Cmd+click on a Mac).
 
 **If you see something else:**
 
@@ -394,6 +395,10 @@ CONTAINER ID   IMAGE     ...   PORTS                    NAMES
 ...            hello:1   ...   0.0.0.0:8082->8080/tcp   hello-prod
 ...            hello:1   ...   0.0.0.0:8081->8080/tcp   hello-staging
 ```
+
+**How to read it:**
+
+- Side by side in your browser: echo "https://$ME.$DOMAIN/proxy/8081/" for staging and echo "https://$ME.$DOMAIN/proxy/8082/" for prod, then Ctrl+click each (Cmd+click on a Mac). Same image, two colours, two names.
 
 #### Step 3. Make version 2
 

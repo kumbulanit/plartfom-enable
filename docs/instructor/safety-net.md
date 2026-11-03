@@ -82,7 +82,7 @@ Only the steps that say "open Argo CD" change. Everything else is the same.
 
 | Lab and step | With Argo CD | With the safety net on |
 | --- | --- | --- |
-| Day 2 Lab 2, step 5 | Watch `teamNN-hello-dev` sync | In Gitea, open `teamNN/hello` → Commits → the merge commit → the tick. Look for `safety-net/dev`: "Waiting for the pipeline…", then "Deployed to teamNN-dev: <commit>" |
+| Day 2 Lab 3, step 5 | Watch `teamNN-hello-dev` sync | In Gitea, open `teamNN/hello` → Commits → the merge commit → the tick. Look for `safety-net/dev`: "Waiting for the pipeline…", then "Deployed to teamNN-dev: <commit>" |
 | Day 3 Lab 2, step 6 | staging and prod stop retrying | Within two minutes of the environment merge, the latest `hello` commit shows `safety-net/staging`: "Deployed to teamNN-staging: not-released-yet, 0 replicas". Also `kubectl -n teamNN-staging get deployments` |
 | Day 4 Lab 3, step 4 | `teamNN-rates-dev` appears | The latest commit of `teamNN/rates` shows `safety-net/dev`: "Deployed to teamNN-dev", once the first pipeline has passed |
 | Day 4 Lab 4, step 4 | Watch Argo CD | The merge commit's `safety-net/dev` |

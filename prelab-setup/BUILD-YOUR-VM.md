@@ -67,7 +67,8 @@ own VM.
 ```bash
 sudo apt update && sudo apt install -y pipx git tmux
 pipx install --include-deps ansible
-pipx inject ansible passlib 'bcrypt<4.1'
+pipx inject ansible passlib bcrypt
+pipx runpip ansible install 'bcrypt<4.1'
 pipx ensurepath
 ```
 

@@ -66,8 +66,10 @@ else
   pipx install --include-deps ${PIPX_PY[@]+"${PIPX_PY[@]}"} ansible
 fi
 # passlib 1.7.4 (the last release) fails with bcrypt 4.1 and later ("password cannot
-# be longer than 72 bytes"), so bcrypt stays on 4.0.
-pipx inject ansible passlib 'bcrypt<4.1'
+# be longer than 72 bytes"), so bcrypt stays on 4.0. runpip, not inject: inject
+# leaves an already-injected bcrypt 5 where it is.
+pipx inject ansible passlib bcrypt
+pipx runpip ansible install -q 'bcrypt<4.1'
 pipx ensurepath >/dev/null
 ansible --version | head -1
 

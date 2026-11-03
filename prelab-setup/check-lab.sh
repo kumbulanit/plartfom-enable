@@ -3,15 +3,23 @@
 # platform service, the workspace and runner, Gitea, Harbor, Argo CD, Kyverno,
 # the hello app in dev and the platform's timers. Changes nothing.
 #
-#   bash ~/sarb/prelab-setup/check-lab.sh
+#   bash ~/plartfom-enable/prelab-setup/check-lab.sh
 #
 # Run it on the lab VM, as your own user: it asks for your sudo password once.
 # Each check prints PASS, WARN (works, but look at it) or FAIL, and the summary
 # at the end says what to do. The exit code is the number of failures.
+#
+# At the end it lists every web address and every login, administrators
+# included. Add --no-passwords to hide the passwords (for a shared screen).
 set -uo pipefail
 
+SHOW_PASSWORDS=true
+[ "${1:-}" = --no-passwords ] && SHOW_PASSWORDS=false
+SETUP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 KUBECONFIG_FILE=/etc/rancher/k3s/k3s.yaml
-CA=/etc/pelab/tls/ca.crt
+# The copy in the system trust store: /etc/pelab/tls is readable by root only.
+CA=/usr/local/share/ca-certificates/pelab-lab-ca.crt
 PASS=0 WARN=0 FAIL=0
 FAILED=()
 
@@ -78,6 +86,7 @@ fi
 
 # ---------------------------------------------------------------- web addresses
 section "Web addresses (every Ingress)"
+HOSTS_FILE=$(mktemp)  # kept for the list of addresses at the end
 DOMAIN=$(kc -n gitea get ingress -o jsonpath='{.items[0].spec.rules[0].host}' 2>/dev/null); DOMAIN=${DOMAIN#gitea.}
 [ -n "$DOMAIN" ] && pass "Lab domain: $DOMAIN" || fail "Cannot find the lab domain (no Gitea Ingress)"
 while read -r host; do
@@ -89,7 +98,7 @@ while read -r host; do
     000) fail "https://$host/ does not answer (name, certificate or Traefik): curl -v https://$host/" ;;
     *) fail "https://$host/ answers $code" ;;
   esac
-done < <(kc get ingress -A -o jsonpath='{range .items[*]}{range .spec.rules[*]}{.host}{"\n"}{end}{end}' 2>/dev/null | sort -u)
+done < <(kc get ingress -A -o jsonpath='{range .items[*]}{range .spec.rules[*]}{.host}{"\n"}{end}{end}' 2>/dev/null | sort -u | tee "$HOSTS_FILE")
 
 # ---------------------------------------------------------------- LXD
 section "Workspace and runner (LXD)"
@@ -197,12 +206,79 @@ section "Platform timers"
 systemctl is-active --quiet pelab-platform-apply.timer && pass "Platform applier (pelab-platform-apply.timer) is active" || fail "The platform applier timer is not active: sudo systemctl enable --now pelab-platform-apply.timer (unless you paused it on purpose)"
 systemctl is-active --quiet pelab-backup.timer && pass "Nightly backup (pelab-backup.timer) is active" || warn "The nightly backup timer is not active: ansible-playbook site.yml -K --tags backup"
 
+# ---------------------------------------------------------------- applications and logins
+secret() { kc -n "$1" get secret "$2" -o json 2>/dev/null | json "import base64; print(base64.b64decode(d['data']['$3']).decode())"; }
+pw() { if $SHOW_PASSWORDS; then printf '%s' "${1:-(not found)}"; else printf '(hidden)'; fi; }
+# One application: its name and address, then one line per login.
+app() { printf '\n  %s%-29s%s %s\n' "$B" "$1" "$N" "$2"; }
+acct() { printf '      %-20s %-28s %s\n' "$1" "$(pw "$2")" "$3"; }
+none() { printf '      %s\n' "$1"; }
+
+# The participant's logins come from the logins file the build wrote: its first
+# table, | Who | User | Password | Use it for |.
+LOGINS=$(sudo cat /etc/pelab/logins.md 2>/dev/null | awk '/^\| Who/ {t=1; next} t && /^\| ---/ {next} t && /^\|/ {print; next} t {exit}' | tr -d '`')
+login_of() { echo "$LOGINS" | awk -F' *\\| *' -v who="$1" '$2 ~ who {print $3; exit}'; }
+pass_of() { echo "$LOGINS" | awk -F' *\\| *' -v who="$1" '$2 ~ who {print $4; exit}'; }
+ME=$(login_of '^You$'); ME=${ME:-student01}; ME_PW=$(pass_of '^You$')
+VIEWER=$(login_of '^Read-only viewer$'); VIEWER=${VIEWER:-delegate}; VIEWER_PW=$(pass_of '^Read-only viewer$')
+REVIEWER=$(login_of '^The reviewer$'); REVIEWER_PW=$(pass_of '^The reviewer$')
+APPROVER=$(login_of '^The platform team$'); APPROVER_PW=$(pass_of '^The platform team$')
+[ -n "$LOGINS" ] || echo "  (No /etc/pelab/logins.md, so the participant passwords are missing below.)"
+
+section "Applications, addresses and logins"
+printf '      %-20s %-28s %s\n' "User" "Password" "What for"
+while read -r host; do
+  [ -z "$host" ] && continue
+  url="https://$host/"
+  case "${host%%.*}" in
+    student*) app "Workspace (editor, terminal)" "$url?folder=/home/${host%%.*}"
+      acct "${host%%.*}" "$ME_PW" "you" ;;
+    backstage) app "Portal (Backstage)" "$url"
+      none "guest sign-in, no password" ;;
+    gitea) app "Gitea (code, pipelines)" "$url"
+      acct "$ME" "$ME_PW" "you"
+      [ -n "$REVIEWER" ] && acct "$REVIEWER" "$REVIEWER_PW" "approves your pull requests"
+      [ -n "$APPROVER" ] && acct "$APPROVER" "$APPROVER_PW" "the platform team: approves requests"
+      acct "$GU" "$GP" "administrator" ;;
+    harbor) app "Harbor (images, scans)" "$url"
+      acct "$ME" "$ME_PW" "you"
+      acct admin "$HP" "administrator" ;;
+    argocd) app "Argo CD (deployments)" "$url"
+      acct "$VIEWER" "$VIEWER_PW" "read-only, for participants"
+      acct admin "$(secret argocd argocd-initial-admin-secret password)" "administrator" ;;
+    grafana) app "Grafana (dashboards, logs)" "$url"
+      acct "$VIEWER" "$VIEWER_PW" "Viewer, for participants"
+      acct "$(secret monitoring grafana-admin admin-user)" "$(secret monitoring grafana-admin admin-password)" "administrator" ;;
+    prometheus) app "Prometheus" "$url"
+      acct "$VIEWER" "$VIEWER_PW" "the browser asks" ;;
+    alertmanager) app "Alertmanager" "$url"
+      acct "$VIEWER" "$VIEWER_PW" "the browser asks" ;;
+    keycloak) app "Keycloak" "$url"
+      acct "$(secret keycloak keycloak-admin username)" "$(secret keycloak keycloak-admin password)" "administrator" ;;
+    sonarqube) app "SonarQube" "$url"
+      acct admin "$(secret sonarqube sonarqube-admin password)" "administrator" ;;
+    api) app "API gateway (APISIX)" "$url"
+      acct "admin key" "$(secret apisix apisix-admin admin)" "header X-API-KEY, admin API only" ;;
+    rollouts) app "Argo Rollouts dashboard" "$url"; none "no login (read-only)" ;;
+    jaeger) app "Jaeger (traces)" "$url"; none "no login" ;;
+    opencost) app "OpenCost (costs)" "$url"; none "no login" ;;
+    redpanda) app "Redpanda Console" "$url"; none "no login" ;;
+    hello-*) app "hello (${host%%.*})" "$url"; none "no login" ;;
+    *) app "${host%%.*}" "$url" ;;
+  esac
+# In the order the labs use them, then the rest.
+done < <(awk -F. 'BEGIN { n = split("student backstage gitea harbor argocd grafana prometheus alertmanager", o, " "); for (i = 1; i <= n; i++) r[o[i]] = i }
+  { k = $1; sub(/[0-9]+$/, "", k); print (k in r ? r[k] : 99) " " $0 }' "$HOSTS_FILE" | sort -n -k1,1 -k2 | cut -d' ' -f2)
+rm -f "$HOSTS_FILE"
+echo
+echo "  Passwords are lab-only: never use them anywhere else."
+
 # ---------------------------------------------------------------- summary
 printf '\n%s== Summary%s\n  %s%d passed%s, %s%d warnings%s, %s%d failed%s\n' "$B" "$N" "$G" "$PASS" "$N" "$Y" "$WARN" "$N" "$R" "$FAIL" "$N"
 if [ "$FAIL" -eq 0 ]; then
-  echo "  The lab is ready. Logins: cat /etc/pelab/logins.md"
+  echo "  The lab is ready. Your own logins again at any time: cat /etc/pelab/logins.md"
 else
-  echo "  Fix the failures above (each says how), or run the build again: cd ~/sarb/prelab-setup && ansible-playbook site.yml -K"
+  echo "  Fix the failures above (each says how), or run the build again: cd $SETUP_DIR && ansible-playbook site.yml"
   echo "  Pods that were still starting are often fine two minutes later: run this check again first."
 fi
 exit "$FAIL"

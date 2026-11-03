@@ -130,7 +130,9 @@ bash ~/sarb/prelab-setup/check-lab.sh
 ```
 
 *You should see* a line per check (PASS, WARN or FAIL) and at the end
-`0 failed` and "The lab is ready.". Each FAIL says what to do. Parts that were
+`0 failed` and "The lab is ready.". Before that it lists each application with its
+web address and its logins, administrators included (`--no-passwords` hides the passwords, for
+a shared screen). Each FAIL says what to do. Parts that were
 still starting are often fine two minutes later: run the check again first.
 
 The same by hand, for the two most important parts:

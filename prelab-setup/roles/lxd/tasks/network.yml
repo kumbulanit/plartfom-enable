@@ -37,3 +37,25 @@
     state: started
     daemon_reload: true
   when: not pelab_container_host | bool
+
+# The per-link rule above works only when programs ask systemd-resolved, through
+# its stub (127.0.0.53). Some VMs link /etc/resolv.conf to resolved's upstream
+# list instead, which bypasses it: then no lab name resolves on the host. k3s
+# finds the upstream servers by itself when it sees the stub.
+- name: Look at the stub resolver and /etc/resolv.conf
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop: [/etc/resolv.conf, /run/systemd/resolve/stub-resolv.conf]
+  register: lxd_resolv
+  when: not pelab_container_host | bool
+
+- name: Send the host's lookups through systemd-resolved
+  ansible.builtin.file:
+    src: ../run/systemd/resolve/stub-resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+    force: true
+  when:
+    - not pelab_container_host | bool
+    - lxd_resolv.results[1].stat.exists
+    - lxd_resolv.results[0].stat.lnk_source | default('') == '/run/systemd/resolve/resolv.conf'

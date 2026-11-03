@@ -10,6 +10,10 @@ Nobody else's passwords are on your VM, and yours are on no one else's.
 
 Allow about two hours. Most of that time is waiting, and you can leave it running.
 
+To see what the one command does for you, step by step and with every version,
+read [BUILD-BY-HAND.md](BUILD-BY-HAND.md): the same build without Ansible, and
+how long each part takes by hand.
+
 Every command below is typed in a terminal **on your VM**. Copy and paste it,
 then press Enter.
 

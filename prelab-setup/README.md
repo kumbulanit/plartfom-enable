@@ -5,7 +5,8 @@ Development Programme. By default **every delegate has an Ubuntu Server 24.04 VM
 their own** with the whole platform on it, and works alone. Ansible runs on the VM
 it builds (localhost, `inventory/hosts.yml`). The usual way: each delegate clones
 this repository onto their own Ubuntu machine and runs the build there, following
-[BUILD-YOUR-VM.md](BUILD-YOUR-VM.md); every machine gets the same passwords, from
+[BUILD-YOUR-VM.md](BUILD-YOUR-VM.md) ([BUILD-BY-HAND.md](BUILD-BY-HAND.md) is the
+same build without Ansible, with every version, to compare); every machine gets the same passwords, from
 `files/passwords/` in this repository. The
 other way: the instructor builds one VM and clones it for every delegate, so every
 VM is an exact copy with the same passwords (the build is clone-safe: a fixed

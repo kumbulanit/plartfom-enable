@@ -2,7 +2,7 @@
 
 Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).
 
-Every command has a picture of the terminal. Where the lab was tested, it shows what the command printed (your ids, times, names and team are your own); "type this" pictures show only what to type.
+Each command comes twice. **Copy and paste:** is the grey box to copy (the copy button is at its top right). Under it, a picture of the terminal marked EXAMPLE shows what it looks like: do not copy from the picture. Where the lab was tested, the picture shows what the command printed (your ids, times, names and team are your own); a picture titled "type this" shows only the command.
 
 ## Infrastructure as Code: the idea in four lines
 
@@ -21,6 +21,8 @@ Use OpenTofu on something tiny and harmless, a file in your workspace, to learn 
 
 2. Paste it into the terminal and press Enter.
 
+**Copy and paste:**
+
 ```bash
 mkdir -p ~/day3 && cd ~/day3
 cat > main.tf <<'EOF'
@@ -38,21 +40,31 @@ EOF
 ls
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day3-lab1-1-101-write-the-code.svg)
 
 ### 2. Prepare the folder: tofu init
+
+**Copy and paste:**
 
 ```bash
 tofu init
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day3-lab1-2-101-prepare-the-folder-tofu-init.svg)
 
 ### 3. See what would happen: tofu plan
 
+**Copy and paste:**
+
 ```bash
 tofu plan
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day3-lab1-3-101-see-what-would-happen-tofu-plan.svg)
 
@@ -66,16 +78,24 @@ tofu plan
 
 4. Then run the two commands in the second box to look at the result.
 
+**Copy and paste:**
+
 ```bash
 tofu apply
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day3-lab1-4-101-make-it-so-tofu-apply.svg)
+
+**Copy and paste:**
 
 ```bash
 cat note.txt; echo
 ls
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day3-lab1-4-102-make-it-so-tofu-apply.svg)
 
@@ -101,18 +121,26 @@ to:
 content  = "Changed by code."
 ```
 
+**Copy and paste:**
+
 ```bash
 sed -i 's/Built by code, not by hand./Changed by code./' main.tf
 grep content main.tf
 tofu plan
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day3-lab1-5-101-change-the-code-and-plan-again.svg)
+
+**Copy and paste:**
 
 ```bash
 tofu apply
 cat note.txt; echo
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day3-lab1-5-102-change-the-code-and-plan-again.svg)
 
@@ -124,24 +152,36 @@ cat note.txt; echo
 
 3. Run the third box: destroy removes what the code made (type yes), then ls shows what is left.
 
+**Copy and paste:**
+
 ```bash
 rm note.txt
 tofu plan
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day3-lab1-6-101-break-it-by-hand-let-the-code-repair-it-.svg)
+
+**Copy and paste:**
 
 ```bash
 tofu apply
 cat note.txt; echo
 ```
 
+*In the terminal it looks like this (the output depends on your lab):*
+
 ![What to type in the terminal](../images/terminal/day3-lab1-6-102-break-it-by-hand-let-the-code-repair-it-.svg)
+
+**Copy and paste:**
 
 ```bash
 tofu destroy
 ls
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day3-lab1-6-103-break-it-by-hand-let-the-code-repair-it-.svg)
 
@@ -155,6 +195,8 @@ Get your team's staging and prod environments the platform way: fill in the envi
 
 2. If Git asks for a Username and Password, type them as in "Before you start".
 
+**Copy and paste:**
+
 ```bash
 cd ~
 git clone https://gitea.$DOMAIN/platform/environments
@@ -162,6 +204,8 @@ cd environments
 git switch -c $TEAM-environments
 ls
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day3-lab2-1-101-copy-the-environments-repository-and-mak.svg)
 
@@ -193,12 +237,16 @@ module "team03" {
 }
 ```
 
+**Copy and paste:**
+
 ```bash
 cp team00.tf.example $TEAM.tf
 sed -i "s/team00/$TEAM/g" $TEAM.tf
 cat $TEAM.tf
 git status
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day3-lab2-2-101-fill-in-the-template-six-lines.svg)
 
@@ -216,11 +264,15 @@ git status
 
 6. Scroll to the end of the Plan step and read the summary line. Then scroll up and read the list with your team.
 
+**Copy and paste:**
+
 ```bash
 git add $TEAM.tf
 git commit -m "Request staging and prod for $TEAM"
 git push -u origin $TEAM-environments
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day3-lab2-3-101-propose-it-and-read-the-plan.svg)
 
@@ -240,11 +292,15 @@ git push -u origin $TEAM-environments
 
 ### 5. Look at your new environment
 
+**Copy and paste:**
+
 ```bash
 kubectl get namespaces | grep $TEAM
 kubectl -n $TEAM-staging get resourcequota,limitrange
 kubectl -n $TEAM-staging describe resourcequota team-quota
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day3-lab2-5-101-look-at-your-new-environment.svg)
 
@@ -272,9 +328,13 @@ See the platform notice and repair a change made by hand, and see that a whole e
 
 2. Then paste the box and press Enter.
 
+**Copy and paste:**
+
 ```bash
 kubectl -n $TEAM-staging get resourcequota team-quota -o jsonpath='{.spec.hard.requests\.cpu}{"\n"}'
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day3-lab3-1-101-the-instructor-changes-your-quota-by-han.svg)
 
@@ -298,10 +358,14 @@ kubectl -n $TEAM-staging get resourcequota team-quota -o jsonpath='{.spec.hard.r
 
 3. Then in Gitea, open platform/environments → Commits and click the tick next to the newest commit.
 
+**Copy and paste:**
+
 ```bash
 sleep 120
 kubectl -n $TEAM-staging get resourcequota team-quota -o jsonpath='{.spec.hard.requests\.cpu}{"\n"}'
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day3-lab3-3-101-let-the-platform-repair-it.svg)
 
@@ -327,6 +391,8 @@ to:
   environments = ["prod"]
 ```
 
+**Copy and paste:**
+
 ```bash
 cd ~/environments
 git switch main && git pull
@@ -336,6 +402,8 @@ git diff
 git commit -am "Remove staging for $TEAM"
 git push -u origin $TEAM-remove-staging
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day3-lab3-4-101-propose-removing-staging-and-read-the-pl.svg)
 
@@ -349,11 +417,17 @@ git push -u origin $TEAM-remove-staging
 
 4. Wait two minutes, then paste the third box: staging is back with the same budget.
 
+**Copy and paste:**
+
 ```bash
 kubectl get namespace $TEAM-staging
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day3-lab3-5-101-remove-it-then-bring-it-back.svg)
+
+**Copy and paste:**
 
 ```bash
 git switch main && git pull
@@ -364,12 +438,18 @@ git commit -am "Add staging back for $TEAM"
 git push -u origin $TEAM-add-staging
 ```
 
+*In the terminal it looks like this (the output depends on your lab):*
+
 ![What to type in the terminal](../images/terminal/day3-lab3-5-102-remove-it-then-bring-it-back.svg)
+
+**Copy and paste:**
 
 ```bash
 kubectl get namespaces | grep $TEAM
 kubectl -n $TEAM-staging get resourcequota team-quota -o jsonpath='{.spec.hard.requests\.cpu}{"\n"}'
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day3-lab3-5-103-remove-it-then-bring-it-back.svg)
 
@@ -381,11 +461,15 @@ Your request in Lab 2 was checked by a pipeline the environments repository came
 
 1. Your copy from Lab 2.
 
+   **Copy and paste:**
+
    ```bash
    cd ~/environments
    git switch main
    git pull
    ```
+
+   *In the terminal it looks like this (the output depends on your lab):*
 
    ![What to type in the terminal](../images/terminal/day3-pipelines-the-one-th-1-1-get-the-latest-environments.svg)
 
@@ -393,9 +477,13 @@ Your request in Lab 2 was checked by a pipeline the environments repository came
 
 1. Each "- name:" is one step of the pipeline.
 
+   **Copy and paste:**
+
    ```bash
    grep -n "name:" .gitea/workflows/plan.yaml
    ```
+
+   *In the terminal it looks like this:*
 
    ![What you should see in the terminal](../images/terminal/day3-pipelines-the-one-th-2-1-list-its-steps.svg)
 
@@ -403,9 +491,13 @@ Your request in Lab 2 was checked by a pipeline the environments repository came
 
 1. The Format check step. No output means every file is formatted.
 
+   **Copy and paste:**
+
    ```bash
    tofu fmt -check -recursive -diff
    ```
+
+   *In the terminal it looks like this:*
 
    ![What you should see in the terminal](../images/terminal/day3-pipelines-the-one-th-3-1-run-its-first-check-yourself.svg)
 

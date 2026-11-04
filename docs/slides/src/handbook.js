@@ -457,10 +457,11 @@ function terminalSvg(cmd, output) {
     if (l.kind === 'cmd') return `<text x="20" y="${y}"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> ${xml(l.t.slice(2))}</tspan></text>`;
     return `<text x="20" y="${y}" fill="${l.kind.startsWith('cmd') ? '#f0f6fc' : outColour(l.t)}">${xml(l.t)}</text>`;
   }).join('\n');
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14" xml:space="preserve">
-<rect width="${w}" height="${h}" rx="10" fill="#0d1117"/>
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14" xml:space="preserve" style="background:#000;border-radius:10px">
+<rect width="${w}" height="${h}" rx="10" fill="#000"/>
 <rect width="${w}" height="28" rx="10" fill="#21262d"/><rect y="18" width="${w}" height="10" fill="#21262d"/>
 <circle cx="20" cy="14" r="6" fill="#ff5f56"/><circle cx="40" cy="14" r="6" fill="#ffbd2e"/><circle cx="60" cy="14" r="6" fill="#27c93f"/>
+<rect x="${w - 214}" y="5" width="204" height="18" rx="9" fill="#d29922"/><text x="${w - 112}" y="18" fill="#000" font-size="11" font-weight="bold" text-anchor="middle">EXAMPLE · DO NOT COPY</text>
 <text x="${w / 2}" y="19" fill="#8b949e" font-size="12" text-anchor="middle">${output === null || output === undefined ? 'Workspace terminal: type this' : 'Workspace terminal'}</text>
 ${text}
 </svg>
@@ -472,7 +473,8 @@ function terminalShot(name, cmd, output = null) {
   fs.writeFileSync(path.join(TERM_DIR, name), terminalSvg(cmd, output));
   termCount++;
   const alt = output === null ? 'What to type in the terminal' : 'What you should see in the terminal';
-  return `![${alt}](../images/terminal/${name})`;
+  const label = output === null ? 'In the terminal it looks like this (the output depends on your lab):' : 'In the terminal it looks like this:';
+  return `*${label}*\n\n![${alt}](../images/terminal/${name})`;
 }
 const slug = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
 
@@ -492,7 +494,7 @@ function simpleStep(step, i, prefix) {
     const cmd = typeof d === 'string' ? null : d.cmd;
     let s = `${k + 1}. ${md(text)}`;
     if (cmd) {
-      s += '\n\n' + pad(fence(cmd, 'bash'));
+      s += '\n\n' + pad('**Copy and paste:**\n\n' + fence(cmd, 'bash'));
       cmd.split('\n').forEach((l) => shown.add(l));
       const quiet = /prints nothing/i.test(text) ? '' : null;
       s += '\n\n' + pad(terminalShot(shotName(k), cmd, d.out !== undefined ? d.out : quiet));
@@ -509,7 +511,7 @@ function simpleStep(step, i, prefix) {
   [step.run, ...thens.map((t) => t.run)].forEach((b, k) => {
     if (!b || b.split('\n').every((l) => shown.has(l))) return;
     const output = k === 0 ? (inItems ? null : step.out) : thens[k - 1].out;
-    out.push(fence(b, 'bash'), '', terminalShot(shotName(100 + k), b, output === undefined ? null : output), '');
+    out.push('**Copy and paste:**', '', fence(b, 'bash'), '', terminalShot(shotName(100 + k), b, output === undefined ? null : output), '');
   });
   if (step.out && step.run && !inItems && step.run.split('\n').every((l) => shown.has(l))) out.push(terminalShot(shotName(), step.run, step.out), '');
   return out;
@@ -518,7 +520,7 @@ function simpleStep(step, i, prefix) {
 function simpleDay(d) {
   const out = [`# Day ${d}: ${md(DAYS[d].title)}: the steps`, '',
     'Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).', '',
-    'Every command has a picture of the terminal. Where the lab was tested, it shows what the command printed (your ids, times, names and team are your own); "type this" pictures show only what to type.', ''];
+    'Each command comes twice. **Copy and paste:** is the grey box to copy (the copy button is at its top right). Under it, a picture of the terminal marked EXAMPLE shows what it looks like: do not copy from the picture. Where the lab was tested, the picture shows what the command printed (your ids, times, names and team are your own); a picture titled "type this" shows only the command.', ''];
   // Topic sections: before the labs, or after them (after: true). A section's
   // say is a sentence, or a list of short points.
   const section = (x) => {

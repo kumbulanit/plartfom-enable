@@ -2,7 +2,7 @@
 
 Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).
 
-Every command has a picture of the terminal. Where the lab was tested, it shows what the command printed (your ids, times, names and team are your own); "type this" pictures show only what to type.
+Each command comes twice. **Copy and paste:** is the grey box to copy (the copy button is at its top right). Under it, a picture of the terminal marked EXAMPLE shows what it looks like: do not copy from the picture. Where the lab was tested, the picture shows what the command printed (your ids, times, names and team are your own); a picture titled "type this" shows only the command.
 
 ## CI/CD and guardrails: where the pipelines are today
 
@@ -90,6 +90,8 @@ Make three common mistakes on purpose (a wrong test, a password in the code, run
 
    *Details → Unit tests (pytest): the test that failed, the line (assert status == 201) and why (assert 200 == 201), then "1 failed, 5 passed".*
 
+**Copy and paste:**
+
 ```bash
 cd ~/hello
 git switch main && git pull
@@ -100,9 +102,13 @@ git commit -am "A wrong test"
 git push -u origin break-things-$ME
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day5-lab2-1-101-a-wrong-test.svg)
 
 ### 2. Fix the test
+
+**Copy and paste:**
 
 ```bash
 sed -i 's/assert status == 201/assert status == 200/' tests/test_main.py
@@ -110,9 +116,13 @@ git commit -am "Fix the test"
 git push
 ```
 
+*In the terminal it looks like this (the output depends on your lab):*
+
 ![What to type in the terminal](../images/terminal/day5-lab2-2-101-fix-the-test.svg)
 
 ### 3. A password in the code
+
+**Copy and paste:**
 
 ```bash
 echo 'DB_PASSWORD = "hunter2-very-secret-123"' >> app/main.py
@@ -120,9 +130,13 @@ git commit -am "Add a database password"
 git push
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day5-lab2-3-101-a-password-in-the-code.svg)
 
 ### 4. Remove the password
+
+**Copy and paste:**
 
 ```bash
 sed -i '/DB_PASSWORD/d' app/main.py
@@ -130,15 +144,21 @@ git commit -am "Remove the password"
 git push
 ```
 
+*In the terminal it looks like this (the output depends on your lab):*
+
 ![What to type in the terminal](../images/terminal/day5-lab2-4-101-remove-the-password.svg)
 
 ### 5. Run as root
+
+**Copy and paste:**
 
 ```bash
 sed -i 's/^USER 10001/USER root/' Dockerfile
 git commit -am "Run as root"
 git push
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day5-lab2-5-101-run-as-root.svg)
 
@@ -147,6 +167,8 @@ git push
 1. Paste the box. It puts USER 10001 back, adds a new test for the health check, runs the tests (6 now), commits and pushes.
 
 2. In the pull request, wait for green. Approve it as reviewer in a private window, then merge as yourself with Create squash commit.
+
+**Copy and paste:**
 
 ```bash
 sed -i 's/^USER root/USER 10001/' Dockerfile
@@ -162,6 +184,8 @@ git commit -am "Run as an ordinary user again, and test the health check"
 git push
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day5-lab2-6-101-put-it-right-add-a-test-and-merge.svg)
 
 ## Lab 3: watch the guardrails refuse a bad deployment
@@ -169,6 +193,8 @@ git push
 Try to put a careless deployment straight into your dev environment, read the three refusals, and fix them one by one.
 
 ### 1. Get the guardrails repository and a copy of the bad example
+
+**Copy and paste:**
 
 ```bash
 cd ~
@@ -178,22 +204,32 @@ sed "s/team01/$TEAM/g" examples/bad.yaml > ~/shortcut.yaml
 cat ~/shortcut.yaml
 ```
 
+*In the terminal it looks like this (the output depends on your lab):*
+
 ![What to type in the terminal](../images/terminal/day5-lab3-1-101-get-the-guardrails-repository-and-a-copy.svg)
 
 ### 2. Try to deploy it
 
+**Copy and paste:**
+
 ```bash
 kubectl apply -f ~/shortcut.yaml
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day5-lab3-2-101-try-to-deploy-it.svg)
 
 ### 3. Fix the image
 
+**Copy and paste:**
+
 ```bash
 sed -i "s#image: nginx:latest#image: harbor.$DOMAIN/dockerhub/library/python:3.12-slim#" ~/shortcut.yaml
 kubectl apply -f ~/shortcut.yaml
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day5-lab3-3-101-fix-the-image.svg)
 
@@ -226,18 +262,26 @@ metadata:
     app.kubernetes.io/part-of: teamNN
 ```
 
+**Copy and paste:**
+
 ```bash
 kubectl apply -f ~/shortcut.yaml
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day5-lab3-4-101-add-the-labels.svg)
 
 ### 5. Clean up, and keep the evidence
 
+**Copy and paste:**
+
 ```bash
 kubectl -n $TEAM-dev delete deployment shortcut
 rm ~/shortcut.yaml
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day5-lab3-5-101-clean-up-and-keep-the-evidence.svg)
 
@@ -247,36 +291,52 @@ Check the guardrails without a cluster, the way the policies repository's pipeli
 
 ### 1. Check a good deployment
 
+**Copy and paste:**
+
 ```bash
 cd ~/policies
 kyverno apply policies/ --resource examples/good.yaml --values-file tests/values.yaml
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day5-lab4-1-101-check-a-good-deployment.svg)
 
 ### 2. Check the bad one
+
+**Copy and paste:**
 
 ```bash
 kyverno apply policies/ --resource examples/bad.yaml --values-file tests/values.yaml
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day5-lab4-2-101-check-the-bad-one.svg)
 
 ### 3. Run the policy tests
+
+**Copy and paste:**
 
 ```bash
 kyverno test tests/
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day5-lab4-3-101-run-the-policy-tests.svg)
 
 ### 4. Break a test on purpose
+
+**Copy and paste:**
 
 ```bash
 sed -i '/required-labels.*shortcut/s/result: fail/result: pass/' tests/kyverno-test.yaml
 kyverno test tests/
 git checkout tests/kyverno-test.yaml
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day5-lab4-4-101-break-a-test-on-purpose.svg)
 
@@ -292,12 +352,16 @@ Ask, the proper way, to break one rule for a short time: a written, reviewed, ti
 
 ### 1. Try the status page
 
+**Copy and paste:**
+
 ```bash
 cd ~/policies
 git switch main && git pull
 sed "s/team01/$TEAM/g" examples/status-page.yaml > ~/status-page.yaml
 kubectl apply -f ~/status-page.yaml
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day5-lab5-1-101-try-the-status-page.svg)
 
@@ -307,6 +371,8 @@ kubectl apply -f ~/status-page.yaml
 
 2. Open the file in the editor (Explorer → policies → exceptions → teamNN-status-page.yaml) and rewrite the reason, under pelab.io/reason, in your own words: why the golden path cannot be used, in one or two sentences. Keep the same indentation. Save.
 
+**Copy and paste:**
+
 ```bash
 git switch -c $TEAM-status-page
 cp examples/exception-template.yaml exceptions/$TEAM-status-page.yaml
@@ -314,6 +380,8 @@ sed -i "s/team01/$TEAM/g; s/student01/$ME/" exceptions/$TEAM-status-page.yaml
 sed -i "s/pelab.io\/expires: .*/pelab.io\/expires: \"$(date -d '+7 days' +%F)\"/" exceptions/$TEAM-status-page.yaml
 cat exceptions/$TEAM-status-page.yaml
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day5-lab5-2-101-write-the-exception-request.svg)
 
@@ -323,11 +391,17 @@ cat exceptions/$TEAM-status-page.yaml
 
 2. Then paste the second box: it sets a date 60 days ahead and checks (refused), then puts the one-week date back and checks again (ok).
 
+**Copy and paste:**
+
 ```bash
 python3 tests/check-exceptions.py
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day5-lab5-3-101-check-it-the-way-the-pipeline-will.svg)
+
+**Copy and paste:**
 
 ```bash
 sed -i "s/pelab.io\/expires: .*/pelab.io\/expires: \"$(date -d '+60 days' +%F)\"/" exceptions/$TEAM-status-page.yaml
@@ -335,6 +409,8 @@ python3 tests/check-exceptions.py
 sed -i "s/pelab.io\/expires: .*/pelab.io\/expires: \"$(date -d '+7 days' +%F)\"/" exceptions/$TEAM-status-page.yaml
 python3 tests/check-exceptions.py
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day5-lab5-3-102-check-it-the-way-the-pipeline-will.svg)
 
@@ -354,20 +430,28 @@ python3 tests/check-exceptions.py
 
 5. Two minutes later, open platform/policies → Commits and click the tick next to your merge commit.
 
+**Copy and paste:**
+
 ```bash
 git add exceptions/$TEAM-status-page.yaml
 git commit -m "Exception: status page for $TEAM"
 git push -u origin $TEAM-status-page
 ```
 
+*In the terminal it looks like this (the output depends on your lab):*
+
 ![What to type in the terminal](../images/terminal/day5-lab5-4-101-propose-it-the-platform-team-approves.svg)
 
 ### 5. Try the status page again
+
+**Copy and paste:**
 
 ```bash
 kubectl apply -f ~/status-page.yaml
 kubectl -n $TEAM-dev get pods
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day5-lab5-5-101-try-the-status-page-again.svg)
 
@@ -379,6 +463,8 @@ kubectl -n $TEAM-dev get pods
 
 3. Two minutes after the merge, platform/apply on the commit says "expired, not applied: teamNN-status-page". Then paste the second box.
 
+**Copy and paste:**
+
 ```bash
 cd ~/policies
 git switch main && git pull
@@ -389,7 +475,11 @@ git commit -am "End the status page exception for $TEAM"
 git push -u origin $TEAM-status-page-end
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day5-lab5-6-101-end-the-exception-and-watch-what-happens.svg)
+
+**Copy and paste:**
 
 ```bash
 kubectl -n $TEAM-dev rollout restart deployment status-page
@@ -397,6 +487,8 @@ sleep 20
 kubectl -n $TEAM-dev get replicasets,pods
 kubectl -n $TEAM-dev get events | grep "Error creating" | tail -1
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day5-lab5-6-102-end-the-exception-and-watch-what-happens.svg)
 
@@ -408,17 +500,23 @@ The same copy-a-template loop as the smoke test on Day 4, this time with Git in 
 
 1. Copy them, or update your copy from Day 2.
 
+   **Copy and paste:**
+
    ```bash
    cd ~
    git clone https://gitea.$DOMAIN/platform/pipeline-templates 2>/dev/null || git -C pipeline-templates pull
    ls ~/pipeline-templates/workflows
    ```
 
+   *In the terminal it looks like this (the output depends on your lab):*
+
    ![What to type in the terminal](../images/terminal/day5-pipelines-add-the-ni-1-1-get-the-templates.svg)
 
 ### 2. Make a branch in rates
 
 1. Your copy of rates from Day 4.
+
+   **Copy and paste:**
 
    ```bash
    cd ~/rates
@@ -427,11 +525,15 @@ The same copy-a-template loop as the smoke test on Day 4, this time with Git in 
    git switch -c nightly-scan-$ME
    ```
 
+   *In the terminal it looks like this (the output depends on your lab):*
+
    ![What to type in the terminal](../images/terminal/day5-pipelines-add-the-ni-2-1-make-a-branch-in-rates.svg)
 
 ### 3. Copy the template in, commit, push
 
 1. One file, unchanged.
+
+   **Copy and paste:**
 
    ```bash
    cp ~/pipeline-templates/workflows/nightly-scan.yaml .gitea/workflows/
@@ -439,6 +541,8 @@ The same copy-a-template loop as the smoke test on Day 4, this time with Git in 
    git commit -m "Add the nightly scan from the platform template"
    git push -u origin nightly-scan-$ME
    ```
+
+   *In the terminal it looks like this (the output depends on your lab):*
 
    ![What to type in the terminal](../images/terminal/day5-pipelines-add-the-ni-3-1-copy-the-template-in-commit-push.svg)
 

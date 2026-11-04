@@ -2,7 +2,7 @@
 
 Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).
 
-Every command has a picture of the terminal. Where the lab was tested, it shows what the command printed (your ids, times, names and team are your own); "type this" pictures show only what to type.
+Each command comes twice. **Copy and paste:** is the grey box to copy (the copy button is at its top right). Under it, a picture of the terminal marked EXAMPLE shows what it looks like: do not copy from the picture. Where the lab was tested, the picture shows what the command printed (your ids, times, names and team are your own); a picture titled "type this" shows only the command.
 
 ## Pipelines: two ways to get one from a template
 
@@ -19,50 +19,72 @@ Package hello into a container image yourself, run it, look inside it, and remov
 
 2. Read the numbered steps as they appear: one for each instruction in the Dockerfile.
 
+**Copy and paste:**
+
 ```bash
 cd ~/hello
 git switch main && git pull
 docker build --build-arg BASE_IMAGE=harbor.$DOMAIN/dockerhub/library/python:3.12-slim -t hello:1 .
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day4-lab1-1-101-build-the-image.svg)
 
 ### 2. Find it in the list of images
+
+**Copy and paste:**
 
 ```bash
 docker images hello
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day4-lab1-2-101-find-it-in-the-list-of-images.svg)
 
 ### 3. Run it
+
+**Copy and paste:**
 
 ```bash
 docker run -d --name hello -p 8081:8081 hello:1
 docker ps
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day4-lab1-3-101-run-it.svg)
 
 ### 4. Call it
+
+**Copy and paste:**
 
 ```bash
 curl -s localhost:8081/
 curl -i localhost:8081/healthz
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day4-lab1-4-101-call-it.svg)
 
 ### 5. Read its logs, and check who it runs as
+
+**Copy and paste:**
 
 ```bash
 docker logs hello
 docker exec hello id
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day4-lab1-5-101-read-its-logs-and-check-who-it-runs-as.svg)
 
 ### 6. Stop and remove it
+
+**Copy and paste:**
 
 ```bash
 docker stop hello
@@ -70,6 +92,8 @@ docker rm hello
 docker ps -a
 docker images hello
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day4-lab1-6-101-stop-and-remove-it.svg)
 
@@ -79,6 +103,8 @@ Run the same image as staging and prod with only its settings changed, and see t
 
 ### 1. Run it as staging
 
+**Copy and paste:**
+
 ```bash
 cd ~/hello
 docker run -d --name hello-staging -p 8082:8081 -e APP_ENV=staging -e GREETING="Hello from staging" hello:1
@@ -86,9 +112,13 @@ sleep 2
 curl -s localhost:8082/
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day4-lab2-1-101-run-it-as-staging.svg)
 
 ### 2. Run it as prod too
+
+**Copy and paste:**
 
 ```bash
 docker run -d --name hello-prod -p 8083:8081 -e APP_ENV=prod -e GREETING="Hello from prod" hello:1
@@ -96,6 +126,8 @@ sleep 2
 curl -s localhost:8083/
 docker ps
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day4-lab2-2-101-run-it-as-prod-too.svg)
 
@@ -117,14 +149,20 @@ to:
 GREETING = os.environ.get("GREETING", "Hello from version 2")
 ```
 
+**Copy and paste:**
+
 ```bash
 docker build --build-arg BASE_IMAGE=harbor.$DOMAIN/dockerhub/library/python:3.12-slim --build-arg APP_VERSION=2 -t hello:2 .
 docker images hello
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day4-lab2-3-101-make-version-2.svg)
 
 ### 4. Run the two versions side by side
+
+**Copy and paste:**
 
 ```bash
 docker run -d --name hello-v1 -p 8081:8081 hello:1
@@ -134,15 +172,21 @@ curl -s localhost:8081/
 curl -s localhost:8084/
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day4-lab2-4-101-run-the-two-versions-side-by-side.svg)
 
 ### 5. Clean up
+
+**Copy and paste:**
 
 ```bash
 docker rm -f hello-staging hello-prod hello-v1 hello-v2
 git checkout app/main.py
 docker ps
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day4-lab2-5-101-clean-up.svg)
 
@@ -234,9 +278,13 @@ Use the golden path: create a brand-new service called rates from the template, 
 
 1. Open https://rates-teamNN-dev.<lab domain>/ in a new tab (your team instead of teamNN).
 
+**Copy and paste:**
+
 ```bash
 curl -s https://rates-$TEAM-dev.$DOMAIN/
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day4-lab3-6-101-open-it.svg)
 
@@ -276,12 +324,16 @@ Make your first change to rates through the same loop as on Day 2, and read the 
 
 ### 1. Copy the new repository and make a branch
 
+**Copy and paste:**
+
 ```bash
 cd ~
 git clone https://gitea.$DOMAIN/$TEAM/rates
 cd rates
 git switch -c first-change-$ME
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day4-lab4-1-101-copy-the-new-repository-and-make-a-branc.svg)
 
@@ -303,9 +355,13 @@ to:
 GREETING = os.environ.get("GREETING", "Rates service of team 3")
 ```
 
+**Copy and paste:**
+
 ```bash
 pytest -q
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day4-lab4-2-101-change-the-greeting-and-run-the-tests.svg)
 
@@ -323,10 +379,14 @@ pytest -q
 
    *Ready to merge: the reviewer approved ("Looks good"), and both checks are green. Your names, team, numbers and times are your own.*
 
+**Copy and paste:**
+
 ```bash
 git commit -am "First change to rates"
 git push -u origin first-change-$ME
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day4-lab4-3-101-commit-push-review-merge.svg)
 
@@ -336,9 +396,13 @@ git push -u origin first-change-$ME
 
 2. Reload your rates dev tab (https://rates-teamNN-dev.<lab domain>/).
 
+**Copy and paste:**
+
 ```bash
 curl -s https://rates-$TEAM-dev.$DOMAIN/
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day4-lab4-4-101-see-it-live-in-dev.svg)
 

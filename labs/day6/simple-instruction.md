@@ -2,7 +2,7 @@
 
 Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).
 
-Every command has a picture of the terminal. Where the lab was tested, it shows what the command printed (your ids, times, names and team are your own); "type this" pictures show only what to type.
+Each command comes twice. **Copy and paste:** is the grey box to copy (the copy button is at its top right). Under it, a picture of the terminal marked EXAMPLE shows what it looks like: do not copy from the picture. Where the lab was tested, the picture shows what the command printed (your ids, times, names and team are your own); a picture titled "type this" shows only the command.
 
 ## Lab 1: promote hello to staging, then prod
 
@@ -16,12 +16,16 @@ Release the image running in dev to staging and then prod, by changing two lines
 
 3. In the artifacts list, find the line whose Tags column shows this tag (move the mouse over a cut-short tag to see it whole), and check that its Vulnerabilities column shows a coloured bar: it has been scanned. If there is no such line, the pipeline on main is still running: wait for it and reload.
 
+**Copy and paste:**
+
 ```bash
 cd ~/hello
 git switch main && git pull
 TAG=$(git rev-parse HEAD)
 echo $TAG
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day6-lab1-1-101-find-the-tag-to-release.svg)
 
@@ -49,11 +53,15 @@ replicas:
     count: 1
 ```
 
+**Copy and paste:**
+
 ```bash
 git switch -c release-staging-$ME
 sed -i "s/newTag: .*/newTag: $TAG/; s/count: 0/count: 1/" deploy/staging/kustomization.yaml
 git diff
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day6-lab1-2-101-change-two-lines-for-staging.svg)
 
@@ -71,10 +79,14 @@ git diff
 
 4. When "All checks were successful", merge with Create squash commit.
 
+**Copy and paste:**
+
 ```bash
 git commit -am "Release ${TAG:0:8} to staging"
 git push -u origin release-staging-$ME
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day6-lab1-3-101-propose-the-release-the-reviewer-approve.svg)
 
@@ -92,9 +104,13 @@ git push -u origin release-staging-$ME
 
 1. Open https://hello-teamNN-staging.<lab domain>/ in a new tab (your team instead of teamNN).
 
+**Copy and paste:**
+
 ```bash
 curl -s https://hello-$TEAM-staging.$DOMAIN/
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day6-lab1-5-101-check-staging-answers-with-the-right-ver.svg)
 
@@ -106,6 +122,8 @@ curl -s https://hello-$TEAM-staging.$DOMAIN/
 
 3. After the merge, call prod (the second box).
 
+**Copy and paste:**
+
 ```bash
 git switch main && git pull
 git switch -c release-prod-$ME
@@ -115,12 +133,18 @@ git commit -am "Release ${TAG:0:8} to prod"
 git push -u origin release-prod-$ME
 ```
 
+*In the terminal it looks like this (the output depends on your lab):*
+
 ![What to type in the terminal](../images/terminal/day6-lab1-6-101-do-the-same-for-prod-with-two-copies.svg)
+
+**Copy and paste:**
 
 ```bash
 curl -s https://hello-$TEAM-prod.$DOMAIN/
 kubectl -n $TEAM-prod get pods
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day6-lab1-6-102-do-the-same-for-prod-with-two-copies.svg)
 
@@ -142,17 +166,25 @@ Read your service's health on the Golden path services dashboard: versions, traf
 
 ### 2. Make some traffic
 
+**Copy and paste:**
+
 ```bash
 for i in $(seq 1 300); do curl -s -o /dev/null https://hello-$TEAM-staging.$DOMAIN/; sleep 0.2; done
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day6-lab2-2-101-make-some-traffic.svg)
 
 ### 3. Make some errors
 
+**Copy and paste:**
+
 ```bash
 for i in $(seq 1 50); do curl -s -o /dev/null https://hello-$TEAM-staging.$DOMAIN/missing; done
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day6-lab2-3-101-make-some-errors.svg)
 
@@ -172,6 +204,8 @@ Put real load on staging with k6, watch what it does on the dashboard, and turn 
 
 ### 1. Write the load test
 
+**Copy and paste:**
+
 ```bash
 mkdir -p ~/day6 && cd ~/day6
 cat > load.js <<EOF
@@ -189,13 +223,19 @@ EOF
 cat load.js
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day6-lab3-1-101-write-the-load-test.svg)
 
 ### 2. Run it
 
+**Copy and paste:**
+
 ```bash
 k6 run load.js
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day6-lab3-2-101-run-it.svg)
 
@@ -213,15 +253,23 @@ k6 run load.js
 
 2. While it runs, open a second terminal (+) and run the second box a few times: it shows how much CPU and memory the staging pod uses right now.
 
+**Copy and paste:**
+
 ```bash
 k6 run --vus 100 load.js
 ```
 
+*In the terminal it looks like this:*
+
 ![What you should see in the terminal](../images/terminal/day6-lab3-4-101-run-it-again-with-100-users.svg)
+
+**Copy and paste:**
 
 ```bash
 kubectl -n $TEAM-staging top pods
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day6-lab3-4-102-run-it-again-with-100-users.svg)
 
@@ -237,11 +285,15 @@ Cause two incidents on purpose, a manual change and a bad release, and measure h
 
 ### 1. Switch dev off by hand
 
+**Copy and paste:**
+
 ```bash
 date +%T
 kubectl -n $TEAM-dev scale deployment hello --replicas=0
 curl -s -o /dev/null -w "%{http_code}\n" https://hello-$TEAM-dev.$DOMAIN/
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day6-lab4-1-101-switch-dev-off-by-hand.svg)
 
@@ -251,15 +303,23 @@ curl -s -o /dev/null -w "%{http_code}\n" https://hello-$TEAM-dev.$DOMAIN/
 
 2. When READY is 1/1 again, press Ctrl+C to stop watching, and note the time:
 
+   **Copy and paste:**
+
    ```bash
    date +%T
    ```
 
+   *In the terminal it looks like this:*
+
    ![What you should see in the terminal](../images/terminal/day6-lab4-2-2-do-nothing-and-watch.svg)
+
+**Copy and paste:**
 
 ```bash
 kubectl -n $TEAM-dev get deployment hello -w
 ```
+
+*In the terminal it looks like this (the output depends on your lab):*
 
 ![What to type in the terminal](../images/terminal/day6-lab4-2-101-do-nothing-and-watch.svg)
 
@@ -271,11 +331,17 @@ kubectl -n $TEAM-dev get deployment hello -w
 
 3. A minute after the merge, run:
 
+   **Copy and paste:**
+
    ```bash
    kubectl -n $TEAM-staging get pods
    ```
 
+   *In the terminal it looks like this (the output depends on your lab):*
+
    ![What to type in the terminal](../images/terminal/day6-lab4-3-3-release-something-broken-to-staging.svg)
+
+**Copy and paste:**
 
 ```bash
 cd ~/hello
@@ -285,6 +351,8 @@ sed -i "s/newTag: .*/newTag: does-not-exist/" deploy/staging/kustomization.yaml
 git commit -am "Release a tag that does not exist"
 git push -u origin bad-release-$ME
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day6-lab4-3-101-release-something-broken-to-staging.svg)
 
@@ -296,11 +364,17 @@ git push -u origin bad-release-$ME
 
 3. A minute later, run this again: it shows one healthy pod.
 
+   **Copy and paste:**
+
    ```bash
    kubectl -n $TEAM-staging get pods
    ```
 
+   *In the terminal it looks like this (the output depends on your lab):*
+
    ![What to type in the terminal](../images/terminal/day6-lab4-4-3-recover-through-git.svg)
+
+**Copy and paste:**
 
 ```bash
 git switch main && git pull
@@ -309,6 +383,8 @@ git revert --no-edit $(git log -1 --format=%H -- deploy/staging/kustomization.ya
 git diff HEAD~1 --stat
 git push -u origin revert-bad-release-$ME
 ```
+
+*In the terminal it looks like this:*
 
 ![What you should see in the terminal](../images/terminal/day6-lab4-4-101-recover-through-git.svg)
 
@@ -330,29 +406,41 @@ Take your Day 4 service (rates) from a real improvement to production, with the 
 
 2. Get the latest rates and make a branch of your own:
 
+   **Copy and paste:**
+
    ```bash
    cd ~/rates
    git switch main && git pull
    git switch -c improvement-$ME
    ```
 
+   *In the terminal it looks like this (the output depends on your lab):*
+
    ![What to type in the terminal](../images/terminal/day6-labcapstone-you-1-2-make-one-real-improvement.svg)
 
 3. Make the change in the editor and save it. Then run the tests:
+
+   **Copy and paste:**
 
    ```bash
    pytest -q
    ```
 
+   *In the terminal it looks like this:*
+
    ![What you should see in the terminal](../images/terminal/day6-labcapstone-you-1-3-make-one-real-improvement.svg)
 
 4. Commit and push:
+
+   **Copy and paste:**
 
    ```bash
    git add -A
    git commit -m "Improve rates"
    git push -u origin improvement-$ME
    ```
+
+   *In the terminal it looks like this (the output depends on your lab):*
 
    ![What to type in the terminal](../images/terminal/day6-labcapstone-you-1-4-make-one-real-improvement.svg)
 
@@ -366,19 +454,27 @@ Take your Day 4 service (rates) from a real improvement to production, with the 
 
 1. Make a copy of the load test for rates:
 
+   **Copy and paste:**
+
    ```bash
    cd ~/day6
    cp load.js rates.js
    sed -i "s/hello-/rates-/" rates.js
    ```
 
+   *In the terminal it looks like this (the output depends on your lab):*
+
    ![What to type in the terminal](../images/terminal/day6-labcapstone-you-3-1-measure-it.svg)
 
 2. Run it. While it runs, open the Golden path services dashboard in Grafana, choose Service: rates at the top left, and read Requests per second and Failed requests for staging:
 
+   **Copy and paste:**
+
    ```bash
    k6 run rates.js
    ```
+
+   *In the terminal it looks like this (the output depends on your lab):*
 
    ![What to type in the terminal](../images/terminal/day6-labcapstone-you-3-2-measure-it.svg)
 

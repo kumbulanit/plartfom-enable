@@ -112,9 +112,9 @@ module.exports = {
         plain: 'Visit your website from a second terminal, as a customer would, while the first keeps it running.',
         do: [
           'Open a second terminal: click the + at the top right of the terminal panel. A new terminal opens with its own prompt. The list on the right of the panel shows both terminals; click one to switch to it.',
-          { text: 'In the new terminal, visit the website\'s front page.', cmd: 'curl -s localhost:8080/', see: 'The website describes itself in one line:', out: '{"app": "hello", "version": "dev", "environment": "local", "message": "Hello from the PE Lab golden path"}', note: 'Now click the first terminal and look: a new line appeared there, saying what was asked and how it was answered. That is the website\'s log.' },
-          { text: 'Back in the second terminal, ask the website whether it is healthy.', cmd: 'curl -i localhost:8080/healthz', see: 'The status line HTTP/1.0 200 OK, a few details, and the answer ok:', out: 'HTTP/1.0 200 OK\nServer: hello Python/3.12.3\nDate: Mon, 02 Nov 2026 10:12:41 GMT\nContent-Type: text/plain\nContent-Length: 3\n\nok' },
-          { text: 'Now open the same website in your browser. Your browser runs on your laptop, where localhost means your laptop, not this workspace, so the browser uses your workspace\'s own address instead, and code-server (your editor) passes anything under /proxy/8080/ on to port 8080 in the workspace. Print your address, then hold Ctrl (Cmd on a Mac) and click it.', cmd: 'echo "https://$ME.$DOMAIN/proxy/8080/"', see: 'Your own address, built from two settings every workspace terminal has: ME (your user name) and DOMAIN (the lab\'s domain):', out: 'https://student01.<lab domain>/proxy/8080/', note: 'A new browser tab shows a big LOCAL and the greeting: the same website as a page, because a browser asks for a page and curl asks for data. The first terminal logs this visit too.' },
+          { text: 'In the new terminal, visit the website\'s front page.', cmd: 'curl -s localhost:8081/', see: 'The website describes itself in one line:', out: '{"app": "hello", "version": "dev", "environment": "local", "message": "Hello from the PE Lab golden path"}', note: 'Now click the first terminal and look: a new line appeared there, saying what was asked and how it was answered. That is the website\'s log.' },
+          { text: 'Back in the second terminal, ask the website whether it is healthy.', cmd: 'curl -i localhost:8081/healthz', see: 'The status line HTTP/1.0 200 OK, a few details, and the answer ok:', out: 'HTTP/1.0 200 OK\nServer: hello Python/3.12.3\nDate: Mon, 02 Nov 2026 10:12:41 GMT\nContent-Type: text/plain\nContent-Length: 3\n\nok' },
+          { text: 'Now open the same website in your browser. Your browser runs on your laptop, where localhost means your laptop, not this workspace, so the browser uses your workspace\'s own address instead, and code-server (your editor) passes anything under /proxy/8081/ on to port 8081 in the workspace. Print your address, then hold Ctrl (Cmd on a Mac) and click it.', cmd: 'echo "https://$ME.$DOMAIN/proxy/8081/"', see: 'Your own address, built from two settings every workspace terminal has: ME (your user name) and DOMAIN (the lab\'s domain):', out: 'https://student01.<lab domain>/proxy/8081/', note: 'A new browser tab shows a big LOCAL and the greeting: the same website as a page, because a browser asks for a page and curl asks for data. The first terminal logs this visit too.' },
         ],
         read: [
           'The first answer is written in JSON, a common way to write data: "name": value pairs between curly brackets. app, version and environment are what the website says about itself. environment is local because you started it by hand.',
@@ -124,7 +124,7 @@ module.exports = {
       },
       3: {
         plain: 'Restart the same website with three different settings, so it behaves as "staging" instead of "local".',
-        check: 'curl -s localhost:8081/ answers with "environment": "staging" and "Hello from staging".',
+        check: 'curl -s localhost:8082/ answers with "environment": "staging" and "Hello from staging".',
       },
       4: {
         plain: 'Look at the numbers the website keeps about itself: how many visits it had, and how long it has been running.',

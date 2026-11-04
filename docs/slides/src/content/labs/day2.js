@@ -316,7 +316,7 @@ module.exports = {
         why: 'Check your own change before you ask anyone to review it: it saves everyone time, and it is what the pipeline will do again anyway.',
         do: [
           'In the first terminal, start the service with the command below. It keeps running.',
-          { text: 'Open a second terminal (the + at the top right of the terminal panel) and run:', cmd: 'curl -s localhost:8080/' },
+          { text: 'Open a second terminal (the + at the top right of the terminal panel) and run:', cmd: 'curl -s localhost:8081/' },
           'Check that "message" shows your new text.',
           'Go back to the first terminal and press Ctrl+C to stop the service.',
         ],

@@ -716,7 +716,7 @@ Everything you need is already inside it: Git, Docker, Python, OpenTofu, kubectl
 | chmod  ·  sudo | Change who may read, write or run a file; run one command as the administrator | chmod +x run.sh  ·  sudo apt update |
 | ps aux  ·  top | List running programs; watch CPU and memory live | ps aux \| grep python |
 | systemctl status  ·  journalctl -u | Is a service running; read its log | journalctl -u docker --since today |
-| curl | Call a web address from the terminal and see the raw answer | curl -i http://localhost:8080/healthz |
+| curl | Call a web address from the terminal and see the raw answer | curl -i http://localhost:8081/healthz |
 | env  ·  export | Show the environment variables; set one for the next command | APP_ENV=staging python3 -m app.main |
 | Ctrl + C  ·  Ctrl + R | Stop the running program; search your command history |  |
 
@@ -1118,7 +1118,7 @@ content-type: text/html; charset=utf-8
 
 A web service is a program that waits for requests and answers them. Your browser, or the curl command, is the client: it sends a request; the service (the server) sends back a response.
 
-A request names an address (a URL): the computer, the port (a numbered door on that computer, like 8080) and the path (/, /healthz). The response starts with a status code and carries a body, often in JSON.
+A request names an address (a URL): the computer, the port (a numbered door on that computer, like 8081) and the path (/, /healthz). The response starts with a status code and carries a body, often in JSON.
 
 The status code says how it went: 200 OK, 404 not found, 403 not allowed, 500 the service failed. Monitoring counts these codes to know whether a service is healthy.
 
@@ -1127,7 +1127,7 @@ The status code says how it went: 200 OK, 404 not found, 403 not allowed, 500 th
 **One request, one response**
 
 ```
-curl localhost:8080/healthz
+curl localhost:8081/healthz
 |    |         |   |
 |    |         |   `- path: the page
 |    |         `- port: which door
@@ -1222,7 +1222,7 @@ You will use two terminals at the same time: one runs the website and stays busy
 
 - **Repository (repo):** A folder of code with its whole history, kept in Gitea. Your service lives in the repository team01/hello: on your own VM you are student01, in team01.
 - **Clone:** Copy a repository from Gitea to your workspace.
-- **Port:** A numbered door on a computer that a program listens on. hello listens on 8080 unless told otherwise.
+- **Port:** A numbered door on a computer that a program listens on. hello listens on 8081 unless told otherwise.
 - **localhost:** "This computer": your own workspace.
 - **Environment variable:** A setting given to a program when it starts, written NAME=value in front of the command.
 - **Health check:** An address (/healthz) that answers ok when the service is alive. The platform asks it all the time.
@@ -1349,10 +1349,10 @@ python3 -m app.main
 
 - `python3 -m app.main`: run the Python program in app/main.py. It starts a small web server and waits for requests.
 
-**You should see:** One line in JSON (a common text format for data) saying it started on port 8080. Then nothing more: the service is waiting.
+**You should see:** One line in JSON (a common text format for data) saying it started on port 8081. Then nothing more: the service is waiting.
 
 ```
-{"event": "started", "app": "hello", "env": "local", "version": "dev", "port": 8080}
+{"event": "started", "app": "hello", "env": "local", "version": "dev", "port": 8081}
 ```
 
 **If you see something else:**
@@ -1377,7 +1377,7 @@ python3 -m app.main
 2. In the new terminal, visit the website's front page.
 
    ```bash
-   curl -s localhost:8080/
+   curl -s localhost:8081/
    ```
 
    **You should see:** The website describes itself in one line:
@@ -1391,7 +1391,7 @@ python3 -m app.main
 3. Back in the second terminal, ask the website whether it is healthy.
 
    ```bash
-   curl -i localhost:8080/healthz
+   curl -i localhost:8081/healthz
    ```
 
    **You should see:** The status line HTTP/1.0 200 OK, a few details, and the answer ok:
@@ -1406,24 +1406,24 @@ python3 -m app.main
    ok
    ```
 
-4. Now open the same website in your browser. Your browser runs on your laptop, where localhost means your laptop, not this workspace, so the browser uses your workspace's own address instead, and code-server (your editor) passes anything under /proxy/8080/ on to port 8080 in the workspace. Print your address, then hold Ctrl (Cmd on a Mac) and click it.
+4. Now open the same website in your browser. Your browser runs on your laptop, where localhost means your laptop, not this workspace, so the browser uses your workspace's own address instead, and code-server (your editor) passes anything under /proxy/8081/ on to port 8081 in the workspace. Print your address, then hold Ctrl (Cmd on a Mac) and click it.
 
    ```bash
-   echo "https://$ME.$DOMAIN/proxy/8080/"
+   echo "https://$ME.$DOMAIN/proxy/8081/"
    ```
 
    **You should see:** Your own address, built from two settings every workspace terminal has: ME (your user name) and DOMAIN (the lab's domain):
 
    ```
-   https://student01.<lab domain>/proxy/8080/
+   https://student01.<lab domain>/proxy/8081/
    ```
 
    A new browser tab shows a big LOCAL and the greeting: the same website as a page, because a browser asks for a page and curl asks for data. The first terminal logs this visit too.
 
 **What each line does:**
 
-- `curl -s localhost:8080/`: ask the service on this computer (localhost), port 8080, for its main page (/). -s hides curl's progress messages.
-- `curl -i localhost:8080/healthz`: ask the health check. -i also shows the status line and headers.
+- `curl -s localhost:8081/`: ask the service on this computer (localhost), port 8081, for its main page (/). -s hides curl's progress messages.
+- `curl -i localhost:8081/healthz`: ask the health check. -i also shows the status line and headers.
 
 **How to read it:**
 
@@ -1432,8 +1432,8 @@ python3 -m app.main
 
 **If you see something else:**
 
-- *curl: (7) Failed to connect to localhost port 8080*: the service is not running. Look at the first terminal: start it again with python3 -m app.main.
-- *The browser tab shows an error instead of the page*: the service is not running, or the address has another port. Check the first terminal, and that the address ends in /proxy/8080/.
+- *curl: (7) Failed to connect to localhost port 8081*: the service is not running. Look at the first terminal: start it again with python3 -m app.main.
+- *The browser tab shows an error instead of the page*: the service is not running, or the address has another port. Check the first terminal, and that the address ends in /proxy/8081/.
 - *The browser asks for a password*: it is your workspace's sign-in: type your workspace password (from your logins file) and press Enter.
 
 **Check before you go on:** You saw the greeting, then ok, the page opened in your browser, and the first terminal shows a log line for each visit.
@@ -1450,32 +1450,32 @@ python3 -m app.main
 
 1. Click in the first terminal (the one running the service) and press Ctrl+C. The service stops and the prompt comes back.
 
-2. In the same first terminal, paste this box and press Enter. The service starts again, now as staging, on port 8081.
+2. In the same first terminal, paste this box and press Enter. The service starts again, now as staging, on port 8082.
 
    ```bash
-   APP_ENV=staging GREETING="Hello from staging" PORT=8081 python3 -m app.main
+   APP_ENV=staging GREETING="Hello from staging" PORT=8082 python3 -m app.main
    ```
 
 3. Switch to the second terminal and run:
 
    ```bash
-   curl -s localhost:8081/
+   curl -s localhost:8082/
    ```
 
-4. See it in your browser too: print the address for port 8081 and Ctrl+click it (Cmd+click on a Mac). The page now says STAGING.
+4. See it in your browser too: print the address for port 8082 and Ctrl+click it (Cmd+click on a Mac). The page now says STAGING.
 
    ```bash
-   echo "https://$ME.$DOMAIN/proxy/8081/"
+   echo "https://$ME.$DOMAIN/proxy/8082/"
    ```
 
 **What each line does:**
 
 - `APP_ENV=staging`: a setting (environment variable): the name of the environment the service says it runs in.
 - `GREETING="Hello from staging"`: a setting: the message it answers with.
-- `PORT=8081`: a setting: listen on port 8081 instead of 8080.
+- `PORT=8082`: a setting: listen on port 8082 instead of 8081.
 - `python3 -m app.main`: the same program as before. The settings in front of it apply to this run only.
 
-**You should see:** In the second terminal, curl -s localhost:8081/ now answers:
+**You should see:** In the second terminal, curl -s localhost:8082/ now answers:
 
 ```
 {"app": "hello", "version": "dev", "environment": "staging", "message": "Hello from staging"}
@@ -1487,9 +1487,9 @@ python3 -m app.main
 
 **If you see something else:**
 
-- *curl: (7) Failed to connect to localhost port 8081*: the service did not start, or you called 8080. Look at the first terminal for an error, and check the port in your curl.
+- *curl: (7) Failed to connect to localhost port 8082*: the service did not start, or you called 8081. Look at the first terminal for an error, and check the port in your curl.
 
-**Check before you go on:** curl -s localhost:8081/ answers with "environment": "staging" and "Hello from staging".
+**Check before you go on:** curl -s localhost:8082/ answers with "environment": "staging" and "Hello from staging".
 
 #### Step 5. Look at its logs and its numbers
 
@@ -1500,12 +1500,12 @@ python3 -m app.main
 **Why:** Logs say what happened, request by request; metrics count it. Together they are how anyone, and later the dashboard, knows how a service is doing.
 
 ```bash
-curl -s localhost:8081/metrics
+curl -s localhost:8082/metrics
 ```
 
 **What each line does:**
 
-- `curl -s localhost:8081/metrics`: ask the service for its metrics: a page of numbers in the format the monitoring system (Prometheus) reads.
+- `curl -s localhost:8082/metrics`: ask the service for its metrics: a page of numbers in the format the monitoring system (Prometheus) reads.
 
 **You should see:** Counters, each with a line of explanation (# HELP) above it:
 
@@ -1523,7 +1523,7 @@ app_uptime_seconds 74
 
 **How to read it:**
 
-- http_requests_total{path="/",status="200"} 1: one request to / was answered with 200. Call curl -s localhost:8081/ again and look: the count goes up. (No http_requests_total line at all? Nobody has called the service yet: run curl -s localhost:8081/ once, then the metrics again.)
+- http_requests_total{path="/",status="200"} 1: one request to / was answered with 200. Call curl -s localhost:8082/ again and look: the count goes up. (No http_requests_total line at all? Nobody has called the service yet: run curl -s localhost:8082/ once, then the metrics again.)
 - app_info shows the version and environment; app_uptime_seconds how long it has been running.
 - In the first terminal, each request wrote one JSON line: the log. For example {"event": "request", ..., "path": "/", "status": 200, "duration_ms": 0.22}: what was asked, the answer and how long it took.
 

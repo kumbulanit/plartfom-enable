@@ -28,7 +28,7 @@ spec:
           image: {{ pelab_hosts.harbor }}/${REPO_OWNER}/${REPO_NAME}:unset
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: 8081
           env:
             - name: APP_NAME
               value: ${REPO_NAME}

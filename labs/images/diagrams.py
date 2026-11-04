@@ -177,7 +177,7 @@ def container_build():
     s.box(430, 110, 140, 64, 'hello:1', 'image', kind='accent')
     s.arrow([(160, 142), (220, 142)], 'recipe')
     s.arrow([(370, 142), (430, 142)], 'layers', kind='accent')
-    rows = [('hello (local)', 'port 8080', 30), ('hello-staging', '-e APP_ENV=staging · 8081', 120), ('hello-prod', '-e APP_ENV=prod · 8082', 210)]
+    rows = [('hello (local)', 'port 8081', 30), ('hello-staging', '-e APP_ENV=staging · 8082', 120), ('hello-prod', '-e APP_ENV=prod · 8083', 210)]
     for name, sub, y in rows:
         s.box(680, y, 240, 56, name, sub, kind='ok')
         s.arrow([(570, 142), (630, 142), (630, y + 28), (680, y + 28)], None, kind='ok')
@@ -465,8 +465,8 @@ def linux_tree():
 def web_request():
     s = Svg(1000, 330, 'One request through hello')
     s.box(20, 60, 170, 70, 'Client', 'curl or a browser')
-    s.box(420, 50, 200, 90, 'hello', 'listening on port 8080', kind='accent')
-    s.arrow([(190, 80), (420, 80)], 'GET /healthz  (port 8080)', kind='accent')
+    s.box(420, 50, 200, 90, 'hello', 'listening on port 8081', kind='accent')
+    s.arrow([(190, 80), (420, 80)], 'GET /healthz  (port 8081)', kind='accent')
     s.arrow([(420, 115), (190, 115)], '200 OK  ·  body: ok', kind='ok', below=True)
     s.box(700, 30, 280, 56, 'Log', 'one JSON line per request', kind='ghost')
     s.box(700, 110, 280, 56, '/metrics', 'counts requests, by path and status', kind='ghost')

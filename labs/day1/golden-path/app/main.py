@@ -137,7 +137,7 @@ def log(event: str, **fields: object) -> None:
 
 
 def main() -> None:
-    port = int(os.environ.get("PORT", "8080"))
+    port = int(os.environ.get("PORT", "8081"))
     server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
     log("started", version=APP_VERSION, port=port)
     server.serve_forever()

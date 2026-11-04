@@ -1029,7 +1029,7 @@ Changes not staged for commit:
 2. Open a second terminal (the + at the top right of the terminal panel) and run:
 
    ```bash
-   curl -s localhost:8080/
+   curl -s localhost:8081/
    ```
 
 3. Check that "message" shows your new text.

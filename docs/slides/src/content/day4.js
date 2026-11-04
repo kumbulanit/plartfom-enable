@@ -67,7 +67,7 @@ WORKDIR /srv
 COPY app/ ./app/
 
 USER 10001
-EXPOSE 8080
+EXPOSE 8081
 ENTRYPOINT ["python", "-m", "app.main"]`,
     notesRight: [
       'FROM: start from a small official Python image. The pipeline passes the Harbor-cached copy as BASE_IMAGE.',
@@ -84,8 +84,8 @@ ENTRYPOINT ["python", "-m", "app.main"]`,
     steps: [
       { do: `cd ~/hello && git switch main && git pull. Then: docker build --build-arg BASE_IMAGE=harbor.${DOMAIN}/dockerhub/library/python:3.12-slim -t hello:1 .`, expect: 'Each Dockerfile line runs as a step; the last line says the image is tagged hello:1.' },
       { do: 'docker images | head', expect: 'hello:1 in the list, with its size: almost all of it is Python itself; your code is a few kilobytes.' },
-      { do: 'docker run -d --name hello -p 8080:8080 hello:1', expect: 'A long container id. docker ps shows it running.' },
-      { do: 'curl -s localhost:8080/ and curl -i localhost:8080/healthz', expect: 'The JSON with "environment": "local"; HTTP 200 for healthz.' },
+      { do: 'docker run -d --name hello -p 8081:8081 hello:1', expect: 'A long container id. docker ps shows it running.' },
+      { do: 'curl -s localhost:8081/ and curl -i localhost:8081/healthz', expect: 'The JSON with "environment": "local"; HTTP 200 for healthz.' },
       { do: 'docker logs hello, then docker exec hello id', expect: 'JSON log lines; uid=10001, not root.' },
       { do: 'docker stop hello && docker rm hello', expect: 'The container is gone; the image hello:1 remains.' },
     ],
@@ -95,10 +95,10 @@ ENTRYPOINT ["python", "-m", "app.main"]`,
     type: 'steps', section: 'Lab 1: Docker by hand', time: '25 min',
     title: 'Lab 2: one image, three environments',
     steps: [
-      { do: 'docker run -d --name hello-staging -p 8081:8080 -e APP_ENV=staging -e GREETING="Hello from staging" hello:1', expect: 'curl -s localhost:8081/ says "environment": "staging". Same image, different settings.' },
-      { do: 'docker run -d --name hello-prod -p 8082:8080 -e APP_ENV=prod -e GREETING="Hello from prod" hello:1', expect: 'Three containers from one image: local, staging and prod, each reporting its own name.' },
+      { do: 'docker run -d --name hello-staging -p 8082:8081 -e APP_ENV=staging -e GREETING="Hello from staging" hello:1', expect: 'curl -s localhost:8082/ says "environment": "staging". Same image, different settings.' },
+      { do: 'docker run -d --name hello-prod -p 8083:8081 -e APP_ENV=prod -e GREETING="Hello from prod" hello:1', expect: 'Three containers from one image: local, staging and prod, each reporting its own name.' },
       { do: 'Change the default greeting in app/main.py and rebuild as hello:2 (same build command, -t hello:2).', expect: 'docker images shows hello:1 and hello:2; the old one is untouched.' },
-      { do: 'Run hello:2 on port 8083 and compare with 8080.', expect: 'Two versions running side by side.' },
+      { do: 'Run hello:2 on port 8084 and compare with 8081.', expect: 'Two versions running side by side.' },
       { do: 'Clean up: docker rm -f hello-staging hello-prod and any others.', expect: 'docker ps is empty.' },
     ],
     notes: 'This is the whole promotion model in miniature: build once, run the same image everywhere, change only the settings. Never reuse a tag: hello:1 must always mean the same image. The pipeline uses the commit id as the tag for exactly this reason, and a guardrail on Day 5 refuses the "latest" tag.',

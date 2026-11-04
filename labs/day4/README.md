@@ -67,7 +67,7 @@ WORKDIR /srv
 COPY app/ ./app/
 
 USER 10001
-EXPOSE 8080
+EXPOSE 8081
 ENTRYPOINT ["python", "-m", "app.main"]
 ```
 
@@ -96,7 +96,7 @@ ENTRYPOINT ["python", "-m", "app.main"]
 - **Dockerfile:** The recipe for an image: one instruction per line.
 - **Tag:** The label after the colon in hello:1: which version of the image.
 - **Registry:** Where images are kept and shared. The lab's registry is Harbor; it also keeps copies of public images from Docker Hub.
-- **Port mapping:** -p 8080:8080 connects a port of your workspace to a port inside the container.
+- **Port mapping:** -p 8081:8081 connects a port of your workspace to a port inside the container.
 
 **Before you start:**
 
@@ -192,7 +192,7 @@ hello:1   51ec07f75cbf        145MB             0B
 **Why:** An image is only a package; a container is the running copy. One image can run as many containers as you like.
 
 ```bash
-docker run -d --name hello -p 8080:8080 hello:1
+docker run -d --name hello -p 8081:8081 hello:1
 docker ps
 ```
 
@@ -201,7 +201,7 @@ docker ps
 - `docker run`: start a container from an image.
 - `-d`: in the background (detached), so your terminal stays free.
 - `--name hello`: call the container hello, so later commands can find it by name.
-- `-p 8080:8080`: connect port 8080 of your workspace to port 8080 inside the container, where the service listens.
+- `-p 8081:8081`: connect port 8081 of your workspace to port 8081 inside the container, where the service listens.
 - `hello:1`: the image to run.
 - `docker ps`: list the running containers.
 
@@ -210,12 +210,12 @@ docker ps
 ```
 945cd5ec3bf7cdc2172d...
 CONTAINER ID   IMAGE     COMMAND                CREATED         STATUS        PORTS                                         NAMES
-945cd5ec3bf7   hello:1   "python -m app.main"   2 seconds ago   Up 1 second   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp   hello
+945cd5ec3bf7   hello:1   "python -m app.main"   2 seconds ago   Up 1 second   0.0.0.0:8081->8081/tcp, [::]:8081->8081/tcp   hello
 ```
 
 **If you see something else:**
 
-- *port is already allocated*: something already uses port 8080, perhaps hello from Day 1 still running: stop it (Ctrl+C in its terminal, or pkill -f "python3 -m app.main"), then docker rm hello and run again.
+- *port is already allocated*: something already uses port 8081, perhaps hello from Day 1 still running: stop it (Ctrl+C in its terminal, or pkill -f "python3 -m app.main"), then docker rm hello and run again.
 - *The container name "/hello" is already in use*: a container called hello exists from an earlier try: docker rm -f hello, then run again.
 
 #### Step 4. Call it
@@ -225,14 +225,14 @@ CONTAINER ID   IMAGE     COMMAND                CREATED         STATUS        PO
 **Why:** Check that the service in the container answers exactly like the one you ran by hand on Day 1.
 
 ```bash
-curl -s localhost:8080/
-curl -i localhost:8080/healthz
+curl -s localhost:8081/
+curl -i localhost:8081/healthz
 ```
 
 **What each line does:**
 
-- `curl -s localhost:8080/`: call the service; port 8080 of your workspace leads into the container.
-- `curl -i localhost:8080/healthz`: the health check, with the status line.
+- `curl -s localhost:8081/`: call the service; port 8081 of your workspace leads into the container.
+- `curl -i localhost:8081/healthz`: the health check, with the status line.
 
 **You should see:** The same answers as on Day 1, now from inside a container:
 
@@ -247,7 +247,7 @@ ok
 **How to read it:**
 
 - The Server line shows the Python inside the image (yours may be a slightly different 3.12), not your workspace's: the container brings its own.
-- To see it in your browser, as on Day 1: echo "https://$ME.$DOMAIN/proxy/8080/", then Ctrl+click the address (Cmd+click on a Mac).
+- To see it in your browser, as on Day 1: echo "https://$ME.$DOMAIN/proxy/8081/", then Ctrl+click the address (Cmd+click on a Mac).
 
 **If you see something else:**
 
@@ -272,7 +272,7 @@ docker exec hello id
 **You should see:** The JSON log lines, then the user:
 
 ```
-{"event": "started", "app": "hello", "env": "local", "version": "dev", "port": 8080}
+{"event": "started", "app": "hello", "env": "local", "version": "dev", "port": 8081}
 {"event": "request", "app": "hello", "env": "local", "method": "GET", "path": "/", "status": 200, "duration_ms": 0.24}
 uid=10001 gid=0(root) groups=0(root)
 ```
@@ -350,18 +350,18 @@ hello:1   51ec07f75cbf        145MB             0B
 
 ```bash
 cd ~/hello
-docker run -d --name hello-staging -p 8081:8080 -e APP_ENV=staging -e GREETING="Hello from staging" hello:1
+docker run -d --name hello-staging -p 8082:8081 -e APP_ENV=staging -e GREETING="Hello from staging" hello:1
 sleep 2
-curl -s localhost:8081/
+curl -s localhost:8082/
 ```
 
 **What each line does:**
 
 - `cd ~/hello`: go into your copy of hello: this lab builds and edits it (a new terminal starts in your home folder, where docker build would not find the Dockerfile).
-- `--name hello-staging -p 8081:8080`: a second name and another port of your workspace (8081), leading to the same port 8080 inside.
+- `--name hello-staging -p 8082:8081`: a second name and another port of your workspace (8082), leading to the same port 8081 inside.
 - `-e APP_ENV=staging -e GREETING="Hello from staging"`: two settings (environment variables) given to the container.
 - `sleep 2`: wait two seconds: the service needs a moment to start before it can answer.
-- `curl -s localhost:8081/`: call this copy.
+- `curl -s localhost:8082/`: call this copy.
 
 **You should see:** The same image, now reporting staging:
 
@@ -376,15 +376,15 @@ curl -s localhost:8081/
 **Why:** Two environments side by side, from one image: what dev, staging and prod are on the platform.
 
 ```bash
-docker run -d --name hello-prod -p 8082:8080 -e APP_ENV=prod -e GREETING="Hello from prod" hello:1
+docker run -d --name hello-prod -p 8083:8081 -e APP_ENV=prod -e GREETING="Hello from prod" hello:1
 sleep 2
-curl -s localhost:8082/
+curl -s localhost:8083/
 docker ps
 ```
 
 **What each line does:**
 
-- `docker run ... -e APP_ENV=prod ... hello:1`: a third copy, as prod, on port 8082.
+- `docker run ... -e APP_ENV=prod ... hello:1`: a third copy, as prod, on port 8083.
 - `docker ps`: both are running, from the same image.
 
 **You should see:** prod answers, and docker ps lists two containers, both from hello:1:
@@ -392,13 +392,13 @@ docker ps
 ```
 {"app": "hello", "version": "dev", "environment": "prod", "message": "Hello from prod"}
 CONTAINER ID   IMAGE     ...   PORTS                    NAMES
-...            hello:1   ...   0.0.0.0:8082->8080/tcp   hello-prod
-...            hello:1   ...   0.0.0.0:8081->8080/tcp   hello-staging
+...            hello:1   ...   0.0.0.0:8083->8081/tcp   hello-prod
+...            hello:1   ...   0.0.0.0:8082->8081/tcp   hello-staging
 ```
 
 **How to read it:**
 
-- Side by side in your browser: echo "https://$ME.$DOMAIN/proxy/8081/" for staging and echo "https://$ME.$DOMAIN/proxy/8082/" for prod, then Ctrl+click each (Cmd+click on a Mac). Same image, two colours, two names.
+- Side by side in your browser: echo "https://$ME.$DOMAIN/proxy/8082/" for staging and echo "https://$ME.$DOMAIN/proxy/8083/" for prod, then Ctrl+click each (Cmd+click on a Mac). Same image, two colours, two names.
 
 #### Step 3. Make version 2
 
@@ -458,17 +458,17 @@ hello:2   88e52ddf8ecf        145MB             0B
 **Why:** Old and new can run at the same time. Rolling back is just running the old image again: nothing has to be rebuilt.
 
 ```bash
-docker run -d --name hello-v1 -p 8080:8080 hello:1
-docker run -d --name hello-v2 -p 8083:8080 hello:2
+docker run -d --name hello-v1 -p 8081:8081 hello:1
+docker run -d --name hello-v2 -p 8084:8081 hello:2
 sleep 2
-curl -s localhost:8080/
-curl -s localhost:8083/
+curl -s localhost:8081/
+curl -s localhost:8084/
 ```
 
 **What each line does:**
 
-- `docker run ... hello:1 / hello:2`: one container from each version, on ports 8080 and 8083.
-- `curl -s localhost:8080/, curl -s localhost:8083/`: ask both.
+- `docker run ... hello:1 / hello:2`: one container from each version, on ports 8081 and 8084.
+- `curl -s localhost:8081/, curl -s localhost:8084/`: ask both.
 
 **You should see:** Two answers: version dev with the old greeting, version 2 with yours:
 

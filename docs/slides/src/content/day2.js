@@ -274,7 +274,7 @@ module.exports = [
       { do: 'In your workspace: cd ~/hello && git switch main && git pull', expect: '"Already up to date" or a short list of new commits.' },
       { do: 'Create a branch: git switch -c greeting-<yourname>', expect: 'Switched to a new branch.' },
       { do: 'Open app/main.py in the editor and change the default GREETING text. Save.', expect: 'git status lists app/main.py as modified.' },
-      { do: 'Run it locally to check: python3 -m app.main, then curl -s localhost:8080/ in a second terminal. Stop it.', expect: 'Your new greeting in the JSON.' },
+      { do: 'Run it locally to check: python3 -m app.main, then curl -s localhost:8081/ in a second terminal. Stop it.', expect: 'Your new greeting in the JSON.' },
       { do: 'Commit: git add -A && git commit -m "Change the greeting for team01"', expect: 'One file changed, with a commit id.' },
       { do: 'Push: git push -u origin greeting-<yourname>', expect: 'Gitea replies with a link to create a pull request.' },
     ],

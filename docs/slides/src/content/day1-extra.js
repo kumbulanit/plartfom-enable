@@ -279,11 +279,11 @@ module.exports = {
       icon: 'FiGlobe',
       idea: [
         'A web service is a program that waits for requests and answers them. Your browser, or the curl command, is the client: it sends a request; the service (the server) sends back a response.',
-        'A request names an address (a URL): the computer, the port (a numbered door on that computer, like 8080) and the path (/, /healthz). The response starts with a status code and carries a body, often in JSON.',
+        'A request names an address (a URL): the computer, the port (a numbered door on that computer, like 8081) and the path (/, /healthz). The response starts with a status code and carries a body, often in JSON.',
         'The status code says how it went: 200 OK, 404 not found, 403 not allowed, 500 the service failed. Monitoring counts these codes to know whether a service is healthy.',
       ],
       labTitle: 'One request, one response',
-      labCode: 'curl localhost:8080/healthz\n|    |         |   |\n|    |         |   `- path: the page\n|    |         `- port: which door\n|    `- computer: this one\n`- the client\n\nHTTP/1.0 200 OK   <- status\nok                <- body',
+      labCode: 'curl localhost:8081/healthz\n|    |         |   |\n|    |         |   `- path: the page\n|    |         `- port: which door\n|    `- computer: this one\n`- the client\n\nHTTP/1.0 200 OK   <- status\nok                <- body',
 
       lab: [
         'Lab 3 asks hello for / and /healthz.',

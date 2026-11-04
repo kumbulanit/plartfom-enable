@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" width="900" height="330" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14" xml:space="preserve">
+<rect width="900" height="330" rx="10" fill="#0d1117"/>
+<rect width="900" height="28" rx="10" fill="#21262d"/><rect y="18" width="900" height="10" fill="#21262d"/>
+<circle cx="20" cy="14" r="6" fill="#ff5f56"/><circle cx="40" cy="14" r="6" fill="#ffbd2e"/><circle cx="60" cy="14" r="6" fill="#27c93f"/>
+<text x="450" y="19" fill="#8b949e" font-size="12" text-anchor="middle">Workspace terminal</text>
+<text x="20" y="46"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> kubectl apply -f ~/shortcut.yaml</tspan></text>
+<text x="20" y="65" fill="#c9d1d9">Error from server: ... denied the request:</text>
+<text x="20" y="84" fill="#c9d1d9"></text>
+<text x="20" y="103" fill="#c9d1d9">resource Deployment/teamNN-dev/shortcut was blocked due to the following policies</text>
+<text x="20" y="122" fill="#c9d1d9"></text>
+<text x="20" y="141" fill="#c9d1d9">pelab-immutable-tags:</text>
+<text x="20" y="160" fill="#c9d1d9">  autogen-no-latest: 'validation error: The "latest" tag is not allowed; use the commit SHA the </text>
+<text x="20" y="179" fill="#c9d1d9">pipeline tagged the image with. ...'</text>
+<text x="20" y="198" fill="#c9d1d9">pelab-ownership-labels:</text>
+<text x="20" y="217" fill="#c9d1d9">  required-labels: 'validation error: Add the labels app.kubernetes.io/name and app.kubernetes.i</text>
+<text x="20" y="236" fill="#c9d1d9">o/part-of (your team). ...'</text>
+<text x="20" y="255" fill="#c9d1d9">pelab-trusted-registry:</text>
+<text x="20" y="274" fill="#c9d1d9">  autogen-harbor-only: 'validation error: Images must come from harbor.&lt;lab domain&gt;. Build and p</text>
+<text x="20" y="293" fill="#c9d1d9">ush them with the golden-path pipeline. ...'</text>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 178" width="900" height="178" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14" xml:space="preserve">
+<rect width="900" height="178" rx="10" fill="#0d1117"/>
+<rect width="900" height="28" rx="10" fill="#21262d"/><rect y="18" width="900" height="10" fill="#21262d"/>
+<circle cx="20" cy="14" r="6" fill="#ff5f56"/><circle cx="40" cy="14" r="6" fill="#ffbd2e"/><circle cx="60" cy="14" r="6" fill="#27c93f"/>
+<text x="450" y="19" fill="#8b949e" font-size="12" text-anchor="middle">Workspace terminal</text>
+<text x="20" y="46"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> kubectl apply -f ~/status-page.yaml</tspan></text>
+<text x="20" y="65"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> kubectl -n $TEAM-dev get pods</tspan></text>
+<text x="20" y="84" fill="#c9d1d9">deployment.apps/status-page created</text>
+<text x="20" y="103" fill="#c9d1d9">NAME                           READY   STATUS    RESTARTS   AGE</text>
+<text x="20" y="122" fill="#c9d1d9">hello-6d9f8b7c5d-x2k8p         1/1     Running   0          2d</text>
+<text x="20" y="141" fill="#c9d1d9">status-page-7c9d6b5f8-q4m2n    1/1     Running   0          10s</text>
+</svg>

@@ -212,6 +212,10 @@ git diff
 
 2. Open the pulls/new link it prints (Hold Ctrl (on a Mac Cmd) and click the link in the terminal) and click Create Pull Request.
 
+   ![Files Changed of the release: in deploy/staging/kustomization.yaml, newTag becomes the commit id and count goes from 0 to 1. Nothing else. Your names, team, numbers and times are your own.](../images/gitea-39-release-files-changed.png)
+
+   *Files Changed of the release: in deploy/staging/kustomization.yaml, newTag becomes the commit id and count goes from 0 to 1. Nothing else. Your names, team, numbers and times are your own.*
+
 3. Approve as reviewer: Open a private window (Edge or Chrome: Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a Mac Cmd+Shift+P), go to https://gitea.<lab domain>, click Sign In, and sign in with the other person's login: reviewer or platform-approver, with its password from cat /etc/pelab/logins.md in your workspace. Read Files Changed (two lines), then Review → Approve, and close the private window.
 
 4. When "All checks were successful", merge with Create squash commit.
@@ -783,19 +787,13 @@ deployment.apps/hello scaled
    date +%T
    ```
 
+   ```
+   20:31:50
+   ```
+
 **What each line does:**
 
 - `kubectl ... get deployment hello -w`: show hello in dev, and keep watching (-w) for changes.
-
-**You should see:** READY 0/0 changes back to 1/1 within seconds to a minute: Argo CD notices the change and self-heals. The time between your two notes is the time to restore, with no human involved.
-
-```
-NAME    READY   UP-TO-DATE   AVAILABLE   AGE
-hello   0/0     0            0           2d
-hello   0/1     0            0           2d
-hello   0/1     1            0           2d
-hello   1/1     1            1           2d
-```
 
 </details>
 
@@ -991,6 +989,11 @@ hello-7f6b4c9d5e-m3x7p   0/1     ImagePullBackOff   0          1m
    pytest -q
    ```
 
+   ```
+   ......                                                                   [100%]
+   6 passed in 0.04s
+   ```
+
 4. Commit and push:
 
    ```bash
@@ -1000,8 +1003,6 @@ hello-7f6b4c9d5e-m3x7p   0/1     ImagePullBackOff   0          1m
    ```
 
 5. Pull request, review, approval, merge, as on Day 2 and in Day 4 Lab 4.
-
-**You should see:** A green pipeline run on main and a new scanned image in Harbor.
 
 #### Step 2. Release it to staging, then prod
 

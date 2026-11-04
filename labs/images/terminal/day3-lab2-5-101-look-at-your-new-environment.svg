@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 406" width="900" height="406" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14" xml:space="preserve">
+<rect width="900" height="406" rx="10" fill="#0d1117"/>
+<rect width="900" height="28" rx="10" fill="#21262d"/><rect y="18" width="900" height="10" fill="#21262d"/>
+<circle cx="20" cy="14" r="6" fill="#ff5f56"/><circle cx="40" cy="14" r="6" fill="#ffbd2e"/><circle cx="60" cy="14" r="6" fill="#27c93f"/>
+<text x="450" y="19" fill="#8b949e" font-size="12" text-anchor="middle">Workspace terminal</text>
+<text x="20" y="46"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> kubectl get namespaces | grep $TEAM</tspan></text>
+<text x="20" y="65"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> kubectl -n $TEAM-staging get resourcequota,limitrange</tspan></text>
+<text x="20" y="84"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> kubectl -n $TEAM-staging describe resourcequota team-quota</tspan></text>
+<text x="20" y="103" fill="#c9d1d9">team03-dev       Active   2d</text>
+<text x="20" y="122" fill="#c9d1d9">team03-prod      Active   2m</text>
+<text x="20" y="141" fill="#c9d1d9">team03-staging   Active   2m</text>
+<text x="20" y="160" fill="#c9d1d9">...</text>
+<text x="20" y="179" fill="#c9d1d9">Name:                   team-quota</text>
+<text x="20" y="198" fill="#c9d1d9">Namespace:              team03-staging</text>
+<text x="20" y="217" fill="#c9d1d9">Resource                Used  Hard</text>
+<text x="20" y="236" fill="#f85149">--------                ----  ----</text>
+<text x="20" y="255" fill="#c9d1d9">limits.cpu              0     2</text>
+<text x="20" y="274" fill="#c9d1d9">limits.memory           0     4Gi</text>
+<text x="20" y="293" fill="#c9d1d9">persistentvolumeclaims  0     5</text>
+<text x="20" y="312" fill="#c9d1d9">pods                    0     20</text>
+<text x="20" y="331" fill="#c9d1d9">requests.cpu            0     1</text>
+<text x="20" y="350" fill="#c9d1d9">requests.memory         0     2Gi</text>
+<text x="20" y="369" fill="#c9d1d9">...</text>
+</svg>

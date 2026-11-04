@@ -2,6 +2,8 @@
 
 Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).
 
+Every command has a picture of the terminal. Where the lab was tested, it shows what the command printed (your ids, times, names and team are your own); "type this" pictures show only what to type.
+
 ## CI/CD and guardrails: where the pipelines are today
 
 - hello and rates: ci.yaml runs on every pull request and on main: lint, tests, secret scan, build, scan, push. Labs 1 and 2.
@@ -18,13 +20,25 @@ Read what the pipeline did to your last change, and find the evidence it left: t
 
 2. In the list of runs, find the newest one whose label (on the right) is main, and click its title.
 
+   ![hello's Actions tab: each run with its commit, and on the right where it came from: main, or a pull request number. Your names, team, numbers and times are your own.](../images/gitea-34-actions-main-run.png)
+
+   *hello's Actions tab: each run with its commit, and on the right where it came from: main, or a pull request number. Your names, team, numbers and times are your own.*
+
 3. On the left you see the job build; on the right, its steps. Each line is one check.
+
+   ![A run on main: the job build and its steps, in the order of ci.yaml. Sign the image is skipped (grey) unless the platform turned signing on.](../images/gitea-35-main-run-steps.png)
+
+   *A run on main: the job build and its steps, in the order of ci.yaml. Sign the image is skipped (grey) unless the platform turned signing on.*
 
 ### 2. Read the tests and the secret scan
 
 1. Click the step Unit tests (pytest): its log unfolds under it.
 
 2. Then click Secret scan (gitleaks).
+
+   ![The two steps opened: Unit tests says "6 passed"; Secret scan says how much it read and "no leaks found".](../images/gitea-36-tests-and-secret-scan.png)
+
+   *The two steps opened: Unit tests says "6 passed"; Secret scan says how much it read and "no leaks found".*
 
 ### 3. Find the image tag
 
@@ -68,6 +82,14 @@ Make three common mistakes on purpose (a wrong test, a password in the code, run
 
 3. Wait for the check to turn red (a red cross), click Details, and open the step Unit tests (pytest).
 
+   ![The pull request goes red: both checks failed, and merging is blocked. Your names, team, numbers and times are your own.](../images/gitea-31-wrong-test-red.png)
+
+   *The pull request goes red: both checks failed, and merging is blocked. Your names, team, numbers and times are your own.*
+
+   ![Details → Unit tests (pytest): the test that failed, the line (assert status == 201) and why (assert 200 == 201), then "1 failed, 5 passed".](../images/gitea-32-wrong-test-log.png)
+
+   *Details → Unit tests (pytest): the test that failed, the line (assert status == 201) and why (assert 200 == 201), then "1 failed, 5 passed".*
+
 ```bash
 cd ~/hello
 git switch main && git pull
@@ -78,6 +100,8 @@ git commit -am "A wrong test"
 git push -u origin break-things-$ME
 ```
 
+![What you should see in the terminal](../images/terminal/day5-lab2-1-101-a-wrong-test.svg)
+
 ### 2. Fix the test
 
 ```bash
@@ -85,6 +109,8 @@ sed -i 's/assert status == 201/assert status == 200/' tests/test_main.py
 git commit -am "Fix the test"
 git push
 ```
+
+![What to type in the terminal](../images/terminal/day5-lab2-2-101-fix-the-test.svg)
 
 ### 3. A password in the code
 
@@ -94,6 +120,8 @@ git commit -am "Add a database password"
 git push
 ```
 
+![What you should see in the terminal](../images/terminal/day5-lab2-3-101-a-password-in-the-code.svg)
+
 ### 4. Remove the password
 
 ```bash
@@ -102,6 +130,8 @@ git commit -am "Remove the password"
 git push
 ```
 
+![What to type in the terminal](../images/terminal/day5-lab2-4-101-remove-the-password.svg)
+
 ### 5. Run as root
 
 ```bash
@@ -109,6 +139,8 @@ sed -i 's/^USER 10001/USER root/' Dockerfile
 git commit -am "Run as root"
 git push
 ```
+
+![What you should see in the terminal](../images/terminal/day5-lab2-5-101-run-as-root.svg)
 
 ### 6. Put it right, add a test, and merge
 
@@ -130,6 +162,8 @@ git commit -am "Run as an ordinary user again, and test the health check"
 git push
 ```
 
+![What you should see in the terminal](../images/terminal/day5-lab2-6-101-put-it-right-add-a-test-and-merge.svg)
+
 ## Lab 3: watch the guardrails refuse a bad deployment
 
 Try to put a careless deployment straight into your dev environment, read the three refusals, and fix them one by one.
@@ -144,11 +178,15 @@ sed "s/team01/$TEAM/g" examples/bad.yaml > ~/shortcut.yaml
 cat ~/shortcut.yaml
 ```
 
+![What to type in the terminal](../images/terminal/day5-lab3-1-101-get-the-guardrails-repository-and-a-copy.svg)
+
 ### 2. Try to deploy it
 
 ```bash
 kubectl apply -f ~/shortcut.yaml
 ```
+
+![What you should see in the terminal](../images/terminal/day5-lab3-2-101-try-to-deploy-it.svg)
 
 ### 3. Fix the image
 
@@ -156,6 +194,8 @@ kubectl apply -f ~/shortcut.yaml
 sed -i "s#image: nginx:latest#image: harbor.$DOMAIN/dockerhub/library/python:3.12-slim#" ~/shortcut.yaml
 kubectl apply -f ~/shortcut.yaml
 ```
+
+![What to type in the terminal](../images/terminal/day5-lab3-3-101-fix-the-image.svg)
 
 ### 4. Add the labels
 
@@ -190,12 +230,16 @@ metadata:
 kubectl apply -f ~/shortcut.yaml
 ```
 
+![What you should see in the terminal](../images/terminal/day5-lab3-4-101-add-the-labels.svg)
+
 ### 5. Clean up, and keep the evidence
 
 ```bash
 kubectl -n $TEAM-dev delete deployment shortcut
 rm ~/shortcut.yaml
 ```
+
+![What to type in the terminal](../images/terminal/day5-lab3-5-101-clean-up-and-keep-the-evidence.svg)
 
 ## Lab 4: test a policy like code, with the Kyverno CLI
 
@@ -208,17 +252,23 @@ cd ~/policies
 kyverno apply policies/ --resource examples/good.yaml --values-file tests/values.yaml
 ```
 
+![What you should see in the terminal](../images/terminal/day5-lab4-1-101-check-a-good-deployment.svg)
+
 ### 2. Check the bad one
 
 ```bash
 kyverno apply policies/ --resource examples/bad.yaml --values-file tests/values.yaml
 ```
 
+![What you should see in the terminal](../images/terminal/day5-lab4-2-101-check-the-bad-one.svg)
+
 ### 3. Run the policy tests
 
 ```bash
 kyverno test tests/
 ```
+
+![What you should see in the terminal](../images/terminal/day5-lab4-3-101-run-the-policy-tests.svg)
 
 ### 4. Break a test on purpose
 
@@ -227,6 +277,8 @@ sed -i '/required-labels.*shortcut/s/result: fail/result: pass/' tests/kyverno-t
 kyverno test tests/
 git checkout tests/kyverno-test.yaml
 ```
+
+![What you should see in the terminal](../images/terminal/day5-lab4-4-101-break-a-test-on-purpose.svg)
 
 ### 5. Think of one more rule
 
@@ -247,6 +299,8 @@ sed "s/team01/$TEAM/g" examples/status-page.yaml > ~/status-page.yaml
 kubectl apply -f ~/status-page.yaml
 ```
 
+![What to type in the terminal](../images/terminal/day5-lab5-1-101-try-the-status-page.svg)
+
 ### 2. Write the exception request
 
 1. Paste the box. It makes a branch, copies the template under your team's name, fills in your team and your user name, sets the end date to one week from today, and shows the file.
@@ -261,6 +315,8 @@ sed -i "s/pelab.io\/expires: .*/pelab.io\/expires: \"$(date -d '+7 days' +%F)\"/
 cat exceptions/$TEAM-status-page.yaml
 ```
 
+![What you should see in the terminal](../images/terminal/day5-lab5-2-101-write-the-exception-request.svg)
+
 ### 3. Check it the way the pipeline will
 
 1. Run the check (the box).
@@ -271,12 +327,16 @@ cat exceptions/$TEAM-status-page.yaml
 python3 tests/check-exceptions.py
 ```
 
+![What you should see in the terminal](../images/terminal/day5-lab5-3-101-check-it-the-way-the-pipeline-will.svg)
+
 ```bash
 sed -i "s/pelab.io\/expires: .*/pelab.io\/expires: \"$(date -d '+60 days' +%F)\"/" exceptions/$TEAM-status-page.yaml
 python3 tests/check-exceptions.py
 sed -i "s/pelab.io\/expires: .*/pelab.io\/expires: \"$(date -d '+7 days' +%F)\"/" exceptions/$TEAM-status-page.yaml
 python3 tests/check-exceptions.py
 ```
+
+![What to type in the terminal](../images/terminal/day5-lab5-3-102-check-it-the-way-the-pipeline-will.svg)
 
 ### 4. Propose it; the platform team approves
 
@@ -288,6 +348,10 @@ python3 tests/check-exceptions.py
 
 4. When the test pipeline is green and the approval is there, merge in your own window.
 
+   ![The exception's pull request in platform/policies: approved by platform-approver, and the test pipeline (policy tests and exception checks) green. Your names, team, numbers and times are your own.](../images/gitea-40-exception-pr-approved.png)
+
+   *The exception's pull request in platform/policies: approved by platform-approver, and the test pipeline (policy tests and exception checks) green. Your names, team, numbers and times are your own.*
+
 5. Two minutes later, open platform/policies → Commits and click the tick next to your merge commit.
 
 ```bash
@@ -296,12 +360,16 @@ git commit -m "Exception: status page for $TEAM"
 git push -u origin $TEAM-status-page
 ```
 
+![What to type in the terminal](../images/terminal/day5-lab5-4-101-propose-it-the-platform-team-approves.svg)
+
 ### 5. Try the status page again
 
 ```bash
 kubectl apply -f ~/status-page.yaml
 kubectl -n $TEAM-dev get pods
 ```
+
+![What you should see in the terminal](../images/terminal/day5-lab5-5-101-try-the-status-page-again.svg)
 
 ### 6. End the exception, and watch what happens
 
@@ -321,12 +389,16 @@ git commit -am "End the status page exception for $TEAM"
 git push -u origin $TEAM-status-page-end
 ```
 
+![What you should see in the terminal](../images/terminal/day5-lab5-6-101-end-the-exception-and-watch-what-happens.svg)
+
 ```bash
 kubectl -n $TEAM-dev rollout restart deployment status-page
 sleep 20
 kubectl -n $TEAM-dev get replicasets,pods
 kubectl -n $TEAM-dev get events | grep "Error creating" | tail -1
 ```
+
+![What to type in the terminal](../images/terminal/day5-lab5-6-102-end-the-exception-and-watch-what-happens.svg)
 
 ## Pipelines: add the nightly scan to rates, from a template
 
@@ -342,6 +414,8 @@ The same copy-a-template loop as the smoke test on Day 4, this time with Git in 
    ls ~/pipeline-templates/workflows
    ```
 
+   ![What to type in the terminal](../images/terminal/day5-pipelines-add-the-ni-1-1-get-the-templates.svg)
+
 ### 2. Make a branch in rates
 
 1. Your copy of rates from Day 4.
@@ -352,6 +426,8 @@ The same copy-a-template loop as the smoke test on Day 4, this time with Git in 
    git pull
    git switch -c nightly-scan-$ME
    ```
+
+   ![What to type in the terminal](../images/terminal/day5-pipelines-add-the-ni-2-1-make-a-branch-in-rates.svg)
 
 ### 3. Copy the template in, commit, push
 
@@ -364,14 +440,28 @@ The same copy-a-template loop as the smoke test on Day 4, this time with Git in 
    git push -u origin nightly-scan-$ME
    ```
 
+   ![What to type in the terminal](../images/terminal/day5-pipelines-add-the-ni-3-1-copy-the-template-in-commit-push.svg)
+
 ### 4. Pull request, review, merge
 
 1. Ctrl+click the /pulls/new/ address git push printed, then Create Pull Request.
 
 2. When golden-path is green, the reviewer approves (private window, as on Day 2) and you merge.
 
+   ![Merged: the reviewer approved, and the nightly scan is now on main. Your names and numbers are your own.](../images/gitea-45-nightly-scan-merged.png)
+
+   *Merged: the reviewer approved, and the nightly scan is now on main. Your names and numbers are your own.*
+
 ### 5. Run it now
 
-1. In your team's rates, click Actions, then nightly-scan, then Run Workflow.
+1. In your team's rates, click Actions, then nightly-scan, then Run Workflow, and Run Workflow again in the box.
 
-2. Open the run. Green: no fixable HIGH or CRITICAL weaknesses. Red: the Scan it step lists them.
+   ![nightly-scan in the list on the left, and the Run Workflow box: use the workflow from main.](../images/gitea-27-run-nightly-scan.png)
+
+   *nightly-scan in the list on the left, and the Run Workflow box: use the workflow from main.*
+
+2. Open the run, then the Scan it (trivy) step. Green: no fixable HIGH or CRITICAL weaknesses. Red: the step lists them.
+
+   ![A green nightly scan: trivy's report summary, 0 vulnerabilities in the operating system (debian) and in the Python packages. In the lab the image name starts with harbor.<lab domain>.](../images/gitea-28-nightly-scan-result.png)
+
+   *A green nightly scan: trivy's report summary, 0 vulnerabilities in the operating system (debian) and in the Python packages. In the lab the image name starts with harbor.<lab domain>.*

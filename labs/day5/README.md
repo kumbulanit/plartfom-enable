@@ -128,8 +128,18 @@ steps:
 **Do this:**
 
 1. Open teamNN/hello and click the Actions tab.
+
 2. In the list of runs, find the newest one whose label (on the right) is main, and click its title.
+
+   ![hello's Actions tab: each run with its commit, and on the right where it came from: main, or a pull request number. Your names, team, numbers and times are your own.](../images/gitea-34-actions-main-run.png)
+
+   *hello's Actions tab: each run with its commit, and on the right where it came from: main, or a pull request number. Your names, team, numbers and times are your own.*
+
 3. On the left you see the job build; on the right, its steps. Each line is one check.
+
+   ![A run on main: the job build and its steps, in the order of ci.yaml. Sign the image is skipped (grey) unless the platform turned signing on.](../images/gitea-35-main-run-steps.png)
+
+   *A run on main: the job build and its steps, in the order of ci.yaml. Sign the image is skipped (grey) unless the platform turned signing on.*
 
 **You should see:** A list of steps, each with a green tick and how long it took: Check out, Lint (ruff), Unit tests (pytest), Secret scan (gitleaks), Dockerfile lint (hadolint), Validate the manifests (kustomize), Build the image, Vulnerability scan (trivy), Push to Harbor, Clean up, and Post the verdict.
 
@@ -147,7 +157,12 @@ steps:
 **Do this:**
 
 1. Click the step Unit tests (pytest): its log unfolds under it.
+
 2. Then click Secret scan (gitleaks).
+
+   ![The two steps opened: Unit tests says "6 passed"; Secret scan says how much it read and "no leaks found".](../images/gitea-36-tests-and-secret-scan.png)
+
+   *The two steps opened: Unit tests says "6 passed"; Secret scan says how much it read and "no leaks found".*
 
 **You should see:** In the tests, "5 passed"; in the secret scan, "no leaks found":
 
@@ -284,6 +299,14 @@ Pushed harbor.<lab domain>/team03/hello:b70e47f7a1c2.... Argo CD deploys it to d
 2. Open the pulls/new link that git push prints and click Create Pull Request. Hold Ctrl (on a Mac Cmd) and click the link in the terminal: it opens in a new browser tab.
 
 3. Wait for the check to turn red (a red cross), click Details, and open the step Unit tests (pytest).
+
+   ![The pull request goes red: both checks failed, and merging is blocked. Your names, team, numbers and times are your own.](../images/gitea-31-wrong-test-red.png)
+
+   *The pull request goes red: both checks failed, and merging is blocked. Your names, team, numbers and times are your own.*
+
+   ![Details → Unit tests (pytest): the test that failed, the line (assert status == 201) and why (assert 200 == 201), then "1 failed, 5 passed".](../images/gitea-32-wrong-test-log.png)
+
+   *Details → Unit tests (pytest): the test that failed, the line (assert status == 201) and why (assert 200 == 201), then "1 failed, 5 passed".*
 
 **What each line does:**
 
@@ -1055,6 +1078,10 @@ ok   exceptions/team03-status-page.yaml (team03-status-page), until 2026-11-09
 3. Now play the platform team: Open a private window (Edge or Chrome: Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a Mac Cmd+Shift+P), go to https://gitea.<lab domain>, click Sign In, and sign in with the other person's login: reviewer or platform-approver, with its password from cat /etc/pelab/logins.md in your workspace. Sign in as platform-approver. In Files Changed, read who asks, why and until when, as a reviewer would, then Review → Approve.
 
 4. When the test pipeline is green and the approval is there, merge in your own window.
+
+   ![The exception's pull request in platform/policies: approved by platform-approver, and the test pipeline (policy tests and exception checks) green. Your names, team, numbers and times are your own.](../images/gitea-40-exception-pr-approved.png)
+
+   *The exception's pull request in platform/policies: approved by platform-approver, and the test pipeline (policy tests and exception checks) green. Your names, team, numbers and times are your own.*
 
 5. Two minutes later, open platform/policies → Commits and click the tick next to your merge commit.
 

@@ -2,6 +2,8 @@
 
 Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).
 
+Every command has a picture of the terminal. Where the lab was tested, it shows what the command printed (your ids, times, names and team are your own); "type this" pictures show only what to type.
+
 ## Git: change hello, see it, send it to Gitea
 
 A first pass through the whole Git loop, together. Lab 2 then does it again, properly, with a pull request.
@@ -16,6 +18,8 @@ A first pass through the whole Git loop, together. Lab 2 then does it again, pro
    git pull
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-git-change-hello-see-1-1-get-the-latest-main.svg)
+
 ### 2. Make a branch
 
 1. A branch of your own, named after you.
@@ -23,6 +27,8 @@ A first pass through the whole Git loop, together. Lab 2 then does it again, pro
    ```bash
    git switch -c warm-up-$ME
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-git-change-hello-see-2-1-make-a-branch.svg)
 
 ### 3. Change something you can see
 
@@ -32,11 +38,15 @@ A first pass through the whole Git loop, together. Lab 2 then does it again, pro
    sed -i "s/Hello from the PE Lab golden path/Hello from $ME/" app/main.py
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-git-change-hello-see-3-1-change-something-you-can-see.svg)
+
 2. Check the line changed.
 
    ```bash
    grep -n "GREETING =" app/main.py
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-git-change-hello-see-3-2-change-something-you-can-see.svg)
 
 ### 4. See it working
 
@@ -46,17 +56,27 @@ A first pass through the whole Git loop, together. Lab 2 then does it again, pro
    python3 -m app.main
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-git-change-hello-see-4-1-see-it-working.svg)
+
 2. In a second terminal (+ at the top right of the terminal panel), call it.
 
    ```bash
    curl -s localhost:8081/
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-git-change-hello-see-4-2-see-it-working.svg)
+
 3. Print the browser address, then Ctrl+click it (Cmd+click on a Mac): the page shows your greeting.
 
    ```bash
    echo "https://$ME.$DOMAIN/proxy/8081/"
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-git-change-hello-see-4-3-see-it-working.svg)
+
+   ![Your change, running: LOCAL in grey, and your greeting under it.](../images/hello-local-warm-up.png)
+
+   *Your change, running: LOCAL in grey, and your greeting under it.*
 
 4. Back in the first terminal, stop hello with Ctrl+C.
 
@@ -69,6 +89,8 @@ A first pass through the whole Git loop, together. Lab 2 then does it again, pro
    git diff
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-git-change-hello-see-5-1-look-at-what-changed.svg)
+
 ### 6. Commit it
 
 1. Stage the file and save it as a commit.
@@ -76,8 +98,10 @@ A first pass through the whole Git loop, together. Lab 2 then does it again, pro
    ```bash
    git add app/main.py
    git commit -m "Say hello from $ME"
-   git log --oneline -3
+   git log --oneline -1
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-git-change-hello-see-6-1-commit-it.svg)
 
 ### 7. Push the branch to Gitea
 
@@ -87,6 +111,8 @@ A first pass through the whole Git loop, together. Lab 2 then does it again, pro
    git push -u origin warm-up-$ME
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-git-change-hello-see-7-1-push-the-branch-to-gitea.svg)
+
 ### 8. Find it in Gitea
 
 1. Open your team's hello in Gitea: Ctrl+click the address this prints.
@@ -95,7 +121,13 @@ A first pass through the whole Git loop, together. Lab 2 then does it again, pro
    echo "https://gitea.$DOMAIN/$TEAM/hello/src/branch/warm-up-$ME"
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-git-change-hello-see-8-1-find-it-in-gitea.svg)
+
 2. Click app/main.py: line 22 has your greeting. Switch the branch menu to main: main still has the old one.
+
+   ![Your branch in Gitea: the branch menu says warm-up-studentNN, the last commit is yours ("Say hello from studentNN"), and line 22 has your greeting. The green bar offers a pull request: not today, Lab 2 does that.](../images/gitea-21-warm-up-branch.png)
+
+   *Your branch in Gitea: the branch menu says warm-up-studentNN, the last commit is yours ("Say hello from studentNN"), and line 22 has your greeting. The green bar offers a pull request: not today, Lab 2 does that.*
 
 ### 9. Back to main
 
@@ -104,6 +136,8 @@ A first pass through the whole Git loop, together. Lab 2 then does it again, pro
    ```bash
    git switch main
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-git-change-hello-see-9-1-back-to-main.svg)
 
 ## Pipelines: your first pipeline, from a template
 
@@ -119,6 +153,12 @@ A pipeline is a list of steps that a runner does for you on every change. The pl
    ls ~/pipeline-templates/workflows
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-1-1-get-the-templates.svg)
+
+   ![The same templates in Gitea: platform/pipeline-templates, folder workflows. One file each, owned by the platform team.](../images/gitea-20-pipeline-templates-list.png)
+
+   *The same templates in Gitea: platform/pipeline-templates, folder workflows. One file each, owned by the platform team.*
+
 ### 2. Read the first pipeline
 
 1. Three steps, each a "- name:": get the code, show what is there, run the tests. on: says when it runs.
@@ -126,6 +166,8 @@ A pipeline is a list of steps that a runner does for you on every change. The pl
    ```bash
    cat ~/pipeline-templates/workflows/first-pipeline.yaml
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-2-1-read-the-first-pipeline.svg)
 
 ### 3. Make a branch in hello
 
@@ -138,6 +180,8 @@ A pipeline is a list of steps that a runner does for you on every change. The pl
    git switch -c first-pipeline-$ME
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-3-1-make-a-branch-in-hello.svg)
+
 ### 4. Copy the template in
 
 1. Pipelines live in .gitea/workflows. hello already has one there: ci.yaml.
@@ -147,6 +191,8 @@ A pipeline is a list of steps that a runner does for you on every change. The pl
    ls .gitea/workflows
    git status
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-4-1-copy-the-template-in.svg)
 
 ### 5. Commit and push
 
@@ -158,39 +204,51 @@ A pipeline is a list of steps that a runner does for you on every change. The pl
    git push -u origin first-pipeline-$ME
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-5-1-commit-and-push.svg)
+
 ### 6. Open a pull request
 
 1. In what git push printed, Ctrl+click (Cmd+click on a Mac) the address that ends in /pulls/new/first-pipeline-studentNN.
 
 2. Gitea opens the new pull request form: your branch into main. Click Create Pull Request.
 
-   ![The new pull request form (this one is from Lab 3, with a greeting change): which branch goes into which, the title, and the box to write why. Yours shows first-pipeline-studentNN and your commit.](../images/gitea-02-new-pr-form.png)
+   ![The new pull request: merge into main, pull from first-pipeline-studentNN, and the title from your commit. Scroll down for Create Pull Request.](../images/gitea-22-first-pipeline-pr-form.png)
 
-   *The new pull request form (this one is from Lab 3, with a greeting change): which branch goes into which, the title, and the box to write why. Yours shows first-pipeline-studentNN and your commit.*
+   *The new pull request: merge into main, pull from first-pipeline-studentNN, and the title from your commit. Scroll down for Create Pull Request.*
 
 ### 7. Watch it run
 
 1. At the bottom of the pull request, the checks start: golden-path / build (the pipeline hello came with) and first-pipeline / check (yours).
 
-   ![A pull request just created (this one from Lab 3): at the bottom, the checks starting, a yellow dot while they run. Yours lists first-pipeline / check as well.](../images/gitea-03-pr-created.png)
+   ![A few minutes later, all green: pipeline (the required verdict), golden-path / build, and first-pipeline / check, your new one. Merging would still need a reviewer's approval.](../images/gitea-23-first-pipeline-checks.png)
 
-   *A pull request just created (this one from Lab 3): at the bottom, the checks starting, a yellow dot while they run. Yours lists first-pipeline / check as well.*
+   *A few minutes later, all green: pipeline (the required verdict), golden-path / build, and first-pipeline / check, your new one. Merging would still need a reviewer's approval.*
 
 2. Click Details next to first-pipeline, then open each step: Get the code, Show what is here, Run the tests.
 
-   ![A pipeline run, step by step (this one is the smoke test from Day 4). Click a step to open its output. Yours has three steps: Get the code, Show what is here, Run the tests.](../images/gitea-18-smoke-test-green.png)
+   ![The run of first-pipeline: the steps of the template, each green. Get the code says which commit it checked; Run the tests ends in "6 passed".](../images/gitea-24-first-pipeline-run.png)
 
-   *A pipeline run, step by step (this one is the smoke test from Day 4). Click a step to open its output. Yours has three steps: Get the code, Show what is here, Run the tests.*
+   *The run of first-pipeline: the steps of the template, each green. Get the code says which commit it checked; Run the tests ends in "6 passed".*
 
 ### 8. Close it, and go back to main
 
-1. Close the pull request without merging (Close at the bottom): the template stays out of main.
+1. Close the pull request without merging: Close Pull Request, under the comment box at the bottom. The template stays out of main.
+
+   ![Close Pull Request sits under the comment box, at the bottom of the Conversation tab.](../images/gitea-25-close-pr-button.png)
+
+   *Close Pull Request sits under the comment box, at the bottom of the Conversation tab.*
+
+   ![Closed: the red label at the top, and "closed this pull request" in the history. Nothing reached main.](../images/gitea-26-pr-closed.png)
+
+   *Closed: the red label at the top, and "closed this pull request" in the history. Nothing reached main.*
 
 2. In the terminal:
 
    ```bash
    git switch main
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-8-2-close-it-and-go-back-to-main.svg)
 
 ## Lab 1: Git basics in a practice repository
 
@@ -203,6 +261,8 @@ git --version
 git config --global --list
 ```
 
+![What you should see in the terminal](../images/terminal/day2-lab1-1-101-check-that-git-knows-who-you-are.svg)
+
 ### 2. Make a practice repository
 
 ```bash
@@ -212,6 +272,8 @@ ls -a
 git status
 ```
 
+![What you should see in the terminal](../images/terminal/day2-lab1-2-101-make-a-practice-repository.svg)
+
 ### 3. Your first commit: from working folder to repository
 
 ```bash
@@ -219,12 +281,16 @@ echo "Hello from $TEAM" > greeting.txt
 git status
 ```
 
+![What you should see in the terminal](../images/terminal/day2-lab1-3-101-your-first-commit-from-working-folder-to.svg)
+
 ```bash
 git add greeting.txt
 git status
 git commit -m "Add the team greeting"
 git log
 ```
+
+![What you should see in the terminal](../images/terminal/day2-lab1-3-102-your-first-commit-from-working-folder-to.svg)
 
 ### 4. Change the file, and read the difference
 
@@ -234,17 +300,23 @@ echo "Owner: $ME" >> greeting.txt
 git diff
 ```
 
+![What you should see in the terminal](../images/terminal/day2-lab1-4-101-change-the-file-and-read-the-difference.svg)
+
 ```bash
 git add -A
 git commit -m "Say good morning and name the owner"
 git log --oneline
 ```
 
+![What you should see in the terminal](../images/terminal/day2-lab1-4-102-change-the-file-and-read-the-difference.svg)
+
 ### 5. Look inside a commit
 
 ```bash
 git show HEAD
 ```
+
+![What you should see in the terminal](../images/terminal/day2-lab1-5-101-look-inside-a-commit.svg)
 
 ### 6. Make a mistake, and undo it
 
@@ -259,6 +331,8 @@ git status --short
 cat greeting.txt
 ```
 
+![What you should see in the terminal](../images/terminal/day2-lab1-6-101-make-a-mistake-and-undo-it.svg)
+
 ### 7. Work on a branch
 
 ```bash
@@ -268,11 +342,15 @@ git commit -am "Add a farewell"
 git log --oneline --graph --all
 ```
 
+![What you should see in the terminal](../images/terminal/day2-lab1-7-101-work-on-a-branch.svg)
+
 ```bash
 git switch main
 cat greeting.txt
 git branch
 ```
+
+![What you should see in the terminal](../images/terminal/day2-lab1-7-102-work-on-a-branch.svg)
 
 ### 8. Merge the branch, then undo it with a revert
 
@@ -282,11 +360,15 @@ git log --oneline --graph
 git branch -d add-farewell
 ```
 
+![What you should see in the terminal](../images/terminal/day2-lab1-8-101-merge-the-branch-then-undo-it-with-a-rev.svg)
+
 ```bash
 git revert --no-edit HEAD
 git log --oneline
 cat greeting.txt
 ```
+
+![What you should see in the terminal](../images/terminal/day2-lab1-8-102-merge-the-branch-then-undo-it-with-a-rev.svg)
 
 ### 9. The same things in your real repository
 
@@ -297,6 +379,8 @@ git remote -v
 git log --oneline
 git branch -a
 ```
+
+![What you should see in the terminal](../images/terminal/day2-lab1-9-101-the-same-things-in-your-real-repository.svg)
 
 ## Lab 2: your first change, on a branch
 
@@ -310,11 +394,15 @@ Change the greeting of your team's service on a branch of your own, check it, sa
    cd ~/hello
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-lab2-1-1-go-to-main-and-get-the-latest-version.svg)
+
 2. Switch to the main line, the one that gets deployed.
 
    ```bash
    git switch main
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-lab2-1-2-go-to-main-and-get-the-latest-version.svg)
 
 3. Fetch what others added to main in Gitea.
 
@@ -322,11 +410,15 @@ Change the greeting of your team's service on a branch of your own, check it, sa
    git pull
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-lab2-1-3-go-to-main-and-get-the-latest-version.svg)
+
 ### 2. Make your own branch
 
 ```bash
 git switch -c greeting-$ME
 ```
+
+![What you should see in the terminal](../images/terminal/day2-lab2-2-101-make-your-own-branch.svg)
 
 ### 3. Change the greeting
 
@@ -345,11 +437,15 @@ git switch -c greeting-$ME
    grep -n "^GREETING" app/main.py
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-lab2-3-5-change-the-greeting.svg)
+
 6. Back in the terminal, run this to see that Git noticed:
 
    ```bash
    git status
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-lab2-3-6-change-the-greeting.svg)
 
 In `app/main.py`, change:
 
@@ -373,6 +469,8 @@ GREETING = os.environ.get("GREETING", "Hello from team01")
    curl -s localhost:8081/
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-lab2-4-2-check-it-works-before-you-share-it.svg)
+
 3. Check that "message" shows your new text.
 
 4. Go back to the first terminal and press Ctrl+C to stop the service.
@@ -380,6 +478,8 @@ GREETING = os.environ.get("GREETING", "Hello from team01")
 ```bash
 python3 -m app.main
 ```
+
+![What to type in the terminal](../images/terminal/day2-lab2-4-101-check-it-works-before-you-share-it.svg)
 
 ### 5. Save the change as a commit
 
@@ -389,17 +489,23 @@ python3 -m app.main
    git add -A
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-lab2-5-1-save-the-change-as-a-commit.svg)
+
 2. Save it, with a note. The note should finish the sentence "This change will...".
 
    ```bash
    git commit -m "Change the greeting for $TEAM"
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-lab2-5-2-save-the-change-as-a-commit.svg)
+
 ### 6. Send your branch to Gitea
 
 ```bash
 git push -u origin greeting-$ME
 ```
+
+![What you should see in the terminal](../images/terminal/day2-lab2-6-101-send-your-branch-to-gitea.svg)
 
 ## Lab 3: review, approve, merge, and watch it go live
 
@@ -476,17 +582,23 @@ Turn your change into a reviewed decision: a pull request, a review and approval
    git switch main
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-lab3-4-4-merge-it-and-update-your-copy.svg)
+
 5. Fetch the merge from Gitea.
 
    ```bash
    git pull
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-lab3-4-5-merge-it-and-update-your-copy.svg)
+
 6. Show the last three saves (commits) in the history, one line each.
 
    ```bash
    git log --oneline -3
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-lab3-4-6-merge-it-and-update-your-copy.svg)
 
 ### 5. Watch it go live
 
@@ -508,6 +620,8 @@ Turn your change into a reviewed decision: a pull request, a review and approval
 curl -s https://hello-$TEAM-dev.$DOMAIN/
 ```
 
+![What you should see in the terminal](../images/terminal/day2-lab3-6-101-see-your-change-in-dev.svg)
+
 ## Lab 4: try to break the rules
 
 Try the three shortcuts the platform refuses, and keep the refusal messages as evidence that the controls work.
@@ -521,11 +635,15 @@ Try the three shortcuts the platform refuses, and keep the refusal messages as e
    git switch main && git pull
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-lab4-1-1-push-straight-to-main.svg)
+
 2. Add a line at the end of README.md. Prints nothing.
 
    ```bash
    echo "Direct edit" >> README.md
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-lab4-1-2-push-straight-to-main.svg)
 
 3. Save it in Git, directly on main.
 
@@ -534,11 +652,15 @@ Try the three shortcuts the platform refuses, and keep the refusal messages as e
    git commit -m "Direct edit"
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-lab4-1-3-push-straight-to-main.svg)
+
 4. Now try to upload main to Gitea.
 
    ```bash
    git push
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-lab4-1-4-push-straight-to-main.svg)
 
 ### 2. Undo it
 
@@ -548,11 +670,15 @@ Try the three shortcuts the platform refuses, and keep the refusal messages as e
    git reset --hard origin/main
    ```
 
+   ![What you should see in the terminal](../images/terminal/day2-lab4-2-1-undo-it.svg)
+
 2. Check.
 
    ```bash
    git status
    ```
+
+   ![What you should see in the terminal](../images/terminal/day2-lab4-2-2-undo-it.svg)
 
 ### 3. Approve your own pull request
 
@@ -573,6 +699,8 @@ git commit -am "Try to approve my own change"
 git push -u origin self-approve-$ME
 ```
 
+![What you should see in the terminal](../images/terminal/day2-lab4-3-101-approve-your-own-pull-request.svg)
+
 ### 4. Change it after the reviewer approved
 
 1. Approve your self-approve pull request as reviewer, in a private window, as in Lab 3. The page now shows one approval.
@@ -590,6 +718,8 @@ echo "One more line" >> README.md
 git commit -am "Change after approval"
 git push
 ```
+
+![What you should see in the terminal](../images/terminal/day2-lab4-4-101-change-it-after-the-reviewer-approved.svg)
 
 ### 5. Write down the three messages
 
@@ -609,6 +739,8 @@ cat ~/evidence/day2-refusals.md
 cd ~/hello && git switch main
 ```
 
+![What you should see in the terminal](../images/terminal/day2-lab4-5-101-write-down-the-three-messages.svg)
+
 ## Lab 5: resolve a merge conflict
 
 See what happens when two changes touch the same line, and resolve it calmly.
@@ -621,6 +753,10 @@ See what happens when two changes touch the same line, and resolve it calmly.
 
 3. Open both pulls/new links the boxes print, and click Create Pull Request on each.
 
+   ![The two pull requests, A and B, both green, both changing line 22. Your names, team, numbers and times are your own.](../images/gitea-30-two-conflict-prs.png)
+
+   *The two pull requests, A and B, both green, both changing line 22. Your names, team, numbers and times are your own.*
+
 ```bash
 cd ~/hello
 git switch main && git pull
@@ -631,6 +767,8 @@ git commit -am "Greeting from branch A"
 git push -u origin conflict-a-$ME
 ```
 
+![What you should see in the terminal](../images/terminal/day2-lab5-1-101-change-the-same-line-on-two-branches.svg)
+
 ```bash
 git switch main
 git switch -c conflict-b-$ME
@@ -639,6 +777,8 @@ grep -n "^GREETING" app/main.py
 git commit -am "Greeting from branch B"
 git push -u origin conflict-b-$ME
 ```
+
+![What you should see in the terminal](../images/terminal/day2-lab5-1-102-change-the-same-line-on-two-branches.svg)
 
 ### 2. Merge A first
 
@@ -661,6 +801,8 @@ git switch conflict-b-$ME
 git merge main
 ```
 
+![What you should see in the terminal](../images/terminal/day2-lab5-3-101-bring-main-into-branch-b.svg)
+
 ### 4. Choose the line to keep
 
 1. Open app/main.py in the editor (Explorer → hello → app → main.py). Around line 22 Git has put both versions between markers (the editor colours them, and offers buttons such as Accept Current Change and Accept Incoming Change above them).
@@ -675,6 +817,8 @@ git merge main
    sed -i '/^<<<<<<< /,/^=======/d; /^>>>>>>> /d' app/main.py
    grep -n "^GREETING" app/main.py
    ```
+
+   ![What to type in the terminal](../images/terminal/day2-lab5-4-4-choose-the-line-to-keep.svg)
 
 5. Check with the command below that no marker is left.
 
@@ -698,6 +842,8 @@ GREETING = os.environ.get("GREETING", "Hello from branch A and branch B")
 grep -n "<<<<<<<\|=======\|>>>>>>>" app/main.py || echo "no markers left"
 ```
 
+![What to type in the terminal](../images/terminal/day2-lab5-4-101-choose-the-line-to-keep.svg)
+
 ### 5. Finish the merge and update the pull request
 
 1. In the workspace terminal, paste the box: it checks no marker is left, saves the merge as a commit and sends it to Gitea.
@@ -710,15 +856,23 @@ grep -n "<<<<<<<\|=======\|>>>>>>>" app/main.py || echo "no markers left"
    fi
    ```
 
+   ![What to type in the terminal](../images/terminal/day2-lab5-5-1-finish-the-merge-and-update-the-pull-req.svg)
+
 2. In what git push prints, find "Visit the existing pull request:" and the link under it. Hold Ctrl (on a Mac Cmd) and click it: B's pull request opens in Gitea.
 
 3. Reload the page if it was already open: the message above the merge button no longer says "This pull request has changes conflicting with the target branch". The checks start again (yellow dot).
+
+   ![B after the merge commit: no conflict message any more, and the checks run again (yellow dot). Because the line kept is A's, Gitea notes that the branch adds nothing new. Your names, team, numbers and times are your own.](../images/gitea-33-conflict-resolved.png)
+
+   *B after the merge commit: no conflict message any more, and the checks run again (yellow dot). Because the line kept is A's, Gitea notes that the branch adds nothing new. Your names, team, numbers and times are your own.*
 
 4. Approve as the reviewer: open a private window (Edge or Chrome: Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a Mac Cmd+Shift+P), go to https://gitea.<lab domain>, click Sign In and sign in as reviewer. Open B's pull request, click Files Changed, then Review (top right) → Approve. Close the private window.
 
 5. Back in your own window, reload the pull request. When it shows the approval and "All checks were successful", click the small arrow next to the merge button, choose Create squash commit, and confirm.
 
 6. A few minutes later, reload your dev tab (https://hello-team01-dev.<lab domain>/): the greeting you chose in step 4.
+
+![What you should see in the terminal](../images/terminal/day2-lab5-5-finish-the-merge-and-update-the-pull-req.svg)
 
 ## Lab 6: write your one-page platform charter
 

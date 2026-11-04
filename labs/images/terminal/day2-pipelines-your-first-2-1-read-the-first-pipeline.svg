@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 615" width="900" height="615" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14" xml:space="preserve">
+<rect width="900" height="615" rx="10" fill="#0d1117"/>
+<rect width="900" height="28" rx="10" fill="#21262d"/><rect y="18" width="900" height="10" fill="#21262d"/>
+<circle cx="20" cy="14" r="6" fill="#ff5f56"/><circle cx="40" cy="14" r="6" fill="#ffbd2e"/><circle cx="60" cy="14" r="6" fill="#27c93f"/>
+<text x="450" y="19" fill="#8b949e" font-size="12" text-anchor="middle">Workspace terminal</text>
+<text x="20" y="46"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> cat ~/pipeline-templates/workflows/first-pipeline.yaml</tspan></text>
+<text x="20" y="65" fill="#c9d1d9"># Pipeline template: your first pipeline. Owned by the platform team.</text>
+<text x="20" y="84" fill="#c9d1d9">#</text>
+<text x="20" y="103" fill="#c9d1d9"># Use it: copy this file, unchanged, into your service's repository as</text>
+<text x="20" y="122" fill="#c9d1d9">#   .gitea/workflows/first-pipeline.yaml</text>
+<text x="20" y="141" fill="#c9d1d9"># It runs on every pull request, and from the Actions tab (first-pipeline → Run Workflow).</text>
+<text x="20" y="160" fill="#c9d1d9">#</text>
+<text x="20" y="179" fill="#c9d1d9"># A pipeline is a list of steps that a runner does for you, in order, on every</text>
+<text x="20" y="198" fill="#c9d1d9"># change. This one has three: get the code, show what is there, run the tests.</text>
+<text x="20" y="217" fill="#c9d1d9">name: first-pipeline</text>
+<text x="20" y="236" fill="#c9d1d9"></text>
+<text x="20" y="255" fill="#c9d1d9">on:</text>
+<text x="20" y="274" fill="#c9d1d9">  pull_request:</text>
+<text x="20" y="293" fill="#c9d1d9">  workflow_dispatch:</text>
+<text x="20" y="312" fill="#c9d1d9"></text>
+<text x="20" y="331" fill="#c9d1d9">jobs:</text>
+<text x="20" y="350" fill="#c9d1d9">  check:</text>
+<text x="20" y="369" fill="#c9d1d9">    runs-on: pelab-host</text>
+<text x="20" y="388" fill="#c9d1d9">    steps:</text>
+<text x="20" y="407" fill="#c9d1d9">      - name: Get the code</text>
+<text x="20" y="426" fill="#c9d1d9">        run: |</text>
+<text x="20" y="445" fill="#c9d1d9">          git init -q .</text>
+<text x="20" y="464" fill="#c9d1d9">          git -c http.extraHeader="Authorization: token ${{ gitea.token }}" \</text>
+<text x="20" y="483" fill="#c9d1d9">            fetch -q --depth 1 "${{ gitea.server_url }}/${{ gitea.repository }}.git" "${{ gitea.</text>
+<text x="20" y="502" fill="#c9d1d9">ref }}"</text>
+<text x="20" y="521" fill="#c9d1d9">          git checkout -q FETCH_HEAD</text>
+<text x="20" y="540" fill="#c9d1d9">          git log -1 --format='Checking %h: %s (by %an)'</text>
+<text x="20" y="559" fill="#c9d1d9"></text>
+<text x="20" y="578" fill="#c9d1d9">...</text>
+</svg>

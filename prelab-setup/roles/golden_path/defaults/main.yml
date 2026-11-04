@@ -55,7 +55,7 @@ golden_path_platform_repos:
     description: "The delegate handbook: every lab, step by step"
     # Only the instructions: labs/README.md, glossary.md, each day's README.md and simple-instruction.md, and their pictures.
     source: .
-    include: '^((README|glossary|day[1-6]/(README|simple-instruction))[.]md|images/[^/]+[.](svg|png|jpg))$'
+    include: '^((README|glossary|day[1-6]/(README|simple-instruction))[.]md|images/([^/]+/)?[^/]+[.](svg|png|jpg))$'
     marker: day1/README.md
     replace_domain: true
 # Base64 of a binary file (a screenshot), for the repository seeding above.

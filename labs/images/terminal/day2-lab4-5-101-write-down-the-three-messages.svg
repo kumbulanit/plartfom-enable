@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 387" width="900" height="387" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14" xml:space="preserve">
+<rect width="900" height="387" rx="10" fill="#0d1117"/>
+<rect width="900" height="28" rx="10" fill="#21262d"/><rect y="18" width="900" height="10" fill="#21262d"/>
+<circle cx="20" cy="14" r="6" fill="#ff5f56"/><circle cx="40" cy="14" r="6" fill="#ffbd2e"/><circle cx="60" cy="14" r="6" fill="#27c93f"/>
+<text x="450" y="19" fill="#8b949e" font-size="12" text-anchor="middle">Workspace terminal</text>
+<text x="20" y="46"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> mkdir -p ~/evidence</tspan></text>
+<text x="20" y="65"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> cat &gt; ~/evidence/day2-refusals.md &lt;&lt;EOF</tspan></text>
+<text x="20" y="84"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> # Day 2: three refusals, seen by $ME on $(date +%F)</tspan></text>
+<text x="20" y="103"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> 1. Push straight to main: "Not allowed to push to protected branch main"</tspan></text>
+<text x="20" y="122"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> 2. Approve my own pull request: "Pull request authors can't approve their own pull request"</tspan></text>
+<text x="20" y="141"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> 3. Change after approval: "approval review dismissed automatically according to repository set</tspan></text>
+<text x="20" y="160" fill="#f0f6fc">tings"</text>
+<text x="20" y="179"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> EOF</tspan></text>
+<text x="20" y="198"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> cat ~/evidence/day2-refusals.md</tspan></text>
+<text x="20" y="217"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> cd ~/hello &amp;&amp; git switch main</tspan></text>
+<text x="20" y="236" fill="#c9d1d9"># Day 2: three refusals, seen by student01 on 2026-10-29</text>
+<text x="20" y="255" fill="#c9d1d9">1. Push straight to main: "Not allowed to push to protected branch main"</text>
+<text x="20" y="274" fill="#c9d1d9">2. Approve my own pull request: "Pull request authors can't approve their own pull request"</text>
+<text x="20" y="293" fill="#c9d1d9">3. Change after approval: "approval review dismissed automatically according to repository setti</text>
+<text x="20" y="312" fill="#c9d1d9">ngs"</text>
+<text x="20" y="331" fill="#c9d1d9">Switched to branch 'main'</text>
+<text x="20" y="350" fill="#c9d1d9">Your branch is up to date with 'origin/main'.</text>
+</svg>

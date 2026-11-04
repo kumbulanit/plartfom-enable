@@ -653,11 +653,20 @@ The brief wants governed APIs: an owner, a contract, versioning, monitoring. The
 **Do this:**
 
 1. In Gitea, click + (top right, next to your picture) → New Repository.
+
 2. Owner: open the list and choose your team, teamNN (not your own name).
+
 3. Repository Name: rates (in small letters).
+
 4. Template: click "Select a template.", type golden and choose platform/golden-path. (Clicking Use this template on platform/golden-path opens the same form with this already chosen.)
+
 5. Template Items appears: tick Git Content (Default Branch) and Branch Protection. Leave the others.
+
 6. Click Create Repository at the bottom.
+
+   ![The New Repository form, filled in: owner team01 (your team), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.](../images/gitea-41-new-repo-from-template.png)
+
+   *The New Repository form, filled in: owner team01 (your team), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.*
 
 **You should see:** teamNN/rates with the folders app, deploy and tests and the files Dockerfile, README.md and catalog-info.yaml.
 
@@ -681,8 +690,15 @@ The brief wants governed APIs: an owner, a contract, versioning, monitoring. The
 **Do this:**
 
 1. In teamNN/rates, click the Actions tab.
+
 2. On the left, under All Workflows, click golden-path.
+
 3. A blue bar says "This workflow has a workflow_dispatch event trigger.": click Run Workflow on its right, leave the branch as main, and click Run Workflow in the box that opens.
+
+   ![The Run Workflow box of golden-path: use the workflow from main. Your list of runs is empty the first time.](../images/gitea-42-run-golden-path.png)
+
+   *The Run Workflow box of golden-path: use the workflow from main. Your list of runs is empty the first time.*
+
 4. Reload the page after a few seconds: a new run appears at the top. Click it to watch.
 
 **You should see:** The job build with its steps (lint, tests, secret scan, Dockerfile lint, build, scan, push), each turning green, in a few minutes.
@@ -807,8 +823,15 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 **Do this:**
 
 1. In Gitea, open teamNN/hello, then .gitea → workflows → ci.yaml.
+
 2. In a second tab, open teamNN/rates, then .gitea → workflows → ci.yaml.
+
+   ![rates/.gitea/workflows/ci.yaml: the same file, line for line, as in hello and in the template, from the template's first commit.](../images/gitea-46-rates-ci-yaml.png)
+
+   *rates/.gitea/workflows/ci.yaml: the same file, line for line, as in hello and in the template, from the template's first commit.*
+
 3. Compare the two: the same steps, in the same order, with the same comments.
+
 4. Now open platform/golden-path and click Issues: this is where teams ask the platform team for changes to the template.
 
 **You should see:** The same pipeline in hello and rates, copied from platform/golden-path.
@@ -950,6 +973,10 @@ GREETING = os.environ.get("GREETING", "Rates service of team 3")
 
 4. When "All checks were successful", merge (Create squash commit, as on Day 2).
 
+   ![Ready to merge: the reviewer approved ("Looks good"), and both checks are green. Your names, team, numbers and times are your own.](../images/gitea-37-rates-ready-to-merge.png)
+
+   *Ready to merge: the reviewer approved ("Looks good"), and both checks are green. Your names, team, numbers and times are your own.*
+
 **What each line does:**
 
 - `git commit -am "First change to rates"`: commit every changed file, with a message.
@@ -1006,6 +1033,11 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 **Do this:**
 
 1. Open teamNN/rates in Gitea: the README is shown under the file list.
+
+   ![The README rates got from the golden path: its addresses in dev, staging and prod, its pipeline, deployments, images, dashboard and portal entry, then how to run it.](../images/gitea-43-rates-readme.png)
+
+   *The README rates got from the golden path: its addresses in dev, staging and prod, its pipeline, deployments, images, dashboard and portal entry, then how to run it.*
+
 2. Read the sections on changing, releasing and watching the service.
 
 **You should see:** You recognise every step from the last four days: branch and pull request (Day 2), environments (Day 3), the image (Day 4), and the release to staging and prod still to come (Day 6).
@@ -1072,10 +1104,18 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 **Do this:**
 
 1. Click workflows, then smoke-test.yaml.
+
 2. Read the comment at the top: copy it unchanged, as .gitea/workflows/smoke-test.yaml.
+
 3. Read the block on: workflow_dispatch adds a Run Workflow button, and inputs adds a list in it: which environment to check (dev, staging or prod).
+
 4. Read the four steps (each "- name:"): Work out the address, The service answers, Its health check says ok, It runs as the right environment.
+
 5. Above the file, on the right, click the Copy content button (two small squares, next to the download arrow). The whole file is now copied.
+
+   ![smoke-test.yaml in platform/pipeline-templates: the comment says how to use it, on: says when it runs. The Copy content button is the two small squares above the file, right of the download arrow.](../images/gitea-44-smoke-test-file.png)
+
+   *smoke-test.yaml in platform/pipeline-templates: the comment says how to use it, on: says when it runs. The Copy content button is the two small squares above the file, right of the download arrow.*
 
 **You should see:** The template, and the four checks it makes.
 
@@ -1123,9 +1163,16 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 **Do this:**
 
 1. On "Comparing changes", click New Pull Request, then Create Pull Request at the bottom of the form.
+
 2. Wait for the main pipeline (golden-path) to run on the pull request: a few minutes, until "All checks were successful".
+
 3. Approve as reviewer: Open a private window (Edge or Chrome: Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a Mac Cmd+Shift+P), go to https://gitea.<lab domain>, click Sign In, and sign in with the other person's login: reviewer or platform-approver, with its password from cat /etc/pelab/logins.md in your workspace. Then Files Changed → Review → Approve, and close the private window.
+
 4. Back in your own window, reload the pull request and merge it (Create squash commit, as on Day 2).
+
+   ![The smoke test's pull request, approved and green, ready to merge. Your names, team, numbers and times are your own.](../images/gitea-38-smoke-test-pr-ready.png)
+
+   *The smoke test's pull request, approved and green, ready to merge. Your names, team, numbers and times are your own.*
 
 **You should see:** The pull request merged. main of teamNN/rates now has .gitea/workflows/smoke-test.yaml.
 

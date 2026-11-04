@@ -1420,6 +1420,10 @@ python3 -m app.main
 
    A new browser tab shows a big LOCAL and the greeting: the same website as a page, because a browser asks for a page and curl asks for data. The first terminal logs this visit too.
 
+   ![hello in the browser, started by hand: the environment's name in big letters (grey for local), the greeting, and version dev.](../images/hello-local.png)
+
+   *hello in the browser, started by hand: the environment's name in big letters (grey for local), the greeting, and version dev.*
+
 **What each line does:**
 
 - `curl -s localhost:8081/`: ask the service on this computer (localhost), port 8081, for its main page (/). -s hides curl's progress messages.
@@ -1462,11 +1466,23 @@ python3 -m app.main
    curl -s localhost:8082/
    ```
 
+   ```
+   {"app": "hello", "version": "dev", "environment": "staging", "message": "Hello from staging"}
+   ```
+
 4. See it in your browser too: print the address for port 8082 and Ctrl+click it (Cmd+click on a Mac). The page now says STAGING.
 
    ```bash
    echo "https://$ME.$DOMAIN/proxy/8082/"
    ```
+
+   ```
+   https://student01.<lab domain>/proxy/8082/
+   ```
+
+   ![The same program with three other settings: STAGING in yellow and "Hello from staging".](../images/hello-local-staging.png)
+
+   *The same program with three other settings: STAGING in yellow and "Hello from staging".*
 
 **What each line does:**
 
@@ -1474,12 +1490,6 @@ python3 -m app.main
 - `GREETING="Hello from staging"`: a setting: the message it answers with.
 - `PORT=8082`: a setting: listen on port 8082 instead of 8081.
 - `python3 -m app.main`: the same program as before. The settings in front of it apply to this run only.
-
-**You should see:** In the second terminal, curl -s localhost:8082/ now answers:
-
-```
-{"app": "hello", "version": "dev", "environment": "staging", "message": "Hello from staging"}
-```
 
 **How to read it:**
 

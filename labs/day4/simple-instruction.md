@@ -2,6 +2,8 @@
 
 Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).
 
+Every command has a picture of the terminal. Where the lab was tested, it shows what the command printed (your ids, times, names and team are your own); "type this" pictures show only what to type.
+
 ## Pipelines: two ways to get one from a template
 
 - Create a service from the golden-path template: it comes with its whole pipeline, .gitea/workflows/ci.yaml. Lab 3.
@@ -23,11 +25,15 @@ git switch main && git pull
 docker build --build-arg BASE_IMAGE=harbor.$DOMAIN/dockerhub/library/python:3.12-slim -t hello:1 .
 ```
 
+![What you should see in the terminal](../images/terminal/day4-lab1-1-101-build-the-image.svg)
+
 ### 2. Find it in the list of images
 
 ```bash
 docker images hello
 ```
+
+![What you should see in the terminal](../images/terminal/day4-lab1-2-101-find-it-in-the-list-of-images.svg)
 
 ### 3. Run it
 
@@ -36,6 +42,8 @@ docker run -d --name hello -p 8081:8081 hello:1
 docker ps
 ```
 
+![What you should see in the terminal](../images/terminal/day4-lab1-3-101-run-it.svg)
+
 ### 4. Call it
 
 ```bash
@@ -43,12 +51,16 @@ curl -s localhost:8081/
 curl -i localhost:8081/healthz
 ```
 
+![What you should see in the terminal](../images/terminal/day4-lab1-4-101-call-it.svg)
+
 ### 5. Read its logs, and check who it runs as
 
 ```bash
 docker logs hello
 docker exec hello id
 ```
+
+![What you should see in the terminal](../images/terminal/day4-lab1-5-101-read-its-logs-and-check-who-it-runs-as.svg)
 
 ### 6. Stop and remove it
 
@@ -58,6 +70,8 @@ docker rm hello
 docker ps -a
 docker images hello
 ```
+
+![What you should see in the terminal](../images/terminal/day4-lab1-6-101-stop-and-remove-it.svg)
 
 ## Lab 2: one image, three environments
 
@@ -72,6 +86,8 @@ sleep 2
 curl -s localhost:8082/
 ```
 
+![What you should see in the terminal](../images/terminal/day4-lab2-1-101-run-it-as-staging.svg)
+
 ### 2. Run it as prod too
 
 ```bash
@@ -80,6 +96,8 @@ sleep 2
 curl -s localhost:8083/
 docker ps
 ```
+
+![What you should see in the terminal](../images/terminal/day4-lab2-2-101-run-it-as-prod-too.svg)
 
 ### 3. Make version 2
 
@@ -104,6 +122,8 @@ docker build --build-arg BASE_IMAGE=harbor.$DOMAIN/dockerhub/library/python:3.12
 docker images hello
 ```
 
+![What you should see in the terminal](../images/terminal/day4-lab2-3-101-make-version-2.svg)
+
 ### 4. Run the two versions side by side
 
 ```bash
@@ -114,6 +134,8 @@ curl -s localhost:8081/
 curl -s localhost:8084/
 ```
 
+![What you should see in the terminal](../images/terminal/day4-lab2-4-101-run-the-two-versions-side-by-side.svg)
+
 ### 5. Clean up
 
 ```bash
@@ -121,6 +143,8 @@ docker rm -f hello-staging hello-prod hello-v1 hello-v2
 git checkout app/main.py
 docker ps
 ```
+
+![What you should see in the terminal](../images/terminal/day4-lab2-5-101-clean-up.svg)
 
 ## Lab 3: create a new service from the template
 
@@ -170,6 +194,10 @@ Use the golden path: create a brand-new service called rates from the template, 
 
 6. Click Create Repository at the bottom.
 
+   ![The New Repository form, filled in: owner team01 (your team), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.](../images/gitea-41-new-repo-from-template.png)
+
+   *The New Repository form, filled in: owner team01 (your team), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.*
+
 ### 3. Run its pipeline for the first time
 
 1. In teamNN/rates, click the Actions tab.
@@ -177,6 +205,10 @@ Use the golden path: create a brand-new service called rates from the template, 
 2. On the left, under All Workflows, click golden-path.
 
 3. A blue bar says "This workflow has a workflow_dispatch event trigger.": click Run Workflow on its right, leave the branch as main, and click Run Workflow in the box that opens.
+
+   ![The Run Workflow box of golden-path: use the workflow from main. Your list of runs is empty the first time.](../images/gitea-42-run-golden-path.png)
+
+   *The Run Workflow box of golden-path: use the workflow from main. Your list of runs is empty the first time.*
 
 4. Reload the page after a few seconds: a new run appears at the top. Click it to watch.
 
@@ -206,6 +238,8 @@ Use the golden path: create a brand-new service called rates from the template, 
 curl -s https://rates-$TEAM-dev.$DOMAIN/
 ```
 
+![What you should see in the terminal](../images/terminal/day4-lab3-6-101-open-it.svg)
+
 ### 7. Add it to the portal
 
 1. Open https://backstage.<lab domain> in a new tab. A page asks how to sign in: on the Guest card, click Enter. No password is needed.
@@ -228,6 +262,10 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 
 2. In a second tab, open teamNN/rates, then .gitea → workflows → ci.yaml.
 
+   ![rates/.gitea/workflows/ci.yaml: the same file, line for line, as in hello and in the template, from the template's first commit.](../images/gitea-46-rates-ci-yaml.png)
+
+   *rates/.gitea/workflows/ci.yaml: the same file, line for line, as in hello and in the template, from the template's first commit.*
+
 3. Compare the two: the same steps, in the same order, with the same comments.
 
 4. Now open platform/golden-path and click Issues: this is where teams ask the platform team for changes to the template.
@@ -244,6 +282,8 @@ git clone https://gitea.$DOMAIN/$TEAM/rates
 cd rates
 git switch -c first-change-$ME
 ```
+
+![What you should see in the terminal](../images/terminal/day4-lab4-1-101-copy-the-new-repository-and-make-a-branc.svg)
 
 ### 2. Change the greeting and run the tests
 
@@ -267,6 +307,8 @@ GREETING = os.environ.get("GREETING", "Rates service of team 3")
 pytest -q
 ```
 
+![What you should see in the terminal](../images/terminal/day4-lab4-2-101-change-the-greeting-and-run-the-tests.svg)
+
 ### 3. Commit, push, review, merge
 
 1. Paste the box to commit and push.
@@ -277,10 +319,16 @@ pytest -q
 
 4. When "All checks were successful", merge (Create squash commit, as on Day 2).
 
+   ![Ready to merge: the reviewer approved ("Looks good"), and both checks are green. Your names, team, numbers and times are your own.](../images/gitea-37-rates-ready-to-merge.png)
+
+   *Ready to merge: the reviewer approved ("Looks good"), and both checks are green. Your names, team, numbers and times are your own.*
+
 ```bash
 git commit -am "First change to rates"
 git push -u origin first-change-$ME
 ```
+
+![What to type in the terminal](../images/terminal/day4-lab4-3-101-commit-push-review-merge.svg)
 
 ### 4. See it live in dev
 
@@ -292,9 +340,15 @@ git push -u origin first-change-$ME
 curl -s https://rates-$TEAM-dev.$DOMAIN/
 ```
 
+![What you should see in the terminal](../images/terminal/day4-lab4-4-101-see-it-live-in-dev.svg)
+
 ### 5. Read the README
 
 1. Open teamNN/rates in Gitea: the README is shown under the file list.
+
+   ![The README rates got from the golden path: its addresses in dev, staging and prod, its pipeline, deployments, images, dashboard and portal entry, then how to run it.](../images/gitea-43-rates-readme.png)
+
+   *The README rates got from the golden path: its addresses in dev, staging and prod, its pipeline, deployments, images, dashboard and portal entry, then how to run it.*
 
 2. Read the sections on changing, releasing and watching the service.
 
@@ -326,6 +380,10 @@ Give rates a second pipeline, a smoke test, by copying a template the platform t
 
 5. Above the file, on the right, click the Copy content button (two small squares, next to the download arrow). The whole file is now copied.
 
+   ![smoke-test.yaml in platform/pipeline-templates: the comment says how to use it, on: says when it runs. The Copy content button is the two small squares above the file, right of the download arrow.](../images/gitea-44-smoke-test-file.png)
+
+   *smoke-test.yaml in platform/pipeline-templates: the comment says how to use it, on: says when it runs. The Copy content button is the two small squares above the file, right of the download arrow.*
+
 ### 3. Add it to rates, on a new branch
 
 1. Open your team's rates repository: https://gitea.<lab domain>/teamNN/rates.
@@ -353,6 +411,10 @@ Give rates a second pipeline, a smoke test, by copying a template the platform t
 3. Approve as reviewer: Open a private window (Edge or Chrome: Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a Mac Cmd+Shift+P), go to https://gitea.<lab domain>, click Sign In, and sign in with the other person's login: reviewer or platform-approver, with its password from cat /etc/pelab/logins.md in your workspace. Then Files Changed → Review → Approve, and close the private window.
 
 4. Back in your own window, reload the pull request and merge it (Create squash commit, as on Day 2).
+
+   ![The smoke test's pull request, approved and green, ready to merge. Your names, team, numbers and times are your own.](../images/gitea-38-smoke-test-pr-ready.png)
+
+   *The smoke test's pull request, approved and green, ready to merge. Your names, team, numbers and times are your own.*
 
 ### 5. Run the smoke test
 

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" width="900" height="330" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14" xml:space="preserve">
+<rect width="900" height="330" rx="10" fill="#0d1117"/>
+<rect width="900" height="28" rx="10" fill="#21262d"/><rect y="18" width="900" height="10" fill="#21262d"/>
+<circle cx="20" cy="14" r="6" fill="#ff5f56"/><circle cx="40" cy="14" r="6" fill="#ffbd2e"/><circle cx="60" cy="14" r="6" fill="#27c93f"/>
+<text x="450" y="19" fill="#8b949e" font-size="12" text-anchor="middle">Workspace terminal</text>
+<text x="20" y="46"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> tofu apply</tspan></text>
+<text x="20" y="65" fill="#c9d1d9">Do you want to perform these actions?</text>
+<text x="20" y="84" fill="#c9d1d9">  OpenTofu will perform the actions described above.</text>
+<text x="20" y="103" fill="#c9d1d9">  Only 'yes' will be accepted to approve.</text>
+<text x="20" y="122" fill="#c9d1d9"></text>
+<text x="20" y="141" fill="#c9d1d9">  Enter a value: yes</text>
+<text x="20" y="160" fill="#c9d1d9"></text>
+<text x="20" y="179" fill="#c9d1d9">local_file.note: Creating...</text>
+<text x="20" y="198" fill="#c9d1d9">local_file.note: Creation complete after 0s [id=dc2d5adde1d6...]</text>
+<text x="20" y="217" fill="#c9d1d9"></text>
+<text x="20" y="236" fill="#c9d1d9">Apply complete! Resources: 1 added, 0 changed, 0 destroyed.</text>
+<text x="20" y="255" fill="#c9d1d9"></text>
+<text x="20" y="274" fill="#c9d1d9">Built by code, not by hand.</text>
+<text x="20" y="293" fill="#c9d1d9">main.tf  note.txt  terraform.tfstate</text>
+</svg>

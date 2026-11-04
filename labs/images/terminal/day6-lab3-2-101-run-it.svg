@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" width="900" height="330" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14" xml:space="preserve">
+<rect width="900" height="330" rx="10" fill="#0d1117"/>
+<rect width="900" height="28" rx="10" fill="#21262d"/><rect y="18" width="900" height="10" fill="#21262d"/>
+<circle cx="20" cy="14" r="6" fill="#ff5f56"/><circle cx="40" cy="14" r="6" fill="#ffbd2e"/><circle cx="60" cy="14" r="6" fill="#27c93f"/>
+<text x="450" y="19" fill="#8b949e" font-size="12" text-anchor="middle">Workspace terminal</text>
+<text x="20" y="46"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> k6 run load.js</tspan></text>
+<text x="20" y="65" fill="#c9d1d9">  █ TOTAL RESULTS</text>
+<text x="20" y="84" fill="#c9d1d9"></text>
+<text x="20" y="103" fill="#c9d1d9">    checks_total.......: 4731    39.4/s</text>
+<text x="20" y="122" fill="#c9d1d9">    checks_succeeded...: 100.00% 4731 out of 4731</text>
+<text x="20" y="141" fill="#c9d1d9">    checks_failed......: 0.00%   0 out of 4731</text>
+<text x="20" y="160" fill="#c9d1d9"></text>
+<text x="20" y="179" fill="#c9d1d9">    ✓ status is 200</text>
+<text x="20" y="198" fill="#c9d1d9"></text>
+<text x="20" y="217" fill="#c9d1d9">    HTTP</text>
+<text x="20" y="236" fill="#c9d1d9">    http_req_duration..............: avg=4.67ms   min=255.36µs med=2.31ms   max=212.56ms p(90)=5</text>
+<text x="20" y="255" fill="#c9d1d9">.08ms   p(95)=6.15ms</text>
+<text x="20" y="274" fill="#c9d1d9">    http_req_failed................: 0.00%  0 out of 4731</text>
+<text x="20" y="293" fill="#c9d1d9">    http_reqs......................: 4731   39.4/s</text>
+</svg>

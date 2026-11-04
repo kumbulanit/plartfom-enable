@@ -2,6 +2,8 @@
 
 Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).
 
+Every command has a picture of the terminal. Where the lab was tested, it shows what the command printed (your ids, times, names and team are your own); "type this" pictures show only what to type.
+
 ## Infrastructure as Code: the idea in four lines
 
 - You write what you want in files (OpenTofu), not by clicking or typing commands on a server.
@@ -36,17 +38,23 @@ EOF
 ls
 ```
 
+![What you should see in the terminal](../images/terminal/day3-lab1-1-101-write-the-code.svg)
+
 ### 2. Prepare the folder: tofu init
 
 ```bash
 tofu init
 ```
 
+![What you should see in the terminal](../images/terminal/day3-lab1-2-101-prepare-the-folder-tofu-init.svg)
+
 ### 3. See what would happen: tofu plan
 
 ```bash
 tofu plan
 ```
+
+![What you should see in the terminal](../images/terminal/day3-lab1-3-101-see-what-would-happen-tofu-plan.svg)
 
 ### 4. Make it so: tofu apply
 
@@ -62,10 +70,14 @@ tofu plan
 tofu apply
 ```
 
+![What you should see in the terminal](../images/terminal/day3-lab1-4-101-make-it-so-tofu-apply.svg)
+
 ```bash
 cat note.txt; echo
 ls
 ```
+
+![What to type in the terminal](../images/terminal/day3-lab1-4-102-make-it-so-tofu-apply.svg)
 
 ### 5. Change the code, and plan again
 
@@ -95,10 +107,14 @@ grep content main.tf
 tofu plan
 ```
 
+![What you should see in the terminal](../images/terminal/day3-lab1-5-101-change-the-code-and-plan-again.svg)
+
 ```bash
 tofu apply
 cat note.txt; echo
 ```
+
+![What to type in the terminal](../images/terminal/day3-lab1-5-102-change-the-code-and-plan-again.svg)
 
 ### 6. Break it by hand, let the code repair it, then destroy
 
@@ -113,15 +129,21 @@ rm note.txt
 tofu plan
 ```
 
+![What you should see in the terminal](../images/terminal/day3-lab1-6-101-break-it-by-hand-let-the-code-repair-it-.svg)
+
 ```bash
 tofu apply
 cat note.txt; echo
 ```
 
+![What to type in the terminal](../images/terminal/day3-lab1-6-102-break-it-by-hand-let-the-code-repair-it-.svg)
+
 ```bash
 tofu destroy
 ls
 ```
+
+![What to type in the terminal](../images/terminal/day3-lab1-6-103-break-it-by-hand-let-the-code-repair-it-.svg)
 
 ## Lab 2: request staging and prod from the template
 
@@ -140,6 +162,8 @@ cd environments
 git switch -c $TEAM-environments
 ls
 ```
+
+![What you should see in the terminal](../images/terminal/day3-lab2-1-101-copy-the-environments-repository-and-mak.svg)
 
 ### 2. Fill in the template: six lines
 
@@ -176,6 +200,8 @@ cat $TEAM.tf
 git status
 ```
 
+![What you should see in the terminal](../images/terminal/day3-lab2-2-101-fill-in-the-template-six-lines.svg)
+
 ### 3. Propose it, and read the plan
 
 1. Paste the box and press Enter: it saves your file in a commit and sends your branch to Gitea.
@@ -195,6 +221,8 @@ git add $TEAM.tf
 git commit -m "Request staging and prod for $TEAM"
 git push -u origin $TEAM-environments
 ```
+
+![What you should see in the terminal](../images/terminal/day3-lab2-3-101-propose-it-and-read-the-plan.svg)
 
 ### 4. The platform team approves, and you merge
 
@@ -217,6 +245,8 @@ kubectl get namespaces | grep $TEAM
 kubectl -n $TEAM-staging get resourcequota,limitrange
 kubectl -n $TEAM-staging describe resourcequota team-quota
 ```
+
+![What you should see in the terminal](../images/terminal/day3-lab2-5-101-look-at-your-new-environment.svg)
 
 ### 6. See your service find its new homes
 
@@ -246,6 +276,8 @@ See the platform notice and repair a change made by hand, and see that a whole e
 kubectl -n $TEAM-staging get resourcequota team-quota -o jsonpath='{.spec.hard.requests\.cpu}{"\n"}'
 ```
 
+![What you should see in the terminal](../images/terminal/day3-lab3-1-101-the-instructor-changes-your-quota-by-han.svg)
+
 ### 2. Detect the drift with a plan
 
 1. In Gitea, open platform/environments and click the Actions tab at the top.
@@ -270,6 +302,8 @@ kubectl -n $TEAM-staging get resourcequota team-quota -o jsonpath='{.spec.hard.r
 sleep 120
 kubectl -n $TEAM-staging get resourcequota team-quota -o jsonpath='{.spec.hard.requests\.cpu}{"\n"}'
 ```
+
+![What you should see in the terminal](../images/terminal/day3-lab3-3-101-let-the-platform-repair-it.svg)
 
 ### 4. Propose removing staging, and read the plan
 
@@ -303,6 +337,8 @@ git commit -am "Remove staging for $TEAM"
 git push -u origin $TEAM-remove-staging
 ```
 
+![What you should see in the terminal](../images/terminal/day3-lab3-4-101-propose-removing-staging-and-read-the-pl.svg)
+
 ### 5. Remove it, then bring it back
 
 1. Approve it as the platform team (platform-approver, in a private window, as in Lab 2, step 4); then merge it as yourself.
@@ -317,6 +353,8 @@ git push -u origin $TEAM-remove-staging
 kubectl get namespace $TEAM-staging
 ```
 
+![What you should see in the terminal](../images/terminal/day3-lab3-5-101-remove-it-then-bring-it-back.svg)
+
 ```bash
 git switch main && git pull
 git switch -c $TEAM-add-staging
@@ -326,10 +364,14 @@ git commit -am "Add staging back for $TEAM"
 git push -u origin $TEAM-add-staging
 ```
 
+![What to type in the terminal](../images/terminal/day3-lab3-5-102-remove-it-then-bring-it-back.svg)
+
 ```bash
 kubectl get namespaces | grep $TEAM
 kubectl -n $TEAM-staging get resourcequota team-quota -o jsonpath='{.spec.hard.requests\.cpu}{"\n"}'
 ```
+
+![What to type in the terminal](../images/terminal/day3-lab3-5-103-remove-it-then-bring-it-back.svg)
 
 ## Pipelines: the one that checked your request
 
@@ -345,6 +387,8 @@ Your request in Lab 2 was checked by a pipeline the environments repository came
    git pull
    ```
 
+   ![What to type in the terminal](../images/terminal/day3-pipelines-the-one-th-1-1-get-the-latest-environments.svg)
+
 ### 2. List its steps
 
 1. Each "- name:" is one step of the pipeline.
@@ -353,6 +397,8 @@ Your request in Lab 2 was checked by a pipeline the environments repository came
    grep -n "name:" .gitea/workflows/plan.yaml
    ```
 
+   ![What you should see in the terminal](../images/terminal/day3-pipelines-the-one-th-2-1-list-its-steps.svg)
+
 ### 3. Run its first check yourself
 
 1. The Format check step. No output means every file is formatted.
@@ -360,6 +406,8 @@ Your request in Lab 2 was checked by a pipeline the environments repository came
    ```bash
    tofu fmt -check -recursive -diff
    ```
+
+   ![What you should see in the terminal](../images/terminal/day3-pipelines-the-one-th-3-1-run-its-first-check-yourself.svg)
 
 ### 4. Find its runs in Gitea
 

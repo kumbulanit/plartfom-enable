@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 235" width="900" height="235" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14" xml:space="preserve">
+<rect width="900" height="235" rx="10" fill="#0d1117"/>
+<rect width="900" height="28" rx="10" fill="#21262d"/><rect y="18" width="900" height="10" fill="#21262d"/>
+<circle cx="20" cy="14" r="6" fill="#ff5f56"/><circle cx="40" cy="14" r="6" fill="#ffbd2e"/><circle cx="60" cy="14" r="6" fill="#27c93f"/>
+<text x="450" y="19" fill="#8b949e" font-size="12" text-anchor="middle">Workspace terminal</text>
+<text x="20" y="46"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> cd ~/hello</tspan></text>
+<text x="20" y="65"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> git switch main &amp;&amp; git pull</tspan></text>
+<text x="20" y="84"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> git switch -c bad-release-$ME</tspan></text>
+<text x="20" y="103"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> sed -i "s/newTag: .*/newTag: does-not-exist/" deploy/staging/kustomization.yaml</tspan></text>
+<text x="20" y="122"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> git commit -am "Release a tag that does not exist"</tspan></text>
+<text x="20" y="141"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> git push -u origin bad-release-$ME</tspan></text>
+<text x="20" y="160" fill="#c9d1d9">NAME                     READY   STATUS             RESTARTS   AGE</text>
+<text x="20" y="179" fill="#c9d1d9">hello-5c7d9b8f6c-8v2kq   1/1     Running            0          1h</text>
+<text x="20" y="198" fill="#c9d1d9">hello-7f6b4c9d5e-m3x7p   0/1     ImagePullBackOff   0          1m</text>
+</svg>

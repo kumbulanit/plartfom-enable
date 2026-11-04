@@ -426,12 +426,63 @@ function checkoffSheet() {
     table(['Day', 'Lab', 'Done', 'Note'], rows), ''].join('\n');
 }
 
+// A terminal "screenshot" for the short version: the command and the output the
+// lab recorded when it was tested, drawn as a terminal window (SVG). Real outputs
+// only: a step without a recorded output gets no picture.
+const TERM_DIR = path.join(HANDBOOK, 'images', 'terminal');
+// Spaces become no-break spaces: SVG viewers squeeze ordinary ones, and the
+// indentation of git's output matters.
+const xml = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/ /g, '\u00a0').replace(/\t/g, '\u00a0'.repeat(8));
+// Colours as in a terminal: diff lines red and green, hunk headers blue.
+const outColour = (t) => (/^\+(?!\+\+ )/.test(t) ? '#3fb950' : /^-(?!-- )/.test(t) ? '#f85149' : /^@@/.test(t) ? '#79c0ff' : '#c9d1d9');
+// output: what the command printed when tested; '' when it prints nothing (the
+// prompt comes back); null when it was not recorded (the picture shows only what to type).
+function terminalSvg(cmd, output) {
+  const wrap = (line, kind) => {
+    const parts = [];
+    let rest = line;
+    while (rest.length > 96) { parts.push(rest.slice(0, 96)); rest = rest.slice(96); }
+    parts.push(rest);
+    return parts.map((t, k) => ({ t, kind: k ? kind + '-more' : kind }));
+  };
+  let lines = [
+    ...String(cmd).split('\n').flatMap((l) => wrap('$ ' + l, 'cmd')),
+    ...(output ? String(output).replace(/\n+$/, '').split('\n').flatMap((l) => wrap(l, 'out')) : []),
+    ...(output === '' ? [{ t: '$ ', kind: 'cmd' }] : []),
+  ];
+  if (lines.length > 30) lines = [...lines.slice(0, 28), { t: '...', kind: 'out' }];
+  const lh = 19; const top = 46; const h = top + lines.length * lh + 18; const w = 900;
+  const text = lines.map((l, i) => {
+    const y = top + i * lh;
+    if (l.kind === 'cmd') return `<text x="20" y="${y}"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> ${xml(l.t.slice(2))}</tspan></text>`;
+    return `<text x="20" y="${y}" fill="${l.kind.startsWith('cmd') ? '#f0f6fc' : outColour(l.t)}">${xml(l.t)}</text>`;
+  }).join('\n');
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" font-family="ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14" xml:space="preserve">
+<rect width="${w}" height="${h}" rx="10" fill="#0d1117"/>
+<rect width="${w}" height="28" rx="10" fill="#21262d"/><rect y="18" width="${w}" height="10" fill="#21262d"/>
+<circle cx="20" cy="14" r="6" fill="#ff5f56"/><circle cx="40" cy="14" r="6" fill="#ffbd2e"/><circle cx="60" cy="14" r="6" fill="#27c93f"/>
+<text x="${w / 2}" y="19" fill="#8b949e" font-size="12" text-anchor="middle">${output === null || output === undefined ? 'Workspace terminal: type this' : 'Workspace terminal'}</text>
+${text}
+</svg>
+`;
+}
+let termCount = 0;
+function terminalShot(name, cmd, output = null) {
+  fs.mkdirSync(TERM_DIR, { recursive: true });
+  fs.writeFileSync(path.join(TERM_DIR, name), terminalSvg(cmd, output));
+  termCount++;
+  const alt = output === null ? 'What to type in the terminal' : 'What you should see in the terminal';
+  return `![${alt}](../images/terminal/${name})`;
+}
+const slug = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);
+
 // The short version of a day, for a walk-through led by the instructor: each lab's
 // steps with their instructions and commands; no explanations, outputs or checks.
 // content/simple.js adds sections by topic (Git, IaC, pipelines, guardrails).
 const SIMPLE = require('./content/simple');
 
-function simpleStep(step, i) {
+function simpleStep(step, i, prefix) {
+  const shotName = (k) => `${prefix}-${i + 1}${k === undefined ? '' : '-' + (k + 1)}-${slug(step.title)}.svg`;
   const out = [`### ${i + 1}. ${md(step.title)}`, ''];
   const items = step.do || (step.browser && step.browser.do) || [];
   const shown = new Set();
@@ -443,6 +494,8 @@ function simpleStep(step, i) {
     if (cmd) {
       s += '\n\n' + pad(fence(cmd, 'bash'));
       cmd.split('\n').forEach((l) => shown.add(l));
+      const quiet = /prints nothing/i.test(text) ? '' : null;
+      s += '\n\n' + pad(terminalShot(shotName(k), cmd, d.out !== undefined ? d.out : quiet));
     }
     if (typeof d !== 'string') for (const p of [].concat(d.shot || [])) s += '\n\n' + pad(`![${p.caption}](../images/${p.src})`) + '\n\n' + pad(`*${md(p.caption)}*`);
     out.push(s, '');
@@ -450,28 +503,37 @@ function simpleStep(step, i) {
   if (!items.length) for (const t of [].concat(step.say || [])) out.push(md(t), '');
   if (step.file) out.push(`\`${step.file.path}\`:`, '', fence(step.file.text, step.file.lang || ''), '');
   if (step.change) out.push(`In \`${step.change.file}\`, change:`, '', fence(step.change.before), '', 'to:', '', fence(step.change.after), '');
-  const boxes = [step.run, ...[].concat(step.then || []).map((t) => t.run)].filter(Boolean);
-  for (const b of boxes) if (!b.split('\n').every((l) => shown.has(l))) out.push(fence(b, 'bash'), '');
+    // The step's own output belongs to its first box (step.run); a then box has its own.
+  const inItems = items.some((d) => typeof d !== 'string' && d.out);
+  const thens = [].concat(step.then || []);
+  [step.run, ...thens.map((t) => t.run)].forEach((b, k) => {
+    if (!b || b.split('\n').every((l) => shown.has(l))) return;
+    const output = k === 0 ? (inItems ? null : step.out) : thens[k - 1].out;
+    out.push(fence(b, 'bash'), '', terminalShot(shotName(100 + k), b, output === undefined ? null : output), '');
+  });
+  if (step.out && step.run && !inItems && step.run.split('\n').every((l) => shown.has(l))) out.push(terminalShot(shotName(), step.run, step.out), '');
   return out;
 }
 
 function simpleDay(d) {
   const out = [`# Day ${d}: ${md(DAYS[d].title)}: the steps`, '',
-    'Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).', ''];
+    'Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).', '',
+    'Every command has a picture of the terminal. Where the lab was tested, it shows what the command printed (your ids, times, names and team are your own); "type this" pictures show only what to type.', ''];
   // Topic sections: before the labs, or after them (after: true). A section's
   // say is a sentence, or a list of short points.
   const section = (x) => {
     out.push(`## ${md(x.title)}`, '');
     if (Array.isArray(x.say)) out.push(bullets(x.say), '');
     else if (x.say) out.push(md(x.say), '');
-    (x.steps || []).forEach((s, i) => out.push(...simpleStep(s, i)));
+    (x.steps || []).forEach((s, i) => out.push(...simpleStep(s, i, `day${d}-${slug(x.title).slice(0, 20)}`)));
   };
   const extra = SIMPLE[d] || [];
   extra.filter((x) => !x.after).forEach(section);
   for (const spec of require(`./content/day${d}`).filter((s) => s.type === 'steps')) {
     const lab = LABS[spec.title];
     out.push(`## ${md(spec.title)}`, '', md(lab.goal), '');
-    lab.steps.forEach((s, i) => out.push(...simpleStep(s, i)));
+    const labNo = (spec.title.match(/^Lab (\d+)/) || [null, slug(spec.title).slice(0, 12)])[1];
+    lab.steps.forEach((s, i) => out.push(...simpleStep(s, i, `day${d}-lab${labNo}`)));
   }
   extra.filter((x) => x.after).forEach(section);
   return out.join('\n').replace(/\n{3,}/g, '\n\n');
@@ -489,4 +551,6 @@ write(HANDBOOK, 'glossary.md', glossary());
 write(HANDBOOK, 'start-here.md', START_HERE);
 for (const d of Object.keys(DAYS)) write(GUIDE, `day${d}-notes.md`, guideDay(d));
 write(GUIDE, 'lab-check-off.md', checkoffSheet());
+fs.rmSync(TERM_DIR, { recursive: true, force: true });
 for (const d of Object.keys(DAYS)) write(path.join(HANDBOOK, `day${d}`), 'simple-instruction.md', simpleDay(d));
+console.log(`drew ${termCount} terminal pictures in labs/images/terminal`);

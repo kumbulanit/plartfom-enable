@@ -970,10 +970,24 @@ git branch
    grep -n "^GREETING" app/main.py
    ```
 
+   ```
+   22:GREETING = os.environ.get("GREETING", "Hello from team01, by student01")
+   ```
+
 6. Back in the terminal, run this to see that Git noticed:
 
    ```bash
    git status
+   ```
+
+   ```
+   On branch greeting-student01
+   Changes not staged for commit:
+     (use "git add <file>..." to update what will be committed)
+     (use "git restore <file>..." to discard changes in working directory)
+   	modified:   app/main.py
+
+   no changes added to commit (use "git add" and/or "git commit -a")
    ```
 
 **What changes in `app/main.py`:** line 22, only the text in the second pair of quotes.
@@ -993,16 +1007,6 @@ GREETING = os.environ.get("GREETING", "Hello from team01")
 **What each line does:**
 
 - `git status`: show which files changed since the last commit.
-
-**You should see:** One modified file, in red:
-
-```
-On branch greeting-student01
-Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
-  (use "git restore <file>..." to discard changes in working directory)
-	modified:   app/main.py
-```
 
 **If you see something else:**
 
@@ -1032,6 +1036,10 @@ Changes not staged for commit:
    curl -s localhost:8081/
    ```
 
+   ```
+   {"app": "hello", "version": "dev", "environment": "local", "message": "Hello from team01, by student01"}
+   ```
+
 3. Check that "message" shows your new text.
 
 4. Go back to the first terminal and press Ctrl+C to stop the service.
@@ -1039,12 +1047,6 @@ Changes not staged for commit:
 **What each line does:**
 
 - `python3 -m app.main`: run the service from your changed code, as on Day 1.
-
-**You should see:** In the second terminal, your text in "message":
-
-```
-{"app": "hello", "version": "dev", "environment": "local", "message": "Hello from team01"}
-```
 
 **If you see something else:**
 
@@ -1908,6 +1910,10 @@ A conflict is normal and safe: nothing is lost, both versions are kept until you
 
 3. Open both pulls/new links the boxes print, and click Create Pull Request on each.
 
+   ![The two pull requests, A and B, both green, both changing line 22. Your names, team, numbers and times are your own.](../images/gitea-30-two-conflict-prs.png)
+
+   *The two pull requests, A and B, both green, both changing line 22. Your names, team, numbers and times are your own.*
+
 **What each line does:**
 
 - `git switch main && git pull`: start from the newest main.
@@ -2108,6 +2114,10 @@ GREETING = os.environ.get("GREETING", "Hello from branch A and branch B")
 2. In what git push prints, find "Visit the existing pull request:" and the link under it. Hold Ctrl (on a Mac Cmd) and click it: B's pull request opens in Gitea.
 
 3. Reload the page if it was already open: the message above the merge button no longer says "This pull request has changes conflicting with the target branch". The checks start again (yellow dot).
+
+   ![B after the merge commit: no conflict message any more, and the checks run again (yellow dot). Because the line kept is A's, Gitea notes that the branch adds nothing new. Your names, team, numbers and times are your own.](../images/gitea-33-conflict-resolved.png)
+
+   *B after the merge commit: no conflict message any more, and the checks run again (yellow dot). Because the line kept is A's, Gitea notes that the branch adds nothing new. Your names, team, numbers and times are your own.*
 
 4. Approve as the reviewer: open a private window (Edge or Chrome: Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a Mac Cmd+Shift+P), go to https://gitea.<lab domain>, click Sign In and sign in as reviewer. Open B's pull request, click Files Changed, then Review (top right) → Approve. Close the private window.
 

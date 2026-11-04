@@ -2,6 +2,8 @@
 
 Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).
 
+Every command has a picture of the terminal. Where the lab was tested, it shows what the command printed (your ids, times, names and team are your own); "type this" pictures show only what to type.
+
 ## Icebreaker: two truths and a lie
 
 Get to know your own team: share two true facts and one false one about your work, and the one tool you wish existed.
@@ -88,11 +90,15 @@ Get comfortable in the Linux terminal of your workspace: files, permissions, pro
    mkdir -p ~/day1
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab2-1-1-make-a-folder-and-a-file.svg)
+
 2. Go into that folder. It prints nothing either, but look at the end of the prompt: it changes from ~$ to ~/day1$. The prompt always shows where you are.
 
    ```bash
    cd ~/day1
    ```
+
+   ![What you should see in the terminal](../images/terminal/day1-lab2-1-2-make-a-folder-and-a-file.svg)
 
 3. Create a file called notes.txt with the word hello in it. Again, nothing is printed.
 
@@ -100,15 +106,21 @@ Get comfortable in the Linux terminal of your workspace: files, permissions, pro
    echo "hello" > notes.txt
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab2-1-3-make-a-folder-and-a-file.svg)
+
 4. Now list what is in the folder, with details, to see your file.
 
    ```bash
    ls -la
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab2-1-4-make-a-folder-and-a-file.svg)
+
 ```bash
 echo "I am $ME, in $TEAM, on $DOMAIN"
 ```
+
+![What you should see in the terminal](../images/terminal/day1-lab2-1-102-make-a-folder-and-a-file.svg)
 
 ### 2. Read and change permissions
 
@@ -118,11 +130,15 @@ echo "I am $ME, in $TEAM, on $DOMAIN"
    chmod 600 notes.txt
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab2-2-1-read-and-change-permissions.svg)
+
 2. Look at the file's details again.
 
    ```bash
    ls -la notes.txt
    ```
+
+   ![What you should see in the terminal](../images/terminal/day1-lab2-2-2-read-and-change-permissions.svg)
 
 ### 3. See what is running
 
@@ -132,13 +148,19 @@ echo "I am $ME, in $TEAM, on $DOMAIN"
    ps aux | head
    ```
 
+   ![What to type in the terminal](../images/terminal/day1-lab2-3-1-see-what-is-running.svg)
+
 2. Then run top: it shows the running programs live, busiest first, and keeps updating.
 
    ```bash
    top
    ```
 
+   ![What to type in the terminal](../images/terminal/day1-lab2-3-2-see-what-is-running.svg)
+
 3. Look at it for a few seconds, then press q to leave top and get your prompt back.
+
+![What you should see in the terminal](../images/terminal/day1-lab2-3-see-what-is-running.svg)
 
 ### 4. Check a service and read its log
 
@@ -148,17 +170,23 @@ echo "I am $ME, in $TEAM, on $DOMAIN"
    systemctl status docker --no-pager
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab2-4-1-check-a-service-and-read-its-log.svg)
+
 2. Read the last ten lines Docker wrote in its log today. sudo means "as the administrator": reading the system's logs needs it. In your workspace it does not ask for a password.
 
    ```bash
    sudo journalctl -u docker --since today | tail
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab2-4-2-check-a-service-and-read-its-log.svg)
+
 ### 5. Call a web service from the terminal
 
 ```bash
 curl -I https://gitea.$DOMAIN
 ```
+
+![What you should see in the terminal](../images/terminal/day1-lab2-5-101-call-a-web-service-from-the-terminal.svg)
 
 ### 6. Run an admin command with sudo
 
@@ -168,11 +196,15 @@ curl -I https://gitea.$DOMAIN
    whoami
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab2-6-1-run-an-admin-command-with-sudo.svg)
+
 2. Ask the same question with sudo in front.
 
    ```bash
    sudo whoami
    ```
+
+   ![What you should see in the terminal](../images/terminal/day1-lab2-6-2-run-an-admin-command-with-sudo.svg)
 
 ## Lab 3: run hello by hand, and count the steps
 
@@ -186,17 +218,23 @@ Get your team's service, hello, and run it by hand on your workspace in two sett
    read -p "Your full name: " NAME && git config --global user.name "$NAME" && git config --global user.name
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab3-1-1-tell-git-who-you-are-then-copy-your-team.svg)
+
 2. Tell Git your e-mail address in the lab. Prints nothing.
 
    ```bash
    git config --global user.email "$ME@$DOMAIN"
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab3-1-2-tell-git-who-you-are-then-copy-your-team.svg)
+
 3. Let Git remember your password for today, so you type it only once. Prints nothing.
 
    ```bash
    git config --global credential.helper "cache --timeout=36000"
    ```
+
+   ![What you should see in the terminal](../images/terminal/day1-lab3-1-3-tell-git-who-you-are-then-copy-your-team.svg)
 
 4. Go to your home folder and copy (clone) your team's code from Gitea. Git asks for a Username: type student01 and press Enter. Then a Password: type your password (from your logins file, cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type a password: that is normal, keep typing.
 
@@ -205,12 +243,16 @@ Get your team's service, hello, and run it by hand on your workspace in two sett
    git clone https://gitea.$DOMAIN/$TEAM/hello
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab3-1-4-tell-git-who-you-are-then-copy-your-team.svg)
+
 5. Go into the copy and list what is inside.
 
    ```bash
    cd hello
    ls
    ```
+
+   ![What you should see in the terminal](../images/terminal/day1-lab3-1-5-tell-git-who-you-are-then-copy-your-team.svg)
 
 ### 2. Start the service
 
@@ -219,6 +261,8 @@ This starts the program in this terminal. It keeps running, so this terminal sta
 ```bash
 python3 -m app.main
 ```
+
+![What you should see in the terminal](../images/terminal/day1-lab3-2-101-start-the-service.svg)
 
 ### 3. Call it from a second terminal
 
@@ -230,17 +274,27 @@ python3 -m app.main
    curl -s localhost:8081/
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab3-3-2-call-it-from-a-second-terminal.svg)
+
 3. Back in the second terminal, ask the website whether it is healthy.
 
    ```bash
    curl -i localhost:8081/healthz
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab3-3-3-call-it-from-a-second-terminal.svg)
+
 4. Now open the same website in your browser. Your browser runs on your laptop, where localhost means your laptop, not this workspace, so the browser uses your workspace's own address instead, and code-server (your editor) passes anything under /proxy/8081/ on to port 8081 in the workspace. Print your address, then hold Ctrl (Cmd on a Mac) and click it.
 
    ```bash
    echo "https://$ME.$DOMAIN/proxy/8081/"
    ```
+
+   ![What you should see in the terminal](../images/terminal/day1-lab3-3-4-call-it-from-a-second-terminal.svg)
+
+   ![hello in the browser, started by hand: the environment's name in big letters (grey for local), the greeting, and version dev.](../images/hello-local.png)
+
+   *hello in the browser, started by hand: the environment's name in big letters (grey for local), the greeting, and version dev.*
 
 ### 4. Stop it and start it again as "staging"
 
@@ -254,21 +308,33 @@ python3 -m app.main
    curl -s localhost:8082/
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab3-4-3-stop-it-and-start-it-again-as-staging.svg)
+
 4. See it in your browser too: print the address for port 8082 and Ctrl+click it (Cmd+click on a Mac). The page now says STAGING.
 
    ```bash
    echo "https://$ME.$DOMAIN/proxy/8082/"
    ```
 
+   ![What you should see in the terminal](../images/terminal/day1-lab3-4-4-stop-it-and-start-it-again-as-staging.svg)
+
+   ![The same program with three other settings: STAGING in yellow and "Hello from staging".](../images/hello-local-staging.png)
+
+   *The same program with three other settings: STAGING in yellow and "Hello from staging".*
+
 ```bash
 APP_ENV=staging GREETING="Hello from staging" PORT=8082 python3 -m app.main
 ```
+
+![What to type in the terminal](../images/terminal/day1-lab3-4-101-stop-it-and-start-it-again-as-staging.svg)
 
 ### 5. Look at its logs and its numbers
 
 ```bash
 curl -s localhost:8082/metrics
 ```
+
+![What you should see in the terminal](../images/terminal/day1-lab3-5-101-look-at-its-logs-and-its-numbers.svg)
 
 ### 6. Write down every manual step
 
@@ -299,3 +365,5 @@ For 25 people, three environments and a change every day, this would take:
 EOF
 cat ~/day1/manual-steps.md
 ```
+
+![What you should see in the terminal](../images/terminal/day1-lab3-6-101-write-down-every-manual-step.svg)

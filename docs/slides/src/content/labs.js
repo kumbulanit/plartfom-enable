@@ -29,4 +29,35 @@ for (const [title, layer] of Object.entries(BEGINNER)) {
   }
 }
 
+// labs/shots.js: screenshots for instructions that had none, by step and instruction.
+for (const [title, steps] of Object.entries(require('./labs/shots'))) {
+  const lab = LABS[title];
+  if (!lab) throw new Error(`shots.js: no lab "${title}"`);
+  for (const [s, items] of Object.entries(steps)) {
+    const step = lab.steps[s - 1];
+    if (!step || !step.do) throw new Error(`shots.js: "${title}" has no step ${s} with instructions`);
+    for (const [i, shot] of Object.entries(items)) {
+      const d = step.do[i - 1];
+      if (d === undefined) throw new Error(`shots.js: "${title}" step ${s} has no instruction ${i}`);
+      const item = typeof d === 'string' ? { text: d } : d;
+      item.shot = [].concat(item.shot || [], shot);
+      step.do[i - 1] = item;
+    }
+  }
+}
+
+// labs/outputs.js: recorded outputs for instructions that had none.
+for (const [title, steps] of Object.entries(require('./labs/outputs'))) {
+  const lab = LABS[title];
+  if (!lab) throw new Error(`outputs.js: no lab "${title}"`);
+  for (const [s, items] of Object.entries(steps)) {
+    for (const [i, out] of Object.entries(items)) {
+      const d = lab.steps[s - 1] && lab.steps[s - 1].do && lab.steps[s - 1].do[i - 1];
+      if (!d || typeof d === 'string' || !d.cmd) throw new Error(`outputs.js: "${title}" step ${s} instruction ${i} has no command`);
+      if (d.out !== undefined) throw new Error(`outputs.js: "${title}" step ${s} instruction ${i} already has an output`);
+      d.out = out;
+    }
+  }
+}
+
 module.exports = LABS;

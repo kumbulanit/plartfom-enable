@@ -1,0 +1,31 @@
+# Pipeline template: your first pipeline. Owned by the platform team.
+#
+# Use it: copy this file, unchanged, into your service's repository as
+#   .gitea/workflows/first-pipeline.yaml
+# It runs on every pull request, and from the Actions tab (first-pipeline → Run Workflow).
+#
+# A pipeline is a list of steps that a runner does for you, in order, on every
+# change. This one has three: get the code, show what is there, run the tests.
+name: first-pipeline
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: pelab-host
+    steps:
+      - name: Get the code
+        run: |
+          git init -q .
+          git -c http.extraHeader="Authorization: token ${{ gitea.token }}" \
+            fetch -q --depth 1 "${{ gitea.server_url }}/${{ gitea.repository }}.git" "${{ gitea.ref }}"
+          git checkout -q FETCH_HEAD
+          git log -1 --format='Checking %h: %s (by %an)'
+
+      - name: Show what is here
+        run: ls
+
+      - name: Run the tests
+        run: pytest -q -p no:cacheprovider

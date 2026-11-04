@@ -5,6 +5,7 @@ that works in any service made from the golden path, without changes.
 
 | Template | What it does | When it runs |
 |---|---|---|
+| [workflows/first-pipeline.yaml](workflows/first-pipeline.yaml) | The smallest useful pipeline: gets the code, lists it, runs the tests. A first pipeline to read and copy | On every pull request, and when you click Run Workflow |
 | [workflows/smoke-test.yaml](workflows/smoke-test.yaml) | Checks that a running environment of your service answers: its page, its health check, and the environment it reports | When you click Run Workflow (choose dev, staging or prod) |
 | [workflows/nightly-scan.yaml](workflows/nightly-scan.yaml) | Scans the image of your latest commit on main again for known weaknesses (CVEs) | Every night at 02:00, and when you click Run Workflow |
 

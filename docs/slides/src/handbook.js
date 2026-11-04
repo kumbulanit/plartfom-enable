@@ -426,6 +426,57 @@ function checkoffSheet() {
     table(['Day', 'Lab', 'Done', 'Note'], rows), ''].join('\n');
 }
 
+// The short version of a day, for a walk-through led by the instructor: each lab's
+// steps with their instructions and commands; no explanations, outputs or checks.
+// content/simple.js adds sections by topic (Git, IaC, pipelines, guardrails).
+const SIMPLE = require('./content/simple');
+
+function simpleStep(step, i) {
+  const out = [`### ${i + 1}. ${md(step.title)}`, ''];
+  const items = step.do || (step.browser && step.browser.do) || [];
+  const shown = new Set();
+  const pad = (block) => block.split('\n').map((l) => (l ? '   ' + l : l)).join('\n');
+  items.forEach((d, k) => {
+    const text = typeof d === 'string' ? d : d.text;
+    const cmd = typeof d === 'string' ? null : d.cmd;
+    let s = `${k + 1}. ${md(text)}`;
+    if (cmd) {
+      s += '\n\n' + pad(fence(cmd, 'bash'));
+      cmd.split('\n').forEach((l) => shown.add(l));
+    }
+    if (typeof d !== 'string') for (const p of [].concat(d.shot || [])) s += '\n\n' + pad(`![${p.caption}](../images/${p.src})`) + '\n\n' + pad(`*${md(p.caption)}*`);
+    out.push(s, '');
+  });
+  if (!items.length) for (const t of [].concat(step.say || [])) out.push(md(t), '');
+  if (step.file) out.push(`\`${step.file.path}\`:`, '', fence(step.file.text, step.file.lang || ''), '');
+  if (step.change) out.push(`In \`${step.change.file}\`, change:`, '', fence(step.change.before), '', 'to:', '', fence(step.change.after), '');
+  const boxes = [step.run, ...[].concat(step.then || []).map((t) => t.run)].filter(Boolean);
+  for (const b of boxes) if (!b.split('\n').every((l) => shown.has(l))) out.push(fence(b, 'bash'), '');
+  return out;
+}
+
+function simpleDay(d) {
+  const out = [`# Day ${d}: ${md(DAYS[d].title)}: the steps`, '',
+    'Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).', ''];
+  // Topic sections: before the labs, or after them (after: true). A section's
+  // say is a sentence, or a list of short points.
+  const section = (x) => {
+    out.push(`## ${md(x.title)}`, '');
+    if (Array.isArray(x.say)) out.push(bullets(x.say), '');
+    else if (x.say) out.push(md(x.say), '');
+    (x.steps || []).forEach((s, i) => out.push(...simpleStep(s, i)));
+  };
+  const extra = SIMPLE[d] || [];
+  extra.filter((x) => !x.after).forEach(section);
+  for (const spec of require(`./content/day${d}`).filter((s) => s.type === 'steps')) {
+    const lab = LABS[spec.title];
+    out.push(`## ${md(spec.title)}`, '', md(lab.goal), '');
+    lab.steps.forEach((s, i) => out.push(...simpleStep(s, i)));
+  }
+  extra.filter((x) => x.after).forEach(section);
+  return out.join('\n').replace(/\n{3,}/g, '\n\n');
+}
+
 function write(dir, name, text) {
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, name), text);
@@ -438,3 +489,4 @@ write(HANDBOOK, 'glossary.md', glossary());
 write(HANDBOOK, 'start-here.md', START_HERE);
 for (const d of Object.keys(DAYS)) write(GUIDE, `day${d}-notes.md`, guideDay(d));
 write(GUIDE, 'lab-check-off.md', checkoffSheet());
+for (const d of Object.keys(DAYS)) write(path.join(HANDBOOK, `day${d}`), 'simple-instruction.md', simpleDay(d));

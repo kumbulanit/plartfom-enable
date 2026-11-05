@@ -79,6 +79,16 @@ module.exports = {
           ],
         },
         {
+          title: 'Only if golden-path / build fails at docker build: fix the runner',
+          do: [
+            'Click Details next to golden-path / build, and open Build the image. The fix below is for this error only: "failed to mount ... overlay ... invalid argument", at WORKDIR /srv.',
+            'The instructor does this once for everyone, on the lab host (not in the workspace): it switches the runner\'s Docker to a store that works there.',
+            { text: 'Get the latest setup:', cmd: 'git pull', where: 'Lab host terminal (sarb checkout)' },
+            { text: 'Run the runner part of the setup again. Its task "Check Docker can build images in each runner" says changed when it switches a runner.', cmd: 'cd prelab-setup && ansible-playbook site.yml --tags runners', where: 'Lab host terminal (sarb checkout)' },
+            'Back on the pull request, open the failed run and click Re-run all jobs: golden-path / build gets past WORKDIR /srv.',
+          ],
+        },
+        {
           title: 'Close it, and go back to main',
           do: [
             { text: 'Close the pull request without merging: Close Pull Request, under the comment box at the bottom. The template stays out of main.', shot: [{ src: 'gitea-25-close-pr-button.png', caption: 'Close Pull Request sits under the comment box, at the bottom of the Conversation tab.' }, { src: 'gitea-26-pr-closed.png', caption: 'Closed: the red label at the top, and "closed this pull request" in the history. Nothing reached main.' }] },

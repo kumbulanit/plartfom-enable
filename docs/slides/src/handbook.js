@@ -437,7 +437,8 @@ const xml = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 const outColour = (t) => (/^\+(?!\+\+ )/.test(t) ? '#3fb950' : /^-(?!-- )/.test(t) ? '#f85149' : /^@@/.test(t) ? '#79c0ff' : '#c9d1d9');
 // output: what the command printed when tested; '' when it prints nothing (the
 // prompt comes back); null when it was not recorded (the picture shows only what to type).
-function terminalSvg(cmd, output) {
+// where: whose terminal it is (default: the workspace's).
+function terminalSvg(cmd, output, where = 'Workspace terminal') {
   const wrap = (line, kind) => {
     const parts = [];
     let rest = line;
@@ -462,15 +463,15 @@ function terminalSvg(cmd, output) {
 <rect width="${w}" height="28" rx="10" fill="#21262d"/><rect y="18" width="${w}" height="10" fill="#21262d"/>
 <circle cx="20" cy="14" r="6" fill="#ff5f56"/><circle cx="40" cy="14" r="6" fill="#ffbd2e"/><circle cx="60" cy="14" r="6" fill="#27c93f"/>
 <rect x="${w - 214}" y="5" width="204" height="18" rx="9" fill="#d29922"/><text x="${w - 112}" y="18" fill="#000" font-size="11" font-weight="bold" text-anchor="middle">EXAMPLE · DO NOT COPY</text>
-<text x="${w / 2}" y="19" fill="#8b949e" font-size="12" text-anchor="middle">${output === null || output === undefined ? 'Workspace terminal: type this' : 'Workspace terminal'}</text>
+<text x="${w / 2}" y="19" fill="#8b949e" font-size="12" text-anchor="middle">${output === null || output === undefined ? where + ': type this' : where}</text>
 ${text}
 </svg>
 `;
 }
 let termCount = 0;
-function terminalShot(name, cmd, output = null) {
+function terminalShot(name, cmd, output = null, where) {
   fs.mkdirSync(TERM_DIR, { recursive: true });
-  fs.writeFileSync(path.join(TERM_DIR, name), terminalSvg(cmd, output));
+  fs.writeFileSync(path.join(TERM_DIR, name), terminalSvg(cmd, output, where));
   termCount++;
   const alt = output === null ? 'What to type in the terminal' : 'What you should see in the terminal';
   const label = output === null ? 'In the terminal it looks like this (the output depends on your lab):' : 'In the terminal it looks like this:';
@@ -497,7 +498,7 @@ function simpleStep(step, i, prefix) {
       s += '\n\n' + pad('**Copy and paste:**\n\n' + fence(cmd, 'bash'));
       cmd.split('\n').forEach((l) => shown.add(l));
       const quiet = /prints nothing/i.test(text) ? '' : null;
-      s += '\n\n' + pad(terminalShot(shotName(k), cmd, d.out !== undefined ? d.out : quiet));
+      s += '\n\n' + pad(terminalShot(shotName(k), cmd, d.out !== undefined ? d.out : quiet, d.where));
     }
     if (typeof d !== 'string') for (const p of [].concat(d.shot || [])) s += '\n\n' + pad(`![${p.caption}](../images/${p.src})`) + '\n\n' + pad(`*${md(p.caption)}*`);
     out.push(s, '');

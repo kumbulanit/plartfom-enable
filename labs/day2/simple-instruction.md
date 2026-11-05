@@ -346,7 +346,39 @@ jobs:
 
    *The run of first-pipeline: the steps of the template, each green. Get the code says which commit it checked; Run the tests ends in "6 passed".*
 
-### 9. Close it, and go back to main
+### 9. Only if golden-path / build fails at docker build: fix the runner
+
+1. Click Details next to golden-path / build, and open Build the image. The fix below is for this error only: "failed to mount ... overlay ... invalid argument", at WORKDIR /srv.
+
+2. The instructor does this once for everyone, on the lab host (not in the workspace): it switches the runner's Docker to a store that works there.
+
+3. Get the latest setup:
+
+   **Copy and paste:**
+
+   ```bash
+   git pull
+   ```
+
+   *In the terminal it looks like this (the output depends on your lab):*
+
+   ![What to type in the terminal](../images/terminal/day2-pipelines-your-first-9-3-only-if-golden-path-build-fails-at-docke.svg)
+
+4. Run the runner part of the setup again. Its task "Check Docker can build images in each runner" says changed when it switches a runner.
+
+   **Copy and paste:**
+
+   ```bash
+   cd prelab-setup && ansible-playbook site.yml --tags runners
+   ```
+
+   *In the terminal it looks like this (the output depends on your lab):*
+
+   ![What to type in the terminal](../images/terminal/day2-pipelines-your-first-9-4-only-if-golden-path-build-fails-at-docke.svg)
+
+5. Back on the pull request, open the failed run and click Re-run all jobs: golden-path / build gets past WORKDIR /srv.
+
+### 10. Close it, and go back to main
 
 1. Close the pull request without merging: Close Pull Request, under the comment box at the bottom. The template stays out of main.
 
@@ -368,7 +400,7 @@ jobs:
 
    *In the terminal it looks like this:*
 
-   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-9-2-close-it-and-go-back-to-main.svg)
+   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-10-2-close-it-and-go-back-to-main.svg)
 
 ## Lab 1: Git basics in a practice repository
 

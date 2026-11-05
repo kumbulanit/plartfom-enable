@@ -22,6 +22,8 @@ golden_path_catalog_repo: catalog
 golden_path_environments_repo: environments
 golden_path_policies_repo: policies
 golden_path_handbook_repo: handbook
+# Files in the platform repositories that a later run updates when labs/ has a new version.
+golden_path_pipeline_paths: '^([.]gitea/workflows|workflows)/[^/]+[.]ya?ml$'
 golden_path_platform_repos:
   - name: "{{ golden_path_template_repo }}"
     description: "Golden path: a Python web service with pipeline, deployment, dashboard and catalog entry"

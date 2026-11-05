@@ -290,6 +290,7 @@ module.exports = {
           'Wait about a minute. Near the bottom of the pull request, a check called plan / plan (pull_request) appears: first a yellow dot (running), then a green tick.',
           'Click Details next to it. The run opens. On the left, click the job plan; on the right, click the step called Plan to unfold its output.',
           'Scroll to the end of the Plan step and read the summary line. Then scroll up and read the list with your team.',
+          'The same plan is also posted as a comment on the pull request, by the pipeline: reviewers read it there, without opening the run.',
         ],
         run: 'git add $TEAM.tf\ngit commit -m "Request staging and prod for $TEAM"\ngit push -u origin $TEAM-environments',
         explain: [

@@ -38,7 +38,9 @@ jobs:
           tofu init -input=false -no-color
           tofu validate -no-color
           # -lock=false: the pipeline only reads; the platform holds the lock when it applies.
-          tofu plan -input=false -lock=false -no-color
+          # plan.txt: a copy for the comment on the pull request (last step).
+          set -o pipefail
+          tofu plan -input=false -lock=false -no-color 2>&1 | tee plan.txt
 
       # The merge gate. The pipeline posts its own verdict on the commit, as the
       # "pipeline" status; main is protected so that a red one cannot be merged.
@@ -55,3 +57,22 @@ jobs:
             "${{ gitea.server_url }}/api/v1/repos/${{ gitea.repository }}/statuses/${{ gitea.event.pull_request.head.sha || gitea.sha }}" \
             -d "{\"context\": \"pipeline\", \"state\": \"$STATE\", \"description\": \"$TEXT\", \"target_url\": \"${{ gitea.server_url }}/${{ gitea.repository }}/actions/runs/${{ gitea.run_number }}\"}"
           echo "pipeline: $STATE"
+
+      # The plan as a comment on the pull request, so reviewers read it there. A comment
+      # that cannot be posted is only reported: it never changes the verdict.
+      - name: Post the plan on the pull request
+        if: always() && gitea.event_name == 'pull_request'
+        run: |
+          [ -s plan.txt ] || { echo "No plan to post"; exit 0; }
+          python3 - > comment.json <<'EOF'
+          import json
+          plan = open("plan.txt").read()
+          if len(plan) > 60000:
+              plan = "...\n" + plan[-60000:]
+          body = "**tofu plan** for ${{ gitea.event.pull_request.head.sha }}:\n\n```\n" + plan.strip() + "\n```"
+          print(json.dumps({"body": body}))
+          EOF
+          curl -fsS -o /dev/null -X POST \
+            -H "Authorization: token ${{ gitea.token }}" -H "Content-Type: application/json" \
+            "${{ gitea.server_url }}/api/v1/repos/${{ gitea.repository }}/issues/${{ gitea.event.pull_request.number }}/comments" \
+            -d @comment.json && echo "Posted the plan on the pull request" || echo "Could not post the plan on the pull request"

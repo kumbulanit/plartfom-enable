@@ -677,6 +677,8 @@ Untracked files:
 
 6. Scroll to the end of the Plan step and read the summary line. Then scroll up and read the list with your team.
 
+7. The same plan is also posted as a comment on the pull request, by the pipeline: reviewers read it there, without opening the run.
+
 **What each line does:**
 
 - `git add $TEAM.tf`: put your new file into the next commit.

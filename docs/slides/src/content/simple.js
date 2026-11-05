@@ -4,6 +4,7 @@
 // same shape as a lab step: title, do (text, or { text, cmd }).
 'use strict';
 
+const FIRST_PIPELINE = require('fs').readFileSync(require('path').resolve(__dirname, '../../../../labs/day4/pipeline-templates/workflows/first-pipeline.yaml'), 'utf8');
 const GET_TEMPLATES = 'cd ~\ngit clone https://gitea.$DOMAIN/platform/pipeline-templates 2>/dev/null || git -C pipeline-templates pull\nls ~/pipeline-templates/workflows';
 
 module.exports = {
@@ -48,7 +49,18 @@ module.exports = {
       say: 'A pipeline is a list of steps that a runner does for you on every change. The platform team keeps ready-made ones in platform/pipeline-templates: copy one into hello with the same Git loop, and watch it run on your pull request.',
       steps: [
         { title: 'Get the templates', do: [{ text: 'Copy the templates repository into your workspace and list the templates.', cmd: GET_TEMPLATES, out: 'first-pipeline.yaml\nnightly-scan.yaml\nsmoke-test.yaml', shot: { src: 'gitea-20-pipeline-templates-list.png', caption: 'The same templates in Gitea: platform/pipeline-templates, folder workflows. One file each, owned by the platform team.' } }] },
-        { title: 'Read the first pipeline', do: [{ text: 'Three steps, each a "- name:": get the code, show what is there, run the tests. on: says when it runs.', cmd: 'cat ~/pipeline-templates/workflows/first-pipeline.yaml', out: require('fs').readFileSync(require('path').resolve(__dirname, '../../../../labs/day4/pipeline-templates/workflows/first-pipeline.yaml'), 'utf8') }] },
+        {
+          title: 'Only if first-pipeline.yaml is not in the list: add it in Gitea',
+          do: [
+            'The instructor does this once for everyone: a student account cannot change the platform repositories.',
+            'Sign in to Gitea as the Gitea admin, and open platform → pipeline-templates → workflows.',
+            'Click Add File → New File, and name it first-pipeline.yaml.',
+            'Paste in the file below. Leave "Commit directly to the main branch" ticked, and click Commit Changes.',
+            'Back in the terminal, run Get the templates again: the list now has first-pipeline.yaml.',
+          ],
+          file: { path: 'workflows/first-pipeline.yaml', text: FIRST_PIPELINE, lang: 'yaml' },
+        },
+        { title: 'Read the first pipeline', do: [{ text: 'Three steps, each a "- name:": get the code, show what is there, run the tests. on: says when it runs.', cmd: 'cat ~/pipeline-templates/workflows/first-pipeline.yaml', out: FIRST_PIPELINE }] },
         { title: 'Make a branch in hello', do: [{ text: 'Start from the latest main.', cmd: 'cd ~/hello\ngit switch main\ngit pull\ngit switch -c first-pipeline-$ME', out: "Already on 'main'\nYour branch is up to date with 'origin/main'.\nAlready up to date.\nSwitched to a new branch 'first-pipeline-student01'" }] },
         { title: 'Copy the template in', do: [{ text: 'Pipelines live in .gitea/workflows. hello already has one there: ci.yaml.', cmd: 'cp ~/pipeline-templates/workflows/first-pipeline.yaml .gitea/workflows/\nls .gitea/workflows\ngit status', out: 'ci.yaml\nfirst-pipeline.yaml\nOn branch first-pipeline-student01\nUntracked files:\n  (use "git add <file>..." to include in what will be committed)\n        .gitea/workflows/first-pipeline.yaml\n\nnothing added to commit but untracked files present (use "git add" to track)' }] },
         { title: 'Commit and push', do: [{ text: 'The same loop as the warm-up.', cmd: 'git add .gitea/workflows/first-pipeline.yaml\ngit commit -m "Add the first pipeline from the platform template"\ngit push -u origin first-pipeline-$ME', out: "[first-pipeline-student01 b271116] Add the first pipeline from the platform template\n 1 file changed, 31 insertions(+)\n create mode 100644 .gitea/workflows/first-pipeline.yaml\nremote: \nremote: Create a new pull request for 'first-pipeline-student01':\nremote:   https://gitea.<lab domain>/team01/hello/pulls/new/first-pipeline-student01\nremote: \nTo https://gitea.<lab domain>/team01/hello\n * [new branch]      first-pipeline-student01 -> first-pipeline-student01\nbranch 'first-pipeline-student01' set up to track 'origin/first-pipeline-student01'." }] },

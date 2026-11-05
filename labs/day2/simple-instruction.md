@@ -211,7 +211,55 @@ A pipeline is a list of steps that a runner does for you on every change. The pl
 
    *The same templates in Gitea: platform/pipeline-templates, folder workflows. One file each, owned by the platform team.*
 
-### 2. Read the first pipeline
+### 2. Only if first-pipeline.yaml is not in the list: add it in Gitea
+
+1. The instructor does this once for everyone: a student account cannot change the platform repositories.
+
+2. Sign in to Gitea as the Gitea admin, and open platform → pipeline-templates → workflows.
+
+3. Click Add File → New File, and name it first-pipeline.yaml.
+
+4. Paste in the file below. Leave "Commit directly to the main branch" ticked, and click Commit Changes.
+
+5. Back in the terminal, run Get the templates again: the list now has first-pipeline.yaml.
+
+`workflows/first-pipeline.yaml`:
+
+```yaml
+# Pipeline template: your first pipeline. Owned by the platform team.
+#
+# Use it: copy this file, unchanged, into your service's repository as
+#   .gitea/workflows/first-pipeline.yaml
+# It runs on every pull request, and from the Actions tab (first-pipeline → Run Workflow).
+#
+# A pipeline is a list of steps that a runner does for you, in order, on every
+# change. This one has three: get the code, show what is there, run the tests.
+name: first-pipeline
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: pelab-host
+    steps:
+      - name: Get the code
+        run: |
+          git init -q .
+          git -c http.extraHeader="Authorization: token ${{ gitea.token }}" \
+            fetch -q --depth 1 "${{ gitea.server_url }}/${{ gitea.repository }}.git" "${{ gitea.ref }}"
+          git checkout -q FETCH_HEAD
+          git log -1 --format='Checking %h: %s (by %an)'
+
+      - name: Show what is here
+        run: ls
+
+      - name: Run the tests
+        run: pytest -q -p no:cacheprovider
+```
+
+### 3. Read the first pipeline
 
 1. Three steps, each a "- name:": get the code, show what is there, run the tests. on: says when it runs.
 
@@ -223,9 +271,9 @@ A pipeline is a list of steps that a runner does for you on every change. The pl
 
    *In the terminal it looks like this:*
 
-   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-2-1-read-the-first-pipeline.svg)
+   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-3-1-read-the-first-pipeline.svg)
 
-### 3. Make a branch in hello
+### 4. Make a branch in hello
 
 1. Start from the latest main.
 
@@ -240,9 +288,9 @@ A pipeline is a list of steps that a runner does for you on every change. The pl
 
    *In the terminal it looks like this:*
 
-   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-3-1-make-a-branch-in-hello.svg)
+   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-4-1-make-a-branch-in-hello.svg)
 
-### 4. Copy the template in
+### 5. Copy the template in
 
 1. Pipelines live in .gitea/workflows. hello already has one there: ci.yaml.
 
@@ -256,9 +304,9 @@ A pipeline is a list of steps that a runner does for you on every change. The pl
 
    *In the terminal it looks like this:*
 
-   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-4-1-copy-the-template-in.svg)
+   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-5-1-copy-the-template-in.svg)
 
-### 5. Commit and push
+### 6. Commit and push
 
 1. The same loop as the warm-up.
 
@@ -272,9 +320,9 @@ A pipeline is a list of steps that a runner does for you on every change. The pl
 
    *In the terminal it looks like this:*
 
-   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-5-1-commit-and-push.svg)
+   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-6-1-commit-and-push.svg)
 
-### 6. Open a pull request
+### 7. Open a pull request
 
 1. In what git push printed, Ctrl+click (Cmd+click on a Mac) the address that ends in /pulls/new/first-pipeline-studentNN.
 
@@ -284,7 +332,7 @@ A pipeline is a list of steps that a runner does for you on every change. The pl
 
    *The new pull request: merge into main, pull from first-pipeline-studentNN, and the title from your commit. Scroll down for Create Pull Request.*
 
-### 7. Watch it run
+### 8. Watch it run
 
 1. At the bottom of the pull request, the checks start: golden-path / build (the pipeline hello came with) and first-pipeline / check (yours).
 
@@ -298,7 +346,7 @@ A pipeline is a list of steps that a runner does for you on every change. The pl
 
    *The run of first-pipeline: the steps of the template, each green. Get the code says which commit it checked; Run the tests ends in "6 passed".*
 
-### 8. Close it, and go back to main
+### 9. Close it, and go back to main
 
 1. Close the pull request without merging: Close Pull Request, under the comment box at the bottom. The template stays out of main.
 
@@ -320,7 +368,7 @@ A pipeline is a list of steps that a runner does for you on every change. The pl
 
    *In the terminal it looks like this:*
 
-   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-8-2-close-it-and-go-back-to-main.svg)
+   ![What you should see in the terminal](../images/terminal/day2-pipelines-your-first-9-2-close-it-and-go-back-to-main.svg)
 
 ## Lab 1: Git basics in a practice repository
 

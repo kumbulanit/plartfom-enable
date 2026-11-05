@@ -43,6 +43,8 @@ REQUESTED = {{ pelab_requested_environments | to_json }}  # the others exist fro
 KINDS = {{ golden_path_safety_net_kinds | to_json }}
 HARBOR = "{{ pelab_hosts.harbor }}"
 ARGOCD_CONTROLLERS = "{{ golden_path_argocd_controllers }}"
+# An apply takes a minute or two; a state lock older than this was left by one that was cut off.
+STALE_LOCK = datetime.timedelta(minutes=30)
 TOKEN = (HOME / "token").read_text().strip()
 TLS = ssl.create_default_context(cafile="{{ pelab_tls_dir }}/ca.crt")
 ENV = dict(
@@ -59,7 +61,9 @@ ENV = dict(
 def run(args, cwd=None, stdin=None):
     result = subprocess.run(args, cwd=cwd, env=ENV, input=stdin, capture_output=True, text=True)
     if result.returncode != 0:
-        raise RuntimeError(f"{' '.join(args[:3])} failed: {(result.stderr or result.stdout).strip()[-400:]}")
+        error = RuntimeError(f"{' '.join(args[:3])} failed: {(result.stderr or result.stdout).strip()[-400:]}")
+        error.output = result.stderr + result.stdout
+        raise error
     return result.stdout
 
 
@@ -101,9 +105,28 @@ def report(repo, commit, state, description, owner=ORG, context=CONTEXT):
     seen_file.write_text(json.dumps(seen))
 
 
+def stale_lock(output):
+    """The ID of the state lock in a failed tofu run's output, if it is older than STALE_LOCK."""
+    lock_id = re.search(r"^\s*ID:\s+(\S+)", output, re.M)
+    created = re.search(r"^\s*Created:\s+(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)\S* ([+-]\d{4})", output, re.M)
+    if "acquiring the state lock" not in output or not lock_id or not created:
+        return None
+    at = datetime.datetime.strptime(" ".join(created.groups()), "%Y-%m-%d %H:%M:%S %z")
+    return lock_id.group(1) if datetime.datetime.now(datetime.timezone.utc) - at > STALE_LOCK else None
+
+
 def apply_environments(path):
     run(["tofu", "init", "-input=false", "-no-color"], path)
-    out = run(["tofu", "apply", "-input=false", "-auto-approve", "-no-color", "-lock-timeout=120s"], path)
+    apply = ["tofu", "apply", "-input=false", "-auto-approve", "-no-color", "-lock-timeout=120s"]
+    try:
+        out = run(apply, path)
+    except RuntimeError as error:
+        lock = stale_lock(getattr(error, "output", ""))
+        if not lock:
+            raise
+        print(f"Removing the state lock {lock}, left by an apply that was cut off", file=sys.stderr)
+        run(["tofu", "force-unlock", "-force", lock], path)
+        out = run(apply, path)
     summary = re.search(r"Resources: (\d+) added, (\d+) changed, (\d+) destroyed", out)
     if not summary or summary.groups() == ("0", "0", "0"):
         return "Up to date"

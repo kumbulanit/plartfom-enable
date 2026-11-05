@@ -16,3 +16,8 @@ __pycache__/
 .idea/
 # The client brief stays out of git.
 BRIEF_*.pdf
+
+# Final project: kept local for now, not committed
+labs/final-project/
+docs/slides/src/content/project.js
+docs/slides/src/final-project.js

@@ -372,6 +372,43 @@
     label: "{{ item.item.item.name }}"
   changed_when: true
 
+# A repository seeded by an earlier run misses the files added to labs/ since. For the
+# ones marked top_up, add those files; files already there are left as they are.
+- name: List the files of the platform repositories seeded before
+  ansible.builtin.uri:
+    url: "{{ golden_path_gitea_api }}/repos/{{ golden_path_platform_org }}/{{ item.item.name }}/git/trees/main?recursive=true&per_page=1000"
+  loop: >-
+    {{ golden_path_platform_repo_marker.results | selectattr('status', 'equalto', 200)
+       | selectattr('item.top_up', 'defined') | selectattr('item.top_up') | list }}
+  loop_control:
+    label: "{{ item.item.name }}"
+  register: golden_path_platform_tree
+
+- name: Work out which files each of them is missing
+  ansible.builtin.set_fact:
+    golden_path_platform_missing: >-
+      {{ golden_path_platform_missing | default({})
+         | combine({item.item.item.name: golden_path_repo_files[item.item.item.name]
+                    | rejectattr('path', 'in', item.json.tree | selectattr('type', 'equalto', 'blob') | map(attribute='path') | list)
+                    | list}) }}
+  loop: "{{ golden_path_platform_tree.results }}"
+  loop_control:
+    label: "{{ item.item.item.name }}"
+
+- name: Add the files the platform repositories seeded before are missing
+  ansible.builtin.uri:
+    url: "{{ golden_path_gitea_api }}/repos/{{ golden_path_platform_org }}/{{ item.key }}/contents"
+    method: POST
+    body:
+      branch: main
+      message: Add the PE Lab {{ item.key }} files added since
+      files: "{{ item.value | map('combine', {'operation': 'create'}) | list }}"
+    status_code: [201]
+  loop: "{{ golden_path_platform_missing | default({}) | dict2items | selectattr('value') | list }}"
+  loop_control:
+    label: "{{ item.key }}: {{ item.value | map(attribute='path') | join(', ') }}"
+  changed_when: true
+
 # New services copy this rule when "Branch Protection" is ticked under Template Items on "New Repository".
 - name: Protect main on the template (pull requests only, one approval, a green pipeline)
   ansible.builtin.include_tasks: protect.yml

@@ -1183,7 +1183,8 @@ Create:
 - `student01`, `reviewer`, `platform-approver`: their own passwords, and untick
   "Require user to change password";
 - `platform-bot`: read-only, for Argo CD and Backstage. Sign in as it, then
-  Settings → Applications → Generate token with **read** on repository and organization;
+  Settings → Applications → Generate token with **read** on repository, organization,
+  user and issue (Argo CD's Gitea generator reads issues too);
 - `platform-applier`: Generate a token with **read** on repository and
   **write** on commit statuses.
 

@@ -43,6 +43,26 @@
   delegate_to: localhost
   become: false
 
+# Argo CD's Gitea generator also reads issues (read:issue). A token saved by an earlier
+# run without that scope gets 403 here, and is replaced; a revoked one gets 401.
+- name: Check the saved token still has every scope Argo CD needs
+  ansible.builtin.uri:
+    url: "{{ golden_path_gitea_api }}/repos/{{ pelab_team_names[0] }}/{{ golden_path_starter_repo }}/issues?limit=1"
+    user: ""
+    password: ""
+    force_basic_auth: false
+    headers:
+      Authorization: "token {{ lookup('ansible.builtin.file', golden_path_bot_token_file) }}"
+    status_code: [200, 401, 403, 404]
+  register: golden_path_bot_token_check
+  when: golden_path_bot_token_saved.stat.exists
+  no_log: true
+
+- name: Decide whether {{ golden_path_bot_user }} needs a new token
+  ansible.builtin.set_fact:
+    golden_path_bot_token_renew: >-
+      {{ not golden_path_bot_token_saved.stat.exists or golden_path_bot_token_check.status in [401, 403] }}
+
 - name: Create a read-only access token for {{ golden_path_bot_user }}
   ansible.builtin.command:
     argv:
@@ -59,10 +79,10 @@
       - generate-access-token
       - --username={{ golden_path_bot_user }}
       - --token-name=platform-{{ now(utc=true, fmt='%Y%m%d%H%M%S') }}
-      - --scopes=read:repository,read:organization,read:user
+      - --scopes=read:repository,read:organization,read:user,read:issue
       - --raw
   register: golden_path_bot_token_new
-  when: not golden_path_bot_token_saved.stat.exists
+  when: golden_path_bot_token_renew | bool
   changed_when: true
   no_log: true
 
@@ -80,7 +100,7 @@
     content: "{{ golden_path_bot_token_new.stdout_lines | last }}\n"
     dest: "{{ golden_path_bot_token_file }}"
     mode: "0600"
-  when: not golden_path_bot_token_saved.stat.exists
+  when: golden_path_bot_token_renew | bool
   delegate_to: localhost
   become: false
   no_log: true

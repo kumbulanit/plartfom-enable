@@ -4,6 +4,36 @@ Only the steps and the commands, to follow along with your instructor. Every ste
 
 Each command comes twice. **Copy and paste:** is the grey box to copy (the copy button is at its top right). Under it, a picture of the terminal marked EXAMPLE shows what it looks like: do not copy from the picture. Where the lab was tested, the picture shows what the command printed (your ids, times, names and team are your own); a picture titled "type this" shows only the command.
 
+## Before the class: bring the lab up to date (instructor)
+
+Once, before Day 3, on the lab host (not in a workspace). It gets the latest setup and runs its platform part again: the newest pipelines in the platform repositories, and a Gitea token with every scope Argo CD needs. Participants skip this section.
+
+### 1. Update the lab
+
+1. Get the latest setup, in your checkout of the course repository:
+
+   **Copy and paste:**
+
+   ```bash
+   git pull
+   ```
+
+   *In the terminal it looks like this (the output depends on your lab):*
+
+   ![What to type in the terminal](../images/terminal/day3-before-the-class-bri-1-1-update-the-lab.svg)
+
+2. Run the platform part of the setup again. It takes a few minutes and ends with failed=0.
+
+   **Copy and paste:**
+
+   ```bash
+   cd prelab-setup && ansible-playbook site.yml --tags golden_path
+   ```
+
+   *In the terminal it looks like this (the output depends on your lab):*
+
+   ![What to type in the terminal](../images/terminal/day3-before-the-class-bri-1-2-update-the-lab.svg)
+
 ## Infrastructure as Code: the idea in four lines
 
 - You write what you want in files (OpenTofu), not by clicking or typing commands on a server.

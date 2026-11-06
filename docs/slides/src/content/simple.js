@@ -100,6 +100,19 @@ module.exports = {
   ],
   3: [
     {
+      title: 'Before the class: bring the lab up to date (instructor)',
+      say: 'Once, before Day 3, on the lab host (not in a workspace). It gets the latest setup and runs its platform part again: the newest pipelines in the platform repositories, and a Gitea token with every scope Argo CD needs. Participants skip this section.',
+      steps: [
+        {
+          title: 'Update the lab',
+          do: [
+            { text: 'Get the latest setup, in your checkout of the course repository:', cmd: 'git pull', where: 'Lab host terminal (sarb checkout)' },
+            { text: 'Run the platform part of the setup again. It takes a few minutes and ends with failed=0.', cmd: 'cd prelab-setup && ansible-playbook site.yml --tags golden_path', where: 'Lab host terminal (sarb checkout)' },
+          ],
+        },
+      ],
+    },
+    {
       title: 'Infrastructure as Code: the idea in four lines',
       say: [
         'You write what you want in files (OpenTofu), not by clicking or typing commands on a server.',

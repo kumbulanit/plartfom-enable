@@ -172,8 +172,10 @@ resource "kubernetes_network_policy_v1" "to_platform" {
   }
 }
 
+# A RoleBinding needs at least one subject: a team with no members yet (no delegate in it)
+# gets its namespaces now and the binding on the platform's first apply after one joins.
 resource "kubernetes_role_binding_v1" "members" {
-  for_each = local.environments
+  for_each = length(local.members) > 0 ? local.environments : toset([])
 
   metadata {
     name      = "${var.team}-members"

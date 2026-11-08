@@ -61,11 +61,12 @@ ansible pelab -b -m ansible.builtin.shell -a "ls -1t /opt/pelab/backups | head -
 
 | Lab | Time |
 | --- | --- |
-| Lab 1: promote hello to staging, then prod | 40 min · per team |
+| Lab 1: promote hello to staging, then prod | 40 min · on your own |
 | Lab 2: read the dashboard | 30 min |
 | Lab 3: load-test staging and watch the dashboard | 30 min |
 | Lab 4: break it, and watch the platform recover | 35 min |
 | Capstone: your service to prod, with evidence | 90 min · on your own |
+| Final lab: your name in dev, staging and prod | 30 min · on your own |
 
 ## Slide by slide
 
@@ -151,18 +152,38 @@ The brief's capstone: "a production-equivalent platform product increment for a 
 
 This list is also the answer to the brief's "required evidence" column for Labs 2 to 8. Delegates who keep links as they go finish the capstone in time; those who look for evidence afterwards do not. Say so at 09:00.
 
-### 21. What we built this week: the whole platform, used end to end
+### 21. Final lab: your name in dev, staging and prod
+
+The week in one change, done alone: commit, pull request, approval, pipeline, dev, then two approved releases. Each delegate plays the reviewer in a private window, as all week. Run it after the capstone presentations, as the celebration: put everyone's prod page on the big screen.
+
+### 22. The week on one page: how the pieces come together
+
+Walk one row at a time, left to right, and ask the room which lab each box was (the yellow tags say the day). Then point at the columns, not the rows: every flow has a template, a pull request, a check and an automatic apply. That pattern, not any one tool, is the platform. End on the bottom row: the capstone evidence pack is simply what each box left on record.
+
+### 23. What we built this week: the whole platform, used end to end
 
 Put this beside the Day 1 delivery maps on the wall. Ask the room how many of their bottlenecks the platform removed, and which remain (they are usually organisational, not technical). That conversation is the brief's "lead platform transformation" outcome, at awareness level.
 
-### 22. What you would add next: the platform roadmap
+### 24. Before platform engineering
+
+This is Day 1: ask the room to point at where their own Lab 1 delivery map sits in this picture, usually the ticket queue. Read the right-hand column slowly; the next slide answers each line in the same row.
+
+### 25. After platform engineering
+
+Go back and forth with the previous slide: slow becomes faster, risky becomes safer, inconsistent becomes consistent, overloaded becomes less to learn, audit pain becomes audit-ready. Then ask which box of the platform they used in which lab this week. The next slide puts both side by side and adds where the road can go next.
+
+### 26. Platform engineering: where it was, is, and can go
+
+Left is Day 1: put it next to the delivery maps the teams drew in Lab 1 and ask which of their waits it shows. Right is what they used all week; ask them to name the lab where they met each box. The bottom row is the road ahead: each dashed box is one setting in the lab build, already prepared but switched off. The next slide says what each one would bring.
+
+### 27. What you would add next: the platform roadmap
 
 These are the brief's level 3 and 4 tools. Each is one setting in the lab build, which is itself a lesson: a platform built as code grows by configuration, not by projects. Teams may also propose a golden path for an FMD job: that is the best answer of all.
 
-### 23. Final check: the whole path
+### 28. Final check: the whole path
 
 Answers. 1: The pipeline lints, tests, scans and builds the image tagged with the commit id and pushes it to Harbor, which scans it again; Argo CD sees that main changed, updates the dev folder's image to the new tag and syncs the namespace; the pod starts and the Ingress serves it. 2: A pull request changing the tag and replica count in deploy/prod, approved by a second person and merged; Argo CD syncs; rollback is a revert of that change. 3: A target for a measured promise, for example 99% of requests succeed; the success rate from the dashboard and the load test. 4: Lead time, deployment frequency, change failure rate, time to restore; response time, error rate, saturation. 5: In their own words; the five verbs (find, create, change, ship, watch) and the paved road.
 
-### 24. Thank you
+### 29. Thank you
 
 Close with what happens next: assessment results, certification recorded by SARB, and the follow-on modules (APIs and data, FinOps, leadership). Collect the course feedback form before anyone leaves.

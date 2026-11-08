@@ -34,3 +34,4 @@ Delegate: ____________________    VM: __________
 | Day 6 | Lab 3: load-test staging and watch the dashboard | [ ] |  |
 | Day 6 | Lab 4: break it, and watch the platform recover | [ ] |  |
 | Day 6 | Capstone: your service to prod, with evidence | [ ] |  |
+| Day 6 | Final lab: your name in dev, staging and prod | [ ] |  |

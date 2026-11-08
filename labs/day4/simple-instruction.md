@@ -2,7 +2,12 @@
 
 Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).
 
-Each command comes twice. **Copy and paste:** is the grey box to copy (the copy button is at its top right). Under it, a picture of the terminal marked EXAMPLE shows what it looks like: do not copy from the picture. Where the lab was tested, the picture shows what the command printed (your ids, times, names and team are your own); a picture titled "type this" shows only the command.
+How to read this page:
+
+- 📋 **Copy and paste this into the terminal:** A grey box. Click the copy button at its top right, click in the workspace terminal, paste (Ctrl+V, on a Mac Cmd+V) and press Enter. Copy only from these boxes.
+- 👀 **Example only, do not copy.** What it looks like: a picture of the terminal, marked EXAMPLE · DO NOT COPY. It shows what you should see; your ids, times, names and team are your own.
+- ✏️ **Do this in the editor, not in the terminal.** A line to change by hand in a file, in the editor. Do not paste it into the terminal.
+- Everything else (open, click, read) you do yourself, in the browser or the editor: nothing to copy.
 
 ## Pipelines: two ways to get one from a template
 
@@ -15,87 +20,107 @@ Package hello into a container image yourself, run it, look inside it, and remov
 
 ### 1. Build the image
 
-1. Paste the box and press Enter. The first build takes a minute: it fetches Python through Harbor.
+**Where:** Workspace terminal
 
-2. Read the numbered steps as they appear: one for each instruction in the Dockerfile.
+1. Paste the box. It builds an image called hello:1 from your code (the Dockerfile says how). The first time takes about a minute.
 
-**Copy and paste:**
+   📋 **Copy and paste this into the terminal:**
 
-```bash
-cd ~/hello
-git switch main && git pull
-docker build --build-arg BASE_IMAGE=harbor.$DOMAIN/dockerhub/library/python:3.12-slim -t hello:1 .
-```
+   ```bash
+   cd ~/hello
+   git switch main && git pull
+   docker build --build-arg BASE_IMAGE=harbor.$DOMAIN/dockerhub/library/python:3.12-slim -t hello:1 .
+   ```
 
-*In the terminal it looks like this:*
+   👀 **Example only, do not copy.** What it looks like:
 
-![What you should see in the terminal](../images/terminal/day4-lab1-1-101-build-the-image.svg)
+   ![What you should see in the terminal](../images/terminal/day4-lab1-1-101-build-the-image.svg)
 
 ### 2. Find it in the list of images
 
-**Copy and paste:**
+**Where:** Workspace terminal
 
-```bash
-docker images hello
-```
+1. Paste the box. It lists your hello images: hello:1 is there.
 
-*In the terminal it looks like this:*
+   📋 **Copy and paste this into the terminal:**
 
-![What you should see in the terminal](../images/terminal/day4-lab1-2-101-find-it-in-the-list-of-images.svg)
+   ```bash
+   docker images hello
+   ```
+
+   👀 **Example only, do not copy.** What it looks like:
+
+   ![What you should see in the terminal](../images/terminal/day4-lab1-2-101-find-it-in-the-list-of-images.svg)
 
 ### 3. Run it
 
-**Copy and paste:**
+**Where:** Workspace terminal
 
-```bash
-docker run -d --name hello -p 8081:8081 hello:1
-docker ps
-```
+1. Paste the box. It starts a container from hello:1 in the background, on port 8081, then lists the running containers.
 
-*In the terminal it looks like this:*
+   📋 **Copy and paste this into the terminal:**
 
-![What you should see in the terminal](../images/terminal/day4-lab1-3-101-run-it.svg)
+   ```bash
+   docker run -d --name hello -p 8081:8081 hello:1
+   docker ps
+   ```
+
+   👀 **Example only, do not copy.** What it looks like:
+
+   ![What you should see in the terminal](../images/terminal/day4-lab1-3-101-run-it.svg)
 
 ### 4. Call it
 
-**Copy and paste:**
+**Where:** Workspace terminal
 
-```bash
-curl -s localhost:8081/
-curl -i localhost:8081/healthz
-```
+1. Paste the box. It asks the container for its answer, then for its health check (ok).
 
-*In the terminal it looks like this:*
+   📋 **Copy and paste this into the terminal:**
 
-![What you should see in the terminal](../images/terminal/day4-lab1-4-101-call-it.svg)
+   ```bash
+   curl -s localhost:8081/
+   curl -i localhost:8081/healthz
+   ```
+
+   👀 **Example only, do not copy.** What it looks like:
+
+   ![What you should see in the terminal](../images/terminal/day4-lab1-4-101-call-it.svg)
 
 ### 5. Read its logs, and check who it runs as
 
-**Copy and paste:**
+**Where:** Workspace terminal
 
-```bash
-docker logs hello
-docker exec hello id
-```
+1. Paste the box. It shows what the container printed (its log), then which user it runs as: 10001, an ordinary user, not root.
 
-*In the terminal it looks like this:*
+   📋 **Copy and paste this into the terminal:**
 
-![What you should see in the terminal](../images/terminal/day4-lab1-5-101-read-its-logs-and-check-who-it-runs-as.svg)
+   ```bash
+   docker logs hello
+   docker exec hello id
+   ```
+
+   👀 **Example only, do not copy.** What it looks like:
+
+   ![What you should see in the terminal](../images/terminal/day4-lab1-5-101-read-its-logs-and-check-who-it-runs-as.svg)
 
 ### 6. Stop and remove it
 
-**Copy and paste:**
+**Where:** Workspace terminal
 
-```bash
-docker stop hello
-docker rm hello
-docker ps -a
-docker images hello
-```
+1. Paste the box. It stops and removes the container. The image hello:1 stays.
 
-*In the terminal it looks like this:*
+   📋 **Copy and paste this into the terminal:**
 
-![What you should see in the terminal](../images/terminal/day4-lab1-6-101-stop-and-remove-it.svg)
+   ```bash
+   docker stop hello
+   docker rm hello
+   docker ps -a
+   docker images hello
+   ```
+
+   👀 **Example only, do not copy.** What it looks like:
+
+   ![What you should see in the terminal](../images/terminal/day4-lab1-6-101-stop-and-remove-it.svg)
 
 ## Lab 2: one image, three environments
 
@@ -103,98 +128,105 @@ Run the same image as staging and prod with only its settings changed, and see t
 
 ### 1. Run it as staging
 
-**Copy and paste:**
+**Where:** Workspace terminal
 
-```bash
-cd ~/hello
-docker run -d --name hello-staging -p 8082:8081 -e APP_ENV=staging -e GREETING="Hello from staging" hello:1
-sleep 2
-curl -s localhost:8082/
-```
+1. Paste the box. It starts the same image again, as staging, on port 8082. Only its settings (each -e) are different.
 
-*In the terminal it looks like this:*
+   📋 **Copy and paste this into the terminal:**
 
-![What you should see in the terminal](../images/terminal/day4-lab2-1-101-run-it-as-staging.svg)
+   ```bash
+   cd ~/hello
+   docker run -d --name hello-staging -p 8082:8081 -e APP_ENV=staging -e GREETING="Hello from staging" hello:1
+   sleep 2
+   curl -s localhost:8082/
+   ```
+
+   👀 **Example only, do not copy.** What it looks like:
+
+   ![What you should see in the terminal](../images/terminal/day4-lab2-1-101-run-it-as-staging.svg)
 
 ### 2. Run it as prod too
 
-**Copy and paste:**
+**Where:** Workspace terminal
 
-```bash
-docker run -d --name hello-prod -p 8083:8081 -e APP_ENV=prod -e GREETING="Hello from prod" hello:1
-sleep 2
-curl -s localhost:8083/
-docker ps
-```
+1. Paste the box. It starts a third copy, as prod, on port 8083, then lists the running containers.
 
-*In the terminal it looks like this:*
+   📋 **Copy and paste this into the terminal:**
 
-![What you should see in the terminal](../images/terminal/day4-lab2-2-101-run-it-as-prod-too.svg)
+   ```bash
+   docker run -d --name hello-prod -p 8083:8081 -e APP_ENV=prod -e GREETING="Hello from prod" hello:1
+   sleep 2
+   curl -s localhost:8083/
+   docker ps
+   ```
+
+   👀 **Example only, do not copy.** What it looks like:
+
+   ![What you should see in the terminal](../images/terminal/day4-lab2-2-101-run-it-as-prod-too.svg)
 
 ### 3. Make version 2
 
-1. In the editor, open hello → app → main.py and change the text of the GREETING line (line 22), for example to Hello from version 2. Save with Ctrl+S (Mac Cmd+S).
+**Where:** Workspace terminal
 
-2. Paste the box: it builds a new image, tagged 2, and gives it the version number 2.
+1. Paste the box. It changes the greeting in app/main.py, then builds a new image, hello:2, beside hello:1.
 
-In `app/main.py`, change:
+   📋 **Copy and paste this into the terminal:**
 
-```
-GREETING = os.environ.get("GREETING", "Hello from the PE Lab golden path")
-```
+   ```bash
+   sed -i "s/^GREETING = .*/GREETING = os.environ.get(\"GREETING\", \"Hello from version 2\")/" app/main.py
+   docker build --build-arg BASE_IMAGE=harbor.$DOMAIN/dockerhub/library/python:3.12-slim --build-arg APP_VERSION=2 -t hello:2 .
+   docker images hello
+   ```
 
-to:
+   👀 **Example only, do not copy.** What it looks like:
 
-```
-GREETING = os.environ.get("GREETING", "Hello from version 2")
-```
-
-**Copy and paste:**
-
-```bash
-docker build --build-arg BASE_IMAGE=harbor.$DOMAIN/dockerhub/library/python:3.12-slim --build-arg APP_VERSION=2 -t hello:2 .
-docker images hello
-```
-
-*In the terminal it looks like this:*
-
-![What you should see in the terminal](../images/terminal/day4-lab2-3-101-make-version-2.svg)
+   ![What you should see in the terminal](../images/terminal/day4-lab2-3-101-make-version-2.svg)
 
 ### 4. Run the two versions side by side
 
-**Copy and paste:**
+**Where:** Workspace terminal
 
-```bash
-docker run -d --name hello-v1 -p 8081:8081 hello:1
-docker run -d --name hello-v2 -p 8084:8081 hello:2
-sleep 2
-curl -s localhost:8081/
-curl -s localhost:8084/
-```
+1. Paste the box. It runs version 1 (port 8081) and version 2 (port 8084) side by side, and asks both.
 
-*In the terminal it looks like this:*
+   📋 **Copy and paste this into the terminal:**
 
-![What you should see in the terminal](../images/terminal/day4-lab2-4-101-run-the-two-versions-side-by-side.svg)
+   ```bash
+   docker run -d --name hello-v1 -p 8081:8081 hello:1
+   docker run -d --name hello-v2 -p 8084:8081 hello:2
+   sleep 2
+   curl -s localhost:8081/
+   curl -s localhost:8084/
+   ```
+
+   👀 **Example only, do not copy.** What it looks like:
+
+   ![What you should see in the terminal](../images/terminal/day4-lab2-4-101-run-the-two-versions-side-by-side.svg)
 
 ### 5. Clean up
 
-**Copy and paste:**
+**Where:** Workspace terminal
 
-```bash
-docker rm -f hello-staging hello-prod hello-v1 hello-v2
-git checkout app/main.py
-docker ps
-```
+1. Paste the box. It removes the four containers and puts app/main.py back as it was.
 
-*In the terminal it looks like this:*
+   📋 **Copy and paste this into the terminal:**
 
-![What you should see in the terminal](../images/terminal/day4-lab2-5-101-clean-up.svg)
+   ```bash
+   docker rm -f hello-staging hello-prod hello-v1 hello-v2
+   git checkout app/main.py
+   docker ps
+   ```
+
+   👀 **Example only, do not copy.** What it looks like:
+
+   ![What you should see in the terminal](../images/terminal/day4-lab2-5-101-clean-up.svg)
 
 ## Lab 3: create a new service from the template
 
 Use the golden path: create a brand-new service called rates from the template, and watch it build, deploy and appear in the portal without asking anyone.
 
 ### 1. Look inside the template first
+
+**Where:** Browser: Gitea
 
 1. Open https://gitea.<lab domain>/platform/golden-path. Next to the name platform / golden-path, a grey label says Template, and a blue button Use this template sits above the files: Gitea offers this repository as a starting point for new ones. Do not click it yet.
 
@@ -224,7 +256,11 @@ Use the golden path: create a brand-new service called rates from the template, 
 
 8. Go back, click .gitea, then the file template. It lists the files in which Gitea fills in the blanks: README.md, catalog-info.yaml, .gitea/CODEOWNERS and everything under deploy.
 
+**You should see:** The template: one repository with the code, the pipeline (.gitea/workflows/ci.yaml), the deployment for three environments and the catalog entry, with blanks where the service's name and team go.
+
 ### 2. Create the repository from the template
+
+**Where:** Browser: Gitea
 
 1. In Gitea, click + (top right, next to your picture) → New Repository.
 
@@ -242,7 +278,11 @@ Use the golden path: create a brand-new service called rates from the template, 
 
    *The New Repository form, filled in: owner team01 (your team), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.*
 
+**You should see:** teamNN/rates with the folders app, deploy and tests and the files Dockerfile, README.md and catalog-info.yaml.
+
 ### 3. Run its pipeline for the first time
+
+**Where:** Browser: Gitea
 
 1. In teamNN/rates, click the Actions tab.
 
@@ -256,7 +296,11 @@ Use the golden path: create a brand-new service called rates from the template, 
 
 4. Reload the page after a few seconds: a new run appears at the top. Click it to watch.
 
+**You should see:** The job build with its steps (lint, tests, secret scan, Dockerfile lint, build, scan, push), each turning green, in a few minutes.
+
 ### 4. Find its image in Harbor
+
+**Where:** Browser: Harbor
 
 1. Open https://harbor.<lab domain> in a new tab. On the sign-in page, type your studentNN in Username and your own password in Password (the same as Gitea), and click LOG IN.
 
@@ -266,7 +310,11 @@ Use the golden path: create a brand-new service called rates from the template, 
 
 4. You now see the artifacts list: one line per image built. Read the line from left to right: Artifacts (the image's fingerprint, sha256:...), Tags (the commit id), Size, Vulnerabilities (a coloured bar; move the mouse over it to see how many weaknesses of each severity) and Push Time.
 
+**You should see:** One artifact, tagged with the commit id (40 letters and digits), with its scan result under Vulnerabilities and its SBOM.
+
 ### 5. Watch it deploy
+
+**Where:** Browser: Argo CD
 
 1. Open https://argocd.<lab domain> and sign in as delegate, with its password from cat /etc/pelab/logins.md.
 
@@ -274,21 +322,27 @@ Use the golden path: create a brand-new service called rates from the template, 
 
 3. Wait up to a minute: Argo CD looks for new repositories every minute.
 
+**You should see:** teamNN-rates-dev appears, then shows Synced and Healthy.
+
 ### 6. Open it
+
+**Where:** Workspace terminal
 
 1. Open https://rates-teamNN-dev.<lab domain>/ in a new tab (your team instead of teamNN).
 
-**Copy and paste:**
+📋 **Copy and paste this into the terminal:**
 
 ```bash
 curl -s https://rates-$TEAM-dev.$DOMAIN/
 ```
 
-*In the terminal it looks like this:*
+👀 **Example only, do not copy.** What it looks like:
 
 ![What you should see in the terminal](../images/terminal/day4-lab3-6-101-open-it.svg)
 
 ### 7. Add it to the portal
+
+**Where:** Browser: the portal (Backstage)
 
 1. Open https://backstage.<lab domain> in a new tab. A page asks how to sign in: on the Guest card, click Enter. No password is needed.
 
@@ -304,7 +358,11 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 
 7. Read the component's page: the About card (owner teamNN, the description) and the links to its environments, pipeline, Argo CD, Harbor and Grafana. Click Catalog on the left: rates is now listed next to hello.
 
+**You should see:** rates in the catalog, owned by teamNN, with links to its environments, pipeline, Argo CD, Harbor and Grafana.
+
 ### 8. Two services, one pipeline
+
+**Where:** Browser: Gitea
 
 1. In Gitea, open teamNN/hello, then .gitea → workflows → ci.yaml.
 
@@ -318,13 +376,17 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 
 4. Now open platform/golden-path and click Issues: this is where teams ask the platform team for changes to the template.
 
+**You should see:** The same pipeline in hello and rates, copied from platform/golden-path.
+
 ## Lab 4: a first change to the new service
 
 Make your first change to rates through the same loop as on Day 2, and read the README the golden path gave it.
 
 ### 1. Copy the new repository and make a branch
 
-**Copy and paste:**
+**Where:** Workspace terminal
+
+📋 **Copy and paste this into the terminal:**
 
 ```bash
 cd ~
@@ -333,41 +395,56 @@ cd rates
 git switch -c first-change-$ME
 ```
 
-*In the terminal it looks like this:*
+👀 **Example only, do not copy.** What it looks like:
 
 ![What you should see in the terminal](../images/terminal/day4-lab4-1-101-copy-the-new-repository-and-make-a-branc.svg)
 
 ### 2. Change the greeting and run the tests
 
+**Where:** Workspace editor and terminal
+
 1. In the editor, open rates → app → main.py and change the text of the GREETING line (line 22). Save with Ctrl+S (Mac Cmd+S).
+
+   ✏️ **Do this in the editor, not in the terminal.** In `app/main.py`, change:
+
+   ```
+   GREETING = os.environ.get("GREETING", "Hello from the PE Lab golden path")
+   ```
+
+   to:
+
+   ```
+   GREETING = os.environ.get("GREETING", "Rates service of team 3")
+   ```
 
 2. Paste the box to run the tests.
 
-In `app/main.py`, change:
+   📋 **Copy and paste this into the terminal:**
 
-```
-GREETING = os.environ.get("GREETING", "Hello from the PE Lab golden path")
-```
+   ```bash
+   pytest -q
+   ```
 
-to:
+   👀 **Example only, do not copy.** What it looks like:
 
-```
-GREETING = os.environ.get("GREETING", "Rates service of team 3")
-```
-
-**Copy and paste:**
-
-```bash
-pytest -q
-```
-
-*In the terminal it looks like this:*
-
-![What you should see in the terminal](../images/terminal/day4-lab4-2-101-change-the-greeting-and-run-the-tests.svg)
+   ![What you should see in the terminal](../images/terminal/day4-lab4-2-101-change-the-greeting-and-run-the-tests.svg)
 
 ### 3. Commit, push, review, merge
 
+**Where:** Workspace terminal, then Gitea
+
 1. Paste the box to commit and push.
+
+   📋 **Copy and paste this into the terminal:**
+
+   ```bash
+   git commit -am "First change to rates"
+   git push -u origin first-change-$ME
+   ```
+
+   👀 **Example only, do not copy.** What it looks like (what it prints depends on your lab):
+
+   ![What to type in the terminal](../images/terminal/day4-lab4-3-101-commit-push-review-merge.svg)
 
 2. Open the pulls/new link it prints (Hold Ctrl (on a Mac Cmd) and click the link in the terminal) and click Create Pull Request.
 
@@ -379,34 +456,27 @@ pytest -q
 
    *Ready to merge: the reviewer approved ("Looks good"), and both checks are green. Your names, team, numbers and times are your own.*
 
-**Copy and paste:**
-
-```bash
-git commit -am "First change to rates"
-git push -u origin first-change-$ME
-```
-
-*In the terminal it looks like this (the output depends on your lab):*
-
-![What to type in the terminal](../images/terminal/day4-lab4-3-101-commit-push-review-merge.svg)
-
 ### 4. See it live in dev
+
+**Where:** Workspace terminal
 
 1. Wait a few minutes after the merge: the pipeline builds the image first (Actions tab, green tick), then Argo CD deploys it within a minute.
 
 2. Reload your rates dev tab (https://rates-teamNN-dev.<lab domain>/).
 
-**Copy and paste:**
+📋 **Copy and paste this into the terminal:**
 
 ```bash
 curl -s https://rates-$TEAM-dev.$DOMAIN/
 ```
 
-*In the terminal it looks like this:*
+👀 **Example only, do not copy.** What it looks like:
 
 ![What you should see in the terminal](../images/terminal/day4-lab4-4-101-see-it-live-in-dev.svg)
 
 ### 5. Read the README
+
+**Where:** Browser: Gitea
 
 1. Open teamNN/rates in Gitea: the README is shown under the file list.
 
@@ -416,23 +486,33 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 
 2. Read the sections on changing, releasing and watching the service.
 
+**You should see:** You recognise every step from the last four days: branch and pull request (Day 2), environments (Day 3), the image (Day 4), and the release to staging and prod still to come (Day 6).
+
 ## Lab 5: add a pipeline from a template
 
 Give rates a second pipeline, a smoke test, by copying a template the platform team wrote. Time it: from finding the template to a green run.
 
 ### 1. Find the pipeline templates
 
-1. Open https://gitea.<lab domain>/platform/pipeline-templates.
+**Where:** Browser: Gitea
 
-2. Read the README under the file list: a table with one line per template (what it does, when it runs), then "Use one" in four steps.
+1. Look at the clock and write down the time: you stop the clock at the end of step 5.
+
+2. Open https://gitea.<lab domain>/platform/pipeline-templates.
+
+3. Read the README under the file list: a table with one line per template (what it does, when it runs), then "Use one" in four steps.
 
    ![platform/pipeline-templates: the folder workflows holds the templates, and the README lists them: smoke-test.yaml and nightly-scan.yaml, what each does and when it runs. In your lab the address starts with https://gitea.<lab domain>.](../images/gitea-15-pipeline-templates.png)
 
    *platform/pipeline-templates: the folder workflows holds the templates, and the README lists them: smoke-test.yaml and nightly-scan.yaml, what each does and when it runs. In your lab the address starts with https://gitea.<lab domain>.*
 
-3. You can also find it in the portal: open https://backstage.<lab domain>, click Catalog, and look for Pipeline templates. Its links lead back here.
+4. You can also find it in the portal: open https://backstage.<lab domain>, click Catalog, and look for Pipeline templates. Its links lead back here.
+
+**You should see:** Two templates: smoke-test.yaml (is the service answering?) and nightly-scan.yaml (scan the image again every night).
 
 ### 2. Read the smoke test, and copy it
+
+**Where:** Browser: Gitea
 
 1. Click workflows, then smoke-test.yaml.
 
@@ -448,7 +528,11 @@ Give rates a second pipeline, a smoke test, by copying a template the platform t
 
    *smoke-test.yaml in platform/pipeline-templates: the comment says how to use it, on: says when it runs. The Copy content button is the two small squares above the file, right of the download arrow.*
 
+**You should see:** The template, and the four checks it makes.
+
 ### 3. Add it to rates, on a new branch
+
+**Where:** Browser: Gitea
 
 1. Open your team's rates repository: https://gitea.<lab domain>/teamNN/rates.
 
@@ -466,7 +550,11 @@ Give rates a second pipeline, a smoke test, by copying a template the platform t
 
    *The bottom of the New File page: the end of the pasted template, the commit message, "Create a new branch for this commit and start a pull request." chosen with the branch add-smoke-test, and the Propose file change button.*
 
+**You should see:** The page "Comparing changes": one commit, one file added, .gitea/workflows/smoke-test.yaml with the template's lines in green.
+
 ### 4. Open the pull request, review, merge
+
+**Where:** Browser: Gitea
 
 1. On "Comparing changes", click New Pull Request, then Create Pull Request at the bottom of the form.
 
@@ -480,7 +568,11 @@ Give rates a second pipeline, a smoke test, by copying a template the platform t
 
    *The smoke test's pull request, approved and green, ready to merge. Your names, team, numbers and times are your own.*
 
+**You should see:** The pull request merged. main of teamNN/rates now has .gitea/workflows/smoke-test.yaml.
+
 ### 5. Run the smoke test
+
+**Where:** Browser: Gitea
 
 1. In teamNN/rates, click the Actions tab. On the left, under All Workflows, there are now two: golden-path (the main pipeline) and smoke-test (yours). Click smoke-test.
 
@@ -498,13 +590,21 @@ Give rates a second pipeline, a smoke test, by copying a template the platform t
 
    *A green smoke test: Work out the address prints "Checking https://rates-team01-dev..." and The service answers shows the service's JSON. The two last steps are green too. In your lab the address ends in your lab domain.*
 
+**You should see:** Every step green, in seconds. Work out the address prints "Checking https://rates-teamNN-dev.<lab domain>", The service answers shows rates' JSON, the health check prints ok, and the last step says "It says it is dev."
+
 ### 6. Make it go red
+
+**Where:** Browser: Gitea
 
 1. Click Run Workflow again. This time, in "Which environment to check", choose staging. Click Run Workflow.
 
 2. Reload, open the new run and click smoke-test on the left.
 
+**You should see:** A red cross. The service answers failed: curl reports an error (for example "The requested URL returned error: 404"), because nothing runs at https://rates-teamNN-staging.<lab domain> yet. The later steps did not run.
+
 ### 7. Where the main pipeline came from
+
+**Where:** Browser: Gitea
 
 1. Open teamNN/hello, then .gitea → workflows → ci.yaml.
 
@@ -523,3 +623,5 @@ Give rates a second pipeline, a smoke test, by copying a template the platform t
 8. By hand: nobody checked for secrets, Dockerfile mistakes or known weaknesses → Secret scan (gitleaks), Dockerfile lint (hadolint), Vulnerability scan (trivy), and Harbor scans again.
 
 9. By hand, Day 1 Lab 3 and Day 4 Lab 2: settings typed into the run command → no pipeline step: the template's deploy folder holds the settings, and Argo CD runs them.
+
+**You should see:** Every manual step from Day 1 and this morning, done by the pipeline on every change, the same way for every team.

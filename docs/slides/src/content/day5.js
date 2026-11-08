@@ -102,7 +102,7 @@ steps:
     title: 'Lab 1: read the pipeline and its evidence',
     steps: [
       { do: 'In Gitea, open teamNN/hello, then Actions. Click the latest run on main.', expect: 'The list of steps, each green, with timings.' },
-      { do: 'Open the Unit tests step and the Secret scan step and read the logs.', expect: '"5 passed" and "no leaks found".' },
+      { do: 'Open the Unit tests step and the Secret scan step and read the logs.', expect: '"6 passed" and "no leaks found".' },
       { do: 'Open the Build step and find the image tag at the end.', expect: 'harbor.../teamNN/hello:<commit id>.' },
       { do: `Open Harbor (sign in as studentNN with your lab password), project teamNN, repository hello, newest image.`, expect: 'The Vulnerabilities tab with a count by severity; the SBOM as an attached artefact.' },
       { do: 'Open the SBOM and search for "python".', expect: 'The exact Python version and packages inside your image: the ingredients list.' },
@@ -119,7 +119,7 @@ steps:
       { do: 'In app/main.py add a line: DB_PASSWORD = "hunter2-very-secret-123". Commit and push.', expect: 'Red at Secret scan: "leaks found: 1", with the rule, the file and the line. The value shows as REDACTED.' },
       { do: 'Remove the line, commit and push.', expect: 'Green again. Note that the secret is still in the branch history: a real one would need rotating.' },
       { do: 'Change the Dockerfile\'s USER 10001 to USER root. Commit and push.', expect: 'Red at Dockerfile check: "DL3002 warning: Last USER should not be root".' },
-      { do: 'Put USER 10001 back. Add one new test for /healthz in tests/test_main.py. Push, get it approved, merge.', expect: 'Green, 6 passed, and the pipeline on main pushes a new image.' },
+      { do: 'Put USER 10001 back. Add one new test for /healthz in tests/test_main.py. Push, get it approved, merge.', expect: 'Green, 7 passed, and the pipeline on main pushes a new image.' },
     ],
     notes: 'Each failure is a story from the scenarios slide. Make the point in step 4: the scan caught the secret before merge, so it never reached main; if it had, the password would need changing, because Git never forgets. That is why the check runs on the pull request, not after.',
   },

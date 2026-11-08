@@ -14,11 +14,13 @@ Yesterday you saw what the pipeline and the guardrails refuse. Today you release
 
 | Topic | Labs |
 | --- | --- |
-| Kubernetes and GitOps | [Lab 1: promote hello to staging, then prod](#lab-1-promote-hello-to-staging-then-prod) (per team) |
+| Kubernetes and GitOps | [Lab 1: promote hello to staging, then prod](#lab-1-promote-hello-to-staging-then-prod) (on your own) |
 | Observability | [Lab 2: read the dashboard](#lab-2-read-the-dashboard) |
 | Performance engineering | [Lab 3: load-test staging and watch the dashboard](#lab-3-load-test-staging-and-watch-the-dashboard) |
 | Resilience | [Lab 4: break it, and watch the platform recover](#lab-4-break-it-and-watch-the-platform-recover) |
 | Capstone | [Capstone: your service to prod, with evidence](#capstone-your-service-to-prod-with-evidence) (on your own) |
+| Final lab | [Final lab: your name in dev, staging and prod](#final-lab-your-name-in-dev-staging-and-prod) (on your own) |
+| Looking back, and ahead | Concepts and discussion, no lab |
 
 ## Kubernetes and GitOps
 
@@ -81,7 +83,7 @@ replicas:
 
 ### Lab 1: promote hello to staging, then prod
 
-*per team*
+*on your own*
 
 **What you do:** Release the image running in dev to staging and then prod, by changing two lines in a reviewed pull request.
 
@@ -1093,6 +1095,350 @@ Evidence by default: every item below was produced by normal work this week. Nob
 - **Environments and promotion:** The environment pull request with its plan; the staging and prod promotion pull requests; Argo CD's history for each environment.
 - **Operations:** The dashboard with versions per environment; the SLO note; the load-test numbers and recommendation; the two recovery times from Lab 4.
 
+## Final lab
+
+### Final lab: your name in dev, staging and prod
+
+*on your own*
+
+**What you do:** One last change through the whole platform: put your name on hello's page, see it in dev, then release it to staging and prod, with an approval each time.
+
+**You will learn:**
+
+- The whole path in one go: commit, push, pull request, approval, pipeline, dev, then two approved releases.
+- That staging and prod get the very image dev ran: only a tag in Git changes.
+
+**Words you will meet:**
+
+- **Graduates file:** app/graduates/studentNN.txt: a small file with your name in it. The page shows the name it finds there.
+
+**Before you start:**
+
+1. Your workspace is open in the browser (https://student01.<lab domain>, signed in with your password).
+2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
+3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
+4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
+5. Lab 1 done: you have staging and prod, and know how a release works.
+6. You do every step yourself, and approve as the reviewer in a private window, as all week.
+7. Use one terminal for steps 1 to 3: step 1 keeps your name in $NAME, which a new terminal would not know.
+
+#### Step 1. Type your name
+
+*Where: Workspace terminal*
+
+**Why:** Your name goes on the page in every environment, so type it the way you want it shown.
+
+**Do this:**
+
+1. Paste the box on its own. It asks for your name: type it as you want it on the page, for example Thandi Mokoena, and press Enter.
+
+   ```bash
+   read -p "Your name: " NAME
+   ```
+
+**What each line does:**
+
+- `read -p "Your name: " NAME`: ask a question and keep the answer in a variable called NAME, for the next steps.
+
+**You should see:** Your name: with your answer after it, and the prompt back.
+
+#### Step 2. Put your name on the page
+
+*Where: Workspace terminal*
+
+**Why:** A small change to the code, made on a branch, tested before it is pushed: the same as every change this week.
+
+**Do this:**
+
+1. Paste the box. It makes a branch, writes your name in a file of its own, adds the party to the page and runs the tests.
+
+   ```bash
+   cd ~/hello
+   git switch main && git pull
+   git switch -c congrats-$ME
+   mkdir -p app/graduates
+   echo "$NAME" > app/graduates/$ME.txt
+   python3 - <<'EOF'
+   from pathlib import Path
+
+   main = Path("app/main.py")
+   code = main.read_text()
+   if "def congrats()" in code:
+       print("The party is already on the page (you ran this before). Only your name is updated.")
+   else:
+       block = r'''
+   # The end of the course: the names in app/graduates/ (one file each), and what they did.
+   WEEK = [
+       ("🐧", "Linux and Git: every change by pull request, with a review"),
+       ("🏗️", "Infrastructure as code: environments asked for in OpenTofu"),
+       ("📦", "Containers, and a new service from the golden path template"),
+       ("🛡️", "A pipeline that tests and scans, and guardrails in the cluster"),
+       ("🚀", "Releases to dev, staging and prod with GitOps, watched in Grafana"),
+   ]
+   PARTY = """<style>
+     .env { animation: party-glow 2.4s ease-in-out infinite; }
+     .env, .message, .facts, .party { position: relative; z-index: 1; }
+     .party { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+     .party-trophy { font-size: 4.5rem; animation: party-bounce 1.6s ease-in-out infinite; }
+     .party-title {
+       font-size: clamp(2rem, 9vw, 6.5rem); font-weight: 900; letter-spacing: 0.02em;
+       background: linear-gradient(90deg, #ff4d6d, #ffd166, #06d6a0, #4cc9f0, #b388ff, #ff4d6d);
+       background-size: 200% auto; -webkit-background-clip: text; background-clip: text;
+       color: transparent; animation: party-pop 0.9s ease-out both, party-shine 3s linear infinite;
+     }
+     .party-names { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem; }
+     .party-name {
+       padding: 0.5rem 1.2rem; border-radius: 999px; font-weight: 800;
+       font-size: clamp(1.2rem, 3.2vw, 2rem); color: #1a1a2e;
+       background: linear-gradient(135deg, #ffd166, #ff8fab);
+       box-shadow: 0 0 28px rgba(255, 209, 102, 0.55);
+       animation: party-pop 0.7s ease-out both, party-float 3s ease-in-out infinite;
+     }
+     .party-done { font-size: clamp(1.3rem, 3.6vw, 2.3rem); font-weight: 600; }
+     .party-week {
+       list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-wrap: wrap;
+       justify-content: center; gap: 0.7rem; width: min(64rem, 92vw);
+     }
+     .party-week li {
+       flex: 0 1 19rem; display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem 1.1rem;
+       box-sizing: border-box; text-align: left; color: #e8e8f0; border-radius: 16px;
+       background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.16);
+       backdrop-filter: blur(6px); animation: party-rise 0.7s ease-out both;
+     }
+     .party-week b { font-size: 1.8rem; }
+     .party-confetti { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+     .party-confetti i {
+       position: absolute; top: -6vh; width: 10px; height: 16px; opacity: 0.9;
+       animation: party-fall linear infinite;
+     }
+     @keyframes party-fall { to { transform: translateY(112vh) rotate(760deg); } }
+     @keyframes party-pop { 0% { scale: 0; opacity: 0; } 70% { scale: 1.15; } 100% { scale: 1; } }
+     @keyframes party-shine { to { background-position: 200% center; } }
+     @keyframes party-float { 50% { translate: 0 -8px; } }
+     @keyframes party-rise { from { translate: 0 24px; opacity: 0; } }
+     @keyframes party-bounce { 50% { transform: translateY(-16px) rotate(-8deg); } }
+     @keyframes party-glow { 50% { text-shadow: 0 0 48px currentColor; } }
+     @media (prefers-reduced-motion: reduce) {
+       .party-confetti { display: none; }
+       .env, .party, .party * { animation: none !important; }
+     }
+   </style>"""
+
+
+   def congrats() -> str:
+       """Return a party for everyone in app/graduates/ (one file per person), or nothing."""
+       from html import escape
+       from pathlib import Path
+
+       folder = Path(__file__).parent / "graduates"
+       people = sorted(n for p in folder.glob("*.txt") if (n := p.read_text().strip()))
+       if not people:
+           return ""
+       colours = ["#ff4d6d", "#ffd166", "#06d6a0", "#4cc9f0", "#b388ff", "#ff8fab"]
+       shapes = ["50%", "2px", "0"]
+       confetti = "".join(
+           f'<i style="left: {i * 37 % 100}%; background: {colours[i % 6]}; '
+           f"border-radius: {shapes[i % 3]}; animation-duration: {3 + i % 5 * 0.7:.1f}s; "
+           f'animation-delay: -{i * 0.23 % 4:.2f}s"></i>'
+           for i in range(70)
+       )
+       names = "".join(
+           f'<span class="party-name" style="animation-delay: {0.5 + i * 0.3:.1f}s, {i * 0.4:.1f}s">'
+           f"{escape(name)}</span>"
+           for i, name in enumerate(people)
+       )
+       week = "".join(
+           f'<li style="animation-delay: {1.2 + i * 0.2:.1f}s"><b>{icon}</b>{escape(text)}</li>'
+           for i, (icon, text) in enumerate(WEEK)
+       )
+       return (
+           f'{PARTY}\n  <div class="party-confetti" aria-hidden="true">{confetti}</div>\n'
+           '  <div class="party">\n'
+           '    <div class="party-trophy" aria-hidden="true">🏆</div>\n'
+           '    <div class="party-title">Congratulations</div>\n'
+           f'    <div class="party-names">{names}</div>\n'
+           '    <div class="party-done">you are done with Platform Engineering!</div>\n'
+           f'    <ul class="party-week">{week}</ul>\n'
+           "  </div>"
+       )
+
+   '''
+       env = '  <div class="env">{text["environment"]}</div>\n'
+       code = code.replace("\ndef render_page(", block + "\ndef render_page(", 1)
+       code = code.replace(env, env + "  {congrats()}\n", 1)
+       main.write_text(code)
+       print("Added the party to the page.")
+   EOF
+   pytest -q
+   git status --short
+   ```
+
+**What each line does:**
+
+- `git switch -c congrats-$ME`: a branch of your own for this change.
+- `echo "$NAME" > app/graduates/$ME.txt`: your name, in a file named after you.
+- `python3 - <<'EOF' ... EOF`: add a party to app/main.py, under the environment's name: falling confetti, a trophy, a rainbow Congratulations, your name as a glowing badge, and five things you did this week. If the party is already there (you ran this before), only your name is updated.
+- `pytest -q`: run the tests before you push.
+- `git status --short`: what changed: app/main.py (M) and the new folder app/graduates/ (??).
+
+**You should see:** "Added the party to the page.", the tests passing, and the two changes:
+
+```
+Already on 'main'
+Your branch is up to date with 'origin/main'.
+Already up to date.
+Switched to a new branch 'congrats-student01'
+Added the party to the page.
+......                                                                   [100%]
+6 passed in 0.57s
+ M app/main.py
+?? app/graduates/
+```
+
+**If you see something else:**
+
+- *The party is already on the page (you ran this before)*: nothing is wrong: only your name file is updated. Carry on with step 3.
+- *Your name does not show in dev later*: the name file was empty: $NAME was lost (a new terminal). Run step 1 again, then echo "$NAME" > app/graduates/$ME.txt, commit and push.
+
+#### Step 3. Commit, push, and open the pull request
+
+*Where: Workspace terminal, then Gitea*
+
+**Why:** Nothing reaches an environment without a pull request.
+
+**Do this:**
+
+1. Paste the box to commit and push.
+
+   ```bash
+   git add -A
+   git commit -m "Congratulations $NAME"
+   git push -u origin congrats-$ME
+   ```
+
+2. Open the pulls/new link it prints (Hold Ctrl (on a Mac Cmd) and click the link in the terminal) and click Create Pull Request.
+
+**What each line does:**
+
+- `git add -A`: put both changes, the page and your name file, into the commit.
+
+**You should see:** A pull request with two files changed, and the pipeline running on it.
+
+#### Step 4. The reviewer approves; you merge
+
+*Where: Gitea*
+
+**Why:** Someone else agrees before anything is merged.
+
+**Do this:**
+
+1. Approve as reviewer: Open a private window (Edge or Chrome: Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a Mac Cmd+Shift+P), go to https://gitea.<lab domain>, click Sign In, and sign in with reviewer, with its password from cat /etc/pelab/logins.md in your workspace. Then Files Changed → Review → Approve, and close the private window.
+2. When "All checks were successful", merge with Create squash commit.
+
+**You should see:** Merged: the pipeline was green and the reviewer approved.
+
+#### Step 5. See your name in dev
+
+*Where: Browser*
+
+**Why:** dev follows main: a merged change appears there by itself.
+
+**Do this:**
+
+1. Wait a few minutes: the pipeline on main builds the new image (Actions tab, green tick), then Argo CD puts it in dev.
+2. Open https://hello-teamNN-dev.<lab domain>/ in a new tab (your team instead of teamNN).
+
+**You should see:** DEV glowing red, falling confetti, a bouncing trophy, a rainbow Congratulations, your name on a glowing badge, "you are done with Platform Engineering!" and five cards with what you did this week.
+
+#### Step 6. Release it to staging
+
+*Where: Workspace terminal, then Gitea*
+
+**Why:** staging gets the very image that dev runs, through an approved two-line change, as in Lab 1.
+
+**Do this:**
+
+1. When your name shows in dev, paste the box.
+
+   ```bash
+   cd ~/hello
+   git switch main && git pull
+   TAG=$(git rev-parse HEAD)
+   git switch -c congrats-staging-$ME
+   sed -i "s/newTag: .*/newTag: $TAG/; s/count: 0/count: 1/" deploy/staging/kustomization.yaml
+   git commit -am "Release the congratulations to staging"
+   git push -u origin congrats-staging-$ME
+   ```
+
+2. Open the pulls/new link it prints and click Create Pull Request. The reviewer approves (private window, as in step 4); then merge.
+
+3. A minute after the merge, open https://hello-teamNN-staging.<lab domain>/ in a new tab.
+
+**What each line does:**
+
+- `TAG=$(git rev-parse HEAD)`: the newest commit on main: its image is the one dev runs.
+- `sed -i "s/newTag: .*/newTag: $TAG/; s/count: 0/count: 1/" ...`: staging runs that image, with one copy (if it was still off).
+
+**You should see:** STAGING in yellow, with your name.
+
+#### Step 7. Release it to prod
+
+*Where: Workspace terminal, then Gitea*
+
+**Why:** prod gets exactly what staging runs, after one more approval.
+
+**Do this:**
+
+1. Paste the box. It takes the tag that staging runs, so prod gets the same image.
+
+   ```bash
+   cd ~/hello
+   git switch main && git pull
+   TAG=$(awk '/newTag:/ {print $2}' deploy/staging/kustomization.yaml)
+   git switch -c congrats-prod-$ME
+   sed -i "s/newTag: .*/newTag: $TAG/; s/count: 0/count: 2/" deploy/prod/kustomization.yaml
+   git commit -am "Release the congratulations to prod"
+   git push -u origin congrats-prod-$ME
+   ```
+
+2. Open the pulls/new link, Create Pull Request, the reviewer approves, merge.
+
+3. A minute after the merge, open https://hello-teamNN-prod.<lab domain>/ in a new tab.
+
+**What each line does:**
+
+- `TAG=$(awk '/newTag:/ {print $2}' deploy/staging/kustomization.yaml)`: read the tag staging runs, from Git.
+- `sed -i "s/newTag: .*/newTag: $TAG/; s/count: 0/count: 2/" ...`: prod runs that same image, with two copies (if it was still off).
+
+**You should see:** PROD in green, with your name.
+
+#### Step 8. Three environments, one image
+
+*Where: Browser*
+
+**Why:** The whole week on three tabs: one change, reviewed, tested, built once and released twice.
+
+**Do this:**
+
+1. Put the three tabs side by side: dev (red), staging (yellow), prod (green).
+2. Take a screenshot of the three for your evidence pack.
+
+**You should see:** The same page and your name in all three, each in its own colour. Congratulations: you are done.
+
+**Done when:** Your name is on hello's page in dev, staging and prod: one change, from commit to prod, with an approval at every step.
+
+## Looking back, and ahead
+
+### The week on one page: how the pieces come together
+
+![The week on one page: how the pieces come together](../images/platform-week.svg)
+
+- A, a service change: golden path, workspace, pull request, CI pipeline and Harbor, then Argo CD.
+- B, an environment: the same moves, with OpenTofu and the platform applier.
+- C, an exception to a rule: the same moves again, with Kyverno.
+- Grey is what people do; blue is what the platform does by itself.
+- Underneath: watch it in Grafana, recover from Git, keep the evidence.
+
 ### What we built this week: the whole platform, used end to end
 
 | Piece | Tool | What it does |
@@ -1108,6 +1454,31 @@ Evidence by default: every item below was produced by normal work this week. Nob
 | Observe | Grafana, Loki | Day 6 |
 
 Monday: the app ran by hand. Friday: it runs in prod through every piece of this path, with evidence at each step. Nothing was deployed by a person.
+
+### Before platform engineering
+
+![Before platform engineering](../images/platform-before.svg)
+
+- Every team sets up every tool itself: 3 teams × 6 tools = 18 set-ups, each a little different.
+- What a team cannot do itself waits in the ops team's ticket queue: days to weeks.
+- What it costs: slow, risky, inconsistent, overloaded teams, and evidence gathered afterwards.
+
+### After platform engineering
+
+![After platform engineering](../images/platform-after.svg)
+
+- Teams use one way in: the portal, templates and a pull request. No tickets.
+- A platform team wires the tools once, with guardrails built in, and runs it as a product, with feedback from the teams.
+- Each cost becomes a gain: faster, safer, consistent, less to learn, audit-ready.
+
+### Platform engineering: where it was, is, and can go
+
+![Platform engineering: where it was, is, and can go](../images/platform-why.svg)
+
+- Where it was: every team wires every tool itself, and waits on tickets for the rest.
+- Where it is now: one way in, built once by a platform team, with the checks built in.
+- What it gives the bank: faster, safer, consistent, less to learn, audit-ready.
+- Where it can go next: single sign-on, signed images, canary releases, APIs and events, cost per team.
 
 ### What you would add next: the platform roadmap
 

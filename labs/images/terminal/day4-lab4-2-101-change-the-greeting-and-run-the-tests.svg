@@ -5,6 +5,6 @@
 <rect x="686" y="5" width="204" height="18" rx="9" fill="#d29922"/><text x="788" y="18" fill="#000" font-size="11" font-weight="bold" text-anchor="middle">EXAMPLE · DO NOT COPY</text>
 <text x="450" y="19" fill="#8b949e" font-size="12" text-anchor="middle">Workspace terminal</text>
 <text x="20" y="46"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> pytest -q</tspan></text>
-<text x="20" y="65" fill="#c9d1d9">.....                                                                    [100%]</text>
-<text x="20" y="84" fill="#c9d1d9">5 passed in 0.58s</text>
+<text x="20" y="65" fill="#c9d1d9">......                                                                   [100%]</text>
+<text x="20" y="84" fill="#c9d1d9">6 passed in 0.57s</text>
 </svg>

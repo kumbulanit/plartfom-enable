@@ -16,6 +16,6 @@
 <text x="20" y="217"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> pytest -q</tspan></text>
 <text x="20" y="236"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> git commit -am "Run as an ordinary user again, and test the health check"</tspan></text>
 <text x="20" y="255"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> git push</tspan></text>
-<text x="20" y="274" fill="#c9d1d9">......                                                                   [100%]</text>
-<text x="20" y="293" fill="#c9d1d9">6 passed in 0.03s</text>
+<text x="20" y="274" fill="#c9d1d9">.......                                                                  [100%]</text>
+<text x="20" y="293" fill="#c9d1d9">7 passed in 0.56s</text>
 </svg>

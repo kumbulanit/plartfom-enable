@@ -164,11 +164,11 @@ steps:
 
    *The two steps opened: Unit tests says "6 passed"; Secret scan says how much it read and "no leaks found".*
 
-**You should see:** In the tests, "5 passed"; in the secret scan, "no leaks found":
+**You should see:** In the tests, "6 passed"; in the secret scan, "no leaks found":
 
 ```
-.....                                                                    [100%]
-5 passed in 0.59s
+......                                                                   [100%]
+6 passed in 0.57s
 ...
 INF scanned ~20739 bytes (20.74 KB) in 138ms
 INF no leaks found
@@ -318,7 +318,7 @@ Pushed harbor.<lab domain>/team03/hello:b70e47f7a1c2.... Argo CD deploys it to d
 
 ```
 FAILED tests/test_main.py::test_root_describes_the_service - assert 200 == 201
-1 failed, 4 passed in 0.59s
+1 failed, 5 passed in 0.58s
 ```
 
 **How to read it:**
@@ -433,11 +433,12 @@ Dockerfile:16 DL3066 info: Non-numeric user-id may not be resolvable by host sys
 
 **Do this:**
 
-1. Paste the box. It puts USER 10001 back, adds a new test for the health check, runs the tests (6 now), commits and pushes.
+1. Paste the box. It puts USER 10001 back, adds a new test for the health check, runs the tests (7 now), commits and pushes.
 
    ```bash
    sed -i 's/^USER root/USER 10001/' Dockerfile
    cat >> tests/test_main.py <<'EOF'
+
 
    def test_health_check_says_ok():
        status, _, body = main.route("/healthz")
@@ -457,11 +458,11 @@ Dockerfile:16 DL3066 info: Non-numeric user-id may not be resolvable by host sys
 - `cat >> tests/test_main.py <<'EOF' ... EOF`: add a new test at the end of the tests file: it calls /healthz and checks the answer is 200 with the body ok. (The two empty lines before def are the Python style the lint step expects.)
 - `pytest -q`: run the tests yourself before you push.
 
-**You should see:** 6 passed, then a green pipeline; after the merge, the run on main pushes a new image to Harbor:
+**You should see:** 7 passed, then a green pipeline; after the merge, the run on main pushes a new image to Harbor:
 
 ```
-......                                                                   [100%]
-6 passed in 0.03s
+.......                                                                  [100%]
+7 passed in 0.56s
 ```
 
 **If you see something else:**
@@ -1075,7 +1076,7 @@ ok   exceptions/team03-status-page.yaml (team03-status-page), until 2026-11-09
 
 2. Open the pulls/new link it prints and click Create Pull Request (title: Exception: status page for teamNN).
 
-3. Now play the platform team: Open a private window (Edge or Chrome: Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a Mac Cmd+Shift+P), go to https://gitea.<lab domain>, click Sign In, and sign in with the other person's login: reviewer or platform-approver, with its password from cat /etc/pelab/logins.md in your workspace. Sign in as platform-approver. In Files Changed, read who asks, why and until when, as a reviewer would, then Review → Approve.
+3. Now play the platform team: Open a private window (Edge or Chrome: Ctrl+Shift+N, on a Mac Cmd+Shift+N; Firefox: Ctrl+Shift+P, on a Mac Cmd+Shift+P), go to https://gitea.<lab domain>, click Sign In, and sign in with platform-approver, with its password from cat /etc/pelab/logins.md in your workspace. In Files Changed, read who asks, why and until when, as a reviewer would, then Review → Approve.
 
 4. When the test pipeline is green and the approval is there, merge in your own window.
 

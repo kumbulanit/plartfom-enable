@@ -182,4 +182,27 @@ module.exports = {
       ],
     },
   ],
+  6: [
+    {
+      after: true,
+      title: 'The week on one page: how the pieces come together',
+      figure: { src: 'platform-week.svg', caption: 'Everything you did this week, as three flows through the platform. The yellow tags say which day. Grey: you do it; blue: the platform does it by itself.' },
+      say: [
+        'A: a change to a service (Days 2, 4, 5, 6). Today you finished it: released to staging and prod, and watched it in Grafana.',
+        'B: an environment (Day 3). C: an exception to a rule (Day 5). The same five moves each time: template, change, pull request, pipeline, the platform applies main.',
+        'The capstone took your service through flow A, end to end, and the evidence pack is what each box left on record.',
+      ],
+    },
+    {
+      after: true,
+      title: 'Platform engineering: where it was, is, and can go',
+      figure: { src: 'platform-why.svg', caption: 'Where it was (every team does everything), where it is now (one paved road, built once by a platform team), what that gives the bank, and where the same road can go next. Dashed: not built yet.' },
+      say: [
+        'Where it was: every team set up every tool itself, and waited on tickets for servers, access and firewalls. Day 1, Lab 1.',
+        'Where it is now: one way in for every team (the portal, templates and a pull request), with tests, scans and guardrails that run by themselves.',
+        'What it gives the bank: faster, safer, consistent, less to learn, and evidence on every change.',
+        'Where it can go next: single sign-on, signed images, canary releases, APIs and events, and cost per team. Each is one more piece of the same road.',
+      ],
+    },
+  ],
 };

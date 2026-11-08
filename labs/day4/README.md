@@ -449,7 +449,7 @@ hello:2   88e52ddf8ecf        145MB             0B
 - Different ids: two different images. Building version 2 did not change version 1.
 - U under EXTRA means "in use": your staging and prod containers run hello:1.
 
-> **Tip:** No editor at hand? sed -i 's/Hello from the PE Lab golden path/Hello from version 2/' app/main.py makes the same change.
+> **Tip:** No editor at hand? sed -i "s/^GREETING = .\*/GREETING = os.environ.get(\"GREETING\", \"Hello from version 2\")/" app/main.py makes the same change.
 
 #### Step 4. Run the two versions side by side
 
@@ -936,11 +936,11 @@ GREETING = os.environ.get("GREETING", "Rates service of team 3")
 
 - `pytest -q`: run every test in the tests folder, quietly (-q): one dot per passing test.
 
-**You should see:** Five dots and "5 passed":
+**You should see:** Six dots and "6 passed":
 
 ```
-.....                                                                    [100%]
-5 passed in 0.58s
+......                                                                   [100%]
+6 passed in 0.57s
 ```
 
 **How to read it:**
@@ -1079,15 +1079,17 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 
 **Do this:**
 
-1. Open https://gitea.<lab domain>/platform/pipeline-templates.
+1. Look at the clock and write down the time: you stop the clock at the end of step 5.
 
-2. Read the README under the file list: a table with one line per template (what it does, when it runs), then "Use one" in four steps.
+2. Open https://gitea.<lab domain>/platform/pipeline-templates.
+
+3. Read the README under the file list: a table with one line per template (what it does, when it runs), then "Use one" in four steps.
 
    ![platform/pipeline-templates: the folder workflows holds the templates, and the README lists them: smoke-test.yaml and nightly-scan.yaml, what each does and when it runs. In your lab the address starts with https://gitea.<lab domain>.](../images/gitea-15-pipeline-templates.png)
 
    *platform/pipeline-templates: the folder workflows holds the templates, and the README lists them: smoke-test.yaml and nightly-scan.yaml, what each does and when it runs. In your lab the address starts with https://gitea.<lab domain>.*
 
-3. You can also find it in the portal: open https://backstage.<lab domain>, click Catalog, and look for Pipeline templates. Its links lead back here.
+4. You can also find it in the portal: open https://backstage.<lab domain>, click Catalog, and look for Pipeline templates. Its links lead back here.
 
 **You should see:** Two templates: smoke-test.yaml (is the service answering?) and nightly-scan.yaml (scan the image again every night).
 

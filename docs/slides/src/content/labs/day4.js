@@ -29,6 +29,7 @@ module.exports = {
     steps: [
       {
         title: 'Build the image',
+        simple: { do: ['Paste the box. It builds an image called hello:1 from your code (the Dockerfile says how). The first time takes about a minute.'] },
         where: 'Workspace terminal',
         why: 'Packaging the service once, as an image, means it runs exactly the same everywhere: in your workspace, in dev, staging and prod.',
         do: [
@@ -56,6 +57,7 @@ module.exports = {
       },
       {
         title: 'Find it in the list of images',
+        simple: { do: ['Paste the box. It lists your hello images: hello:1 is there.'] },
         where: 'Workspace terminal',
         why: 'An image is now stored in your workspace, ready to run as many times as you like.',
         run: 'docker images hello',
@@ -71,6 +73,7 @@ module.exports = {
       },
       {
         title: 'Run it',
+        simple: { do: ['Paste the box. It starts a container from hello:1 in the background, on port 8081, then lists the running containers.'] },
         where: 'Workspace terminal',
         why: 'An image is only a package; a container is the running copy. One image can run as many containers as you like.',
         run: 'docker run -d --name hello -p 8081:8081 hello:1\ndocker ps',
@@ -91,6 +94,7 @@ module.exports = {
       },
       {
         title: 'Call it',
+        simple: { do: ['Paste the box. It asks the container for its answer, then for its health check (ok).'] },
         where: 'Workspace terminal',
         why: 'Check that the service in the container answers exactly like the one you ran by hand on Day 1.',
         run: 'curl -s localhost:8081/\ncurl -i localhost:8081/healthz',
@@ -110,6 +114,7 @@ module.exports = {
       },
       {
         title: 'Read its logs, and check who it runs as',
+        simple: { do: ['Paste the box. It shows what the container printed (its log), then which user it runs as: 10001, an ordinary user, not root.'] },
         where: 'Workspace terminal',
         why: 'Logs are how you find out what a container did. And a container should never run as the administrator: if someone breaks into it, they must get as little as possible.',
         run: 'docker logs hello\ndocker exec hello id',
@@ -126,6 +131,7 @@ module.exports = {
       },
       {
         title: 'Stop and remove it',
+        simple: { do: ['Paste the box. It stops and removes the container. The image hello:1 stays.'] },
         where: 'Workspace terminal',
         why: 'Containers are thrown away and recreated, never repaired by hand. The image stays, ready to run again.',
         run: 'docker stop hello\ndocker rm hello\ndocker ps -a\ndocker images hello',
@@ -162,6 +168,7 @@ module.exports = {
     steps: [
       {
         title: 'Run it as staging',
+        simple: { do: ['Paste the box. It starts the same image again, as staging, on port 8082. Only its settings (each -e) are different.'] },
         where: 'Workspace terminal',
         why: 'The same image becomes "staging" just by being given other settings when it starts.',
         run: 'cd ~/hello\ndocker run -d --name hello-staging -p 8082:8081 -e APP_ENV=staging -e GREETING="Hello from staging" hello:1\nsleep 2\ncurl -s localhost:8082/',
@@ -177,6 +184,7 @@ module.exports = {
       },
       {
         title: 'Run it as prod too',
+        simple: { do: ['Paste the box. It starts a third copy, as prod, on port 8083, then lists the running containers.'] },
         where: 'Workspace terminal',
         why: 'Two environments side by side, from one image: what dev, staging and prod are on the platform.',
         run: 'docker run -d --name hello-prod -p 8083:8081 -e APP_ENV=prod -e GREETING="Hello from prod" hello:1\nsleep 2\ncurl -s localhost:8083/\ndocker ps',
@@ -192,6 +200,14 @@ module.exports = {
       },
       {
         title: 'Make version 2',
+        simple: {
+          // No editor: sed makes the same change, so the whole step is one box.
+          where: 'Workspace terminal',
+          do: ['Paste the box. It changes the greeting in app/main.py, then builds a new image, hello:2, beside hello:1.'],
+          change: null,
+          run: 'sed -i "s/^GREETING = .*/GREETING = os.environ.get(\\"GREETING\\", \\"Hello from version 2\\")/" app/main.py\ndocker build --build-arg BASE_IMAGE=' + BASE + ' --build-arg APP_VERSION=2 -t hello:2 .\ndocker images hello',
+          out: '...\nIMAGE     ID             DISK USAGE   CONTENT SIZE   EXTRA\nhello:1   51ec07f75cbf        145MB             0B   U\nhello:2   88e52ddf8ecf        145MB             0B',
+        },
         where: 'Workspace editor and terminal',
         why: 'A change to the code means a new image. The old one stays exactly as it was: that is what makes rolling back safe.',
         do: [
@@ -215,10 +231,11 @@ module.exports = {
           'Different ids: two different images. Building version 2 did not change version 1.',
           'U under EXTRA means "in use": your staging and prod containers run hello:1.',
         ],
-        tip: 'No editor at hand? sed -i \'s/Hello from the PE Lab golden path/Hello from version 2/\' app/main.py makes the same change.',
+        tip: 'No editor at hand? sed -i "s/^GREETING = .*/GREETING = os.environ.get(\\"GREETING\\", \\"Hello from version 2\\")/" app/main.py makes the same change.',
       },
       {
         title: 'Run the two versions side by side',
+        simple: { do: ['Paste the box. It runs version 1 (port 8081) and version 2 (port 8084) side by side, and asks both.'] },
         where: 'Workspace terminal',
         why: 'Old and new can run at the same time. Rolling back is just running the old image again: nothing has to be rebuilt.',
         run: 'docker run -d --name hello-v1 -p 8081:8081 hello:1\ndocker run -d --name hello-v2 -p 8084:8081 hello:2\nsleep 2\ncurl -s localhost:8081/\ncurl -s localhost:8084/',
@@ -231,6 +248,7 @@ module.exports = {
       },
       {
         title: 'Clean up',
+        simple: { do: ['Paste the box. It removes the four containers and puts app/main.py back as it was.'] },
         where: 'Workspace terminal',
         why: 'Leave the workspace tidy, and undo your greeting change: real changes go through a pull request, not from here.',
         run: 'docker rm -f hello-staging hello-prod hello-v1 hello-v2\ngit checkout app/main.py\ndocker ps',
@@ -460,8 +478,8 @@ module.exports = {
         explain: [
           ['pytest -q', 'run every test in the tests folder, quietly (-q): one dot per passing test.'],
         ],
-        see: 'Five dots and "5 passed":',
-        out: '.....                                                                    [100%]\n5 passed in 0.58s',
+        see: 'Six dots and "6 passed":',
+        out: '......                                                                   [100%]\n6 passed in 0.57s',
         read: [
           'Each dot is one test that passed; a failing test would show F and a red explanation (Day 5).',
         ],
@@ -544,6 +562,7 @@ module.exports = {
         where: 'Browser: Gitea',
         why: 'Templates are only useful if teams can find them. The platform team keeps them next to the golden path, with a README that says what each one does.',
         do: [
+          'Look at the clock and write down the time: you stop the clock at the end of step 5.',
           'Open https://gitea.<lab domain>/platform/pipeline-templates.',
           { text: 'Read the README under the file list: a table with one line per template (what it does, when it runs), then "Use one" in four steps.', shot: { src: 'gitea-15-pipeline-templates.png', caption: 'platform/pipeline-templates: the folder workflows holds the templates, and the README lists them: smoke-test.yaml and nightly-scan.yaml, what each does and when it runs. In your lab the address starts with https://gitea.<lab domain>.' } },
           'You can also find it in the portal: open https://backstage.<lab domain>, click Catalog, and look for Pipeline templates. Its links lead back here.',

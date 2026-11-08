@@ -12,5 +12,5 @@
 <text x="20" y="141"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> git commit -am "A wrong test"</tspan></text>
 <text x="20" y="160"><tspan fill="#7ee787">$</tspan><tspan fill="#f0f6fc"> git push -u origin break-things-$ME</tspan></text>
 <text x="20" y="179" fill="#c9d1d9">FAILED tests/test_main.py::test_root_describes_the_service - assert 200 == 201</text>
-<text x="20" y="198" fill="#c9d1d9">1 failed, 4 passed in 0.59s</text>
+<text x="20" y="198" fill="#c9d1d9">1 failed, 5 passed in 0.58s</text>
 </svg>

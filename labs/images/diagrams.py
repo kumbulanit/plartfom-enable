@@ -536,10 +536,220 @@ def git_branches():
     s.save('git-branches.svg')
 
 
+# ---------------------------------------------------------------- Day 6: the week on one page
+DAY, DAY_FILL, DAY_INK = '#d29922', '#fff7e0', '#8a5a00'
+
+
+def day_tag(s, right, y, label):
+    """A small pill on a box's top edge, ending at `right`: the day(s) it was used."""
+    w = 10 + 6.2 * len(label)
+    s.parts.append(f'<rect x="{right - w}" y="{y - 8}" width="{w}" height="16" rx="8" fill="{DAY_FILL}" stroke="{DAY}" stroke-width="1"/>')
+    s.text(right - w / 2, y + 4, label, size=10, weight=700, color=DAY_INK)
+
+
+def platform_week():
+    s = Svg(1200, 712, 'The week on one page: how the platform pieces come together')
+    xs = [20, 208, 396, 584, 772]   # the five columns before the cluster: 160 wide, 28 between
+    cw = 160
+
+    def box(col, y, h, label, sub, days, kind=''):
+        s.box(xs[col], y, cw, h, label, sub, kind=kind)
+        if days:
+            day_tag(s, xs[col] + cw - 6, y, days)
+
+    # The front door, and the one idea behind every flow.
+    s.box(20, 16, 536, 54, 'Backstage portal', 'one front door: find the services, their owners and docs, and the templates')
+    day_tag(s, 550, 16, 'Days 1, 4')
+    s.text(584, 38, 'Everything is code in Gitea. Every change is a pull request.', size=14, weight=700, color=ACCENT, anchor='start')
+    s.text(584, 58, 'The platform checks it, then applies what main says.', size=14, weight=700, color=ACCENT, anchor='start')
+
+    heads = [('1  Start from a template', 'the platform team\'s repositories'), ('2  Change it', 'in your workspace'),
+             ('3  Ask by pull request', 'Gitea, with a review'), ('4  A pipeline checks it', 'Gitea Actions'),
+             ('5  The platform applies it', 'Argo CD, OpenTofu, Kyverno')]
+    for x, (a, b) in zip(xs, heads):
+        s.text(x + cw / 2, 90, a, size=12, weight=700, color=INK)
+        s.text(x + cw / 2, 104, b, size=11, color=MUTED)
+    s.text(1085, 90, '6  Where it runs', size=12, weight=700, color=INK)
+    s.text(1085, 104, 'k3s namespaces', size=11, color=MUTED)
+
+    # Three flows, one per band: the same five moves each time.
+    bands = [(112, 178, 'A  Ship a change to a service'), (300, 112, 'B  Get an environment'), (422, 112, 'C  Ask for an exception to a rule')]
+    for y, h, label in bands:
+        s.parts.append(f'<rect x="10" y="{y}" width="955" height="{h}" rx="10" fill="#fbfcfd" stroke="#e4e7eb" stroke-width="1"/>')
+        s.text(22, y + 16, label, size=12, weight=700, color=INK, anchor='start')
+
+    rows = [
+        (140, [('Golden path template', 'code, Dockerfile, pipeline,\ndeploy/ and catalog entry', 'Day 4', ''),
+               ('Your workspace', 'edit, test, docker build,\ncommit on a branch', 'Days 1, 2, 4', ''),
+               ('Pull request', 'to teamNN/hello or rates;\nthe reviewer approves', 'Day 2', ''),
+               ('CI pipeline', 'lint, tests, secret scan,\nbuild, vulnerability scan', 'Day 5', 'accent'),
+               ('Argo CD', 'dev follows main; staging,\nprod by release PR', 'Days 2, 6', 'accent')]),
+        (330, [('Environment template', 'OpenTofu module\nteam-environment', 'Day 3', ''),
+               ('Your request', 'teamNN.tf: which\nenvironments, what budget', 'Day 3', ''),
+               ('Pull request', 'to platform/environments;\nthe platform team approves', 'Day 3', ''),
+               ('Plan pipeline', 'tofu fmt and plan;\nthe plan is posted on the PR', 'Day 3', 'accent'),
+               ('Platform applier', 'tofu apply of main,\nevery 2 minutes', 'Day 3', 'accent')]),
+        (452, [('Guardrails', 'platform/policies (Kyverno)\nand the exception template', 'Day 5', ''),
+               ('Your exception', 'who, why and until when\n(30 days at most)', 'Day 5', ''),
+               ('Pull request', 'to platform/policies;\nthe platform team approves', 'Day 5', ''),
+               ('Test pipeline', 'kyverno test and the\nexception checks', 'Day 5', 'accent'),
+               ('Platform applies', 'the policies and the\nexceptions in force', 'Day 5', 'accent')]),
+    ]
+    for y, cells in rows:
+        for col, (label, sub, days, kind) in enumerate(cells):
+            box(col, y, 66, label, sub, days, kind)
+        for col in range(4):
+            s.arrow([(xs[col] + cw, y + 33), (xs[col + 1], y + 33)], None, kind='accent' if col >= 2 else '')
+
+    # Flow A has two more pieces: the shared pipeline templates, and Harbor.
+    box(0, 218, 64, 'Pipeline templates', 'first pipeline, smoke test,\nnightly scan', 'Days 2, 4, 5')
+    s.arrow([(xs[0] + cw, 250), (xs[1] + cw / 2, 250), (xs[1] + cw / 2, 206)], None)
+    box(3, 228, 50, 'Harbor', 'the image, its scan, its SBOM', 'Days 4, 5', 'accent')
+    s.arrow([(xs[3] + cw / 2, 206), (xs[3] + cw / 2, 228)], None, kind='accent')
+
+    # The cluster: the environments, their budget and access, and the guardrail in front of them.
+    s.parts.append(f'<rect x="990" y="112" width="190" height="422" rx="10" fill="#ffffff" stroke="{LINE}" stroke-width="1.5"/>')
+    s.text(1085, 132, 'Kubernetes (k3s)', size=13, weight=700)
+    for i, n in enumerate(('dev', 'staging', 'prod')):
+        s.box(1002, 145 + i * 42, 166, 34, f'teamNN-{n}', None, kind='ok')
+    s.box(1002, 330, 140, 66, 'Budget, access', 'quota, network rules,\nwho may deploy')
+    s.box(1002, 452, 166, 66, 'Kyverno', 'checks every pod: images,\ntags, owner labels', kind='bad')
+    day_tag(s, 1162, 452, 'Day 5')
+    s.arrow([(1072, 330), (1072, 263)], None)
+    s.arrow([(1160, 452), (1160, 263)], None, kind='bad', dashed=True)
+    s.arrow([(xs[4] + cw, 173), (1002, 173)], 'syncs', kind='accent')
+    s.arrow([(xs[3] + cw, 253), (1002, 253)], 'image pulled from Harbor', at=0, kind='accent', dashed=True)
+    s.arrow([(xs[4] + cw, 363), (1002, 363)], 'creates', kind='accent')
+    s.arrow([(xs[4] + cw, 485), (1002, 485)], 'loads', kind='accent')
+
+    # Underneath: watch it, put it right, and go round again.
+    s.box(990, 562, 190, 66, 'Grafana', 'metrics, logs, SLO;\nk6 load test', kind='accent')
+    day_tag(s, 1174, 562, 'Day 6')
+    s.arrow([(1085, 534), (1085, 562)], None, kind='accent')
+    box(4, 562, 66, 'Recover', 'Argo CD self-heals;\ngit revert rolls back', 'Day 6')
+    s.arrow([(990, 595), (xs[4] + cw, 595)], None)
+    s.box(xs[1], 562, xs[4] - 28 - xs[1], 66, 'Your next change takes the same path', 'observe, learn, change again: back to step 2', kind='ghost')
+    s.arrow([(xs[4], 595), (xs[4] - 28, 595)], None)
+    box(0, 562, 66, 'Evidence pack', 'every review, run, plan,\nimage and scan, on record', 'Day 6')
+
+    # Legend.
+    y = 668
+    x = 20
+    for kind, label in (('', 'you or your team do it'), ('accent', 'automatic: the platform does it'),
+                        ('ok', 'your environments'), ('bad', 'a guardrail')):
+        stroke, fill = KINDS[kind]
+        s.parts.append(f'<rect x="{x}" y="{y - 11}" width="22" height="14" rx="3" fill="{fill}" stroke="{stroke}" stroke-width="1.5"/>')
+        s.text(x + 30, y, label, size=12, color=MUTED, anchor='start')
+        x += 46 + 6.4 * len(label)
+    day_tag(s, x + 40, y - 4, 'Day 4')
+    s.text(x + 48, y, 'the day you used it', size=12, color=MUTED, anchor='start')
+    s.note(20, y + 26, 'On Day 1 you ran hello by hand. By Day 6 every change, to code, environments or rules, '
+                       'took the same path: a template, a pull request, a check, and the platform applying main.', size=12)
+    s.save('platform-week.svg')
+
+
+def _before_panel(s, notes=True):
+    """Every team wires every tool itself, and waits on tickets for the rest (x 20-550)."""
+    teams = [(40, 'Team A'), (215, 'Team B'), (390, 'Team C')]
+    tools = ['Git', 'Pipeline', 'Scanner', 'Registry', 'Cluster', 'Monitoring']
+    tx = [30 + i * 88 for i in range(6)]
+    for x, _ in teams:   # lines first, so the boxes sit on top of them
+        for t in tx:
+            s.parts.append(f'<line x1="{x + 75}" y1="106" x2="{t + 39}" y2="260" stroke="{LINE}" stroke-width="1"/>')
+    for x, name in teams:
+        s.box(x, 60, 150, 46, name, None)
+    for t, name in zip(tx, tools):
+        s.box(t, 260, 78, 36, name, None)
+    s.text(290, 318, '3 teams × 6 tools = 18 set-ups, each a little different', size=12, weight=600, color=BAD)
+    s.box(40, 330, 500, 46, 'Ops team: a queue of tickets', 'servers, access, firewall: days to weeks each', kind='bad')
+    s.arrow([(40, 83), (26, 83), (26, 353), (40, 353)], None, kind='bad', dashed=True)
+    if notes:
+        s.note(20, 410, 'Every team learns and wires every tool itself.\n'
+                        'Work waits in ticket queues.\n'
+                        'Security checks and audit evidence differ from team to team.', color=BAD, size=12)
+
+
+def _after_panel(s, dx=0, notes=True):
+    """One way in, built once by a platform team that runs it as a product (x 620-1180, plus dx)."""
+    for i, name in enumerate(('Team A', 'Team B', 'Team C')):
+        s.box(dx + 620 + i * 140, 60, 120, 46, name, None)
+        s.arrow([(dx + 680 + i * 140, 106), (dx + 680 + i * 140, 130)], None, kind='accent')
+    s.box(dx + 620, 130, 400, 50, 'Self-service', 'the portal, templates, and a pull request: no tickets', kind='accent')
+    s.arrow([(dx + 820, 180), (dx + 820, 205)], None, kind='accent')
+    s.parts.append(f'<rect x="{dx + 620}" y="205" width="400" height="153" rx="10" fill="{ACCENT_FILL}" stroke="{ACCENT}" stroke-width="1.5"/>')
+    s.text(dx + 820, 224, 'Internal developer platform', size=13, weight=700)
+    s.text(dx + 820, 240, 'golden paths, with guardrails built in', size=11, color=MUTED)
+    caps = [('Code, review', 'Gitea'), ('Pipeline', 'Gitea Actions'), ('Images, scans', 'Harbor'),
+            ('Environments', 'OpenTofu'), ('Deploy', 'Argo CD'), ('Observe', 'Grafana')]
+    for i, (a, b) in enumerate(caps):
+        s.box(dx + 630 + (i % 3) * 130, 250 + (i // 3) * 52, 120, 44, a, b)
+    s.box(dx + 620, 372, 400, 36, 'Infrastructure: Kubernetes, servers, network', None, kind='ghost')
+    s.box(dx + 1040, 230, 140, 100, 'Platform team', 'builds and runs it\nas a product:\nusers, a roadmap', kind='ok')
+    s.arrow([(dx + 1040, 280), (dx + 1020, 280)], None, kind='ok')
+    s.arrow([(dx + 1020, 83), (dx + 1110, 83), (dx + 1110, 230)], 'feedback', at=1, kind='ok', dashed=True)
+    if notes:
+        s.note(dx + 604, 432, 'Teams use one way in; the platform team wires the tools once.\n'
+                              'The safe way is the easy way: the checks run by themselves,\n'
+                              'the same for every team, and leave evidence behind.', color=ACCENT, size=12)
+
+
+PAINS = [('Slow', 'weeks from idea to live'), ('Risky', 'checks depend on who does them'),
+         ('Inconsistent', 'every team a little different'), ('Overloaded', 'every team learns every tool'),
+         ('Audit pain', 'evidence gathered afterwards')]
+GAINS = [('Faster', 'minutes, not weeks'), ('Safer', 'guardrails by default'), ('Consistent', 'one path for every team'),
+         ('Less to learn', 'teams focus on their product'), ('Audit-ready', 'evidence on every change')]
+
+
+def _chip_column(s, x, title, chips, kind, color):
+    s.text(x, 34, title, size=15, weight=700, color=color, anchor='start')
+    for i, (a, b) in enumerate(chips):
+        s.box(x, 60 + i * 70, 340, 58, a, b, kind=kind)
+
+
+def platform_before():
+    s = Svg(1000, 420, 'Before platform engineering: every team does everything')
+    s.text(20, 34, 'Before: every team does everything', size=15, weight=700, color=BAD, anchor='start')
+    _before_panel(s, notes=False)
+    _chip_column(s, 640, 'What it costs', PAINS, 'bad', BAD)
+    s.save('platform-before.svg')
+
+
+def platform_after():
+    s = Svg(1000, 420, 'After platform engineering: one paved road for every team')
+    s.text(20, 34, 'After: one paved road for every team', size=15, weight=700, color=ACCENT, anchor='start')
+    _after_panel(s, dx=-600, notes=False)
+    _chip_column(s, 640, 'What it gives the bank', GAINS, 'ok', OK)
+    s.save('platform-after.svg')
+
+
+def platform_why():
+    s = Svg(1200, 724, 'Platform engineering: where it was, where it is now, and where it can go')
+    s.parts.append(f'<line x1="584" y1="20" x2="584" y2="490" stroke="#e4e7eb" stroke-width="1.5"/>')
+    s.text(20, 34, '1  Where it was: every team does everything', size=15, weight=700, color=BAD, anchor='start')
+    _before_panel(s)
+    s.text(604, 34, '2  Where it is now: one paved road for every team', size=15, weight=700, color=ACCENT, anchor='start')
+    _after_panel(s)
+
+    # Bottom: what the bank gets.
+    s.text(20, 520, 'What it gives the bank', size=14, weight=700, anchor='start')
+    for i, (a, b) in enumerate(GAINS):
+        s.box(20 + i * 232, 536, 220, 58, a, b, kind='ok')
+
+    # And the road goes on: what the same platform can grow into (dashed: not built yet).
+    s.text(20, 636, '3  Where it can go next: the same road, more of it built', size=15, weight=700, anchor='start')
+    nexts = [('Single sign-on', 'one login, tied to the directory'), ('Signed images', 'only signed images may run'),
+             ('Canary releases', '10% of users first, then all'), ('APIs and events', 'a gateway and an event stream'),
+             ('Cost per team', 'the budget, shown in money')]
+    for i, (a, b) in enumerate(nexts):
+        s.box(20 + i * 232, 650, 220, 58, a, b, kind='ghost')
+    s.save('platform-why.svg')
+
+
 if __name__ == '__main__':
     for draw in (golden_path, pr_loop, merge_conflict, iac_loop, env_request, container_build, new_service,
                  pipeline, guardrails, promotion, observability, recovery,
                  before_after, platform_architecture, team_topologies, golden_path_contents, value_stream,
-                 linux_layers, linux_tree, web_request, config_envs, git_areas, git_branches):
+                 linux_layers, linux_tree, web_request, config_envs, git_areas, git_branches, platform_week,
+                 platform_why, platform_before, platform_after):
         draw()
     print('wrote', len([f for f in os.listdir(HERE) if f.endswith('.svg')]), 'diagrams to', HERE)

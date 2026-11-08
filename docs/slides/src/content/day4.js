@@ -189,7 +189,7 @@ ENTRYPOINT ["python", "-m", "app.main"]`,
     title: 'Lab 4: a first change to the new service',
     steps: [
       { do: `git clone https://gitea.${DOMAIN}/teamNN/rates && cd rates && git switch -c first-change`, expect: 'The repository in your workspace.' },
-      { do: 'Change the greeting in app/main.py; run the tests: python3 -m pytest -q', expect: '5 passed.' },
+      { do: 'Change the greeting in app/main.py; run the tests: python3 -m pytest -q', expect: '6 passed.' },
       { do: 'Commit, push, open a pull request; approve as reviewer in a private window; merge.', expect: 'The pipeline runs on the pull request and again on main.' },
       { do: `Watch Argo CD, then open https://rates-teamNN-dev.${DOMAIN}/`, expect: 'The new greeting live in dev.' },
       { do: 'Read the README in the repository: it is the user guide for the golden path.', expect: 'You recognise every step from the last four days.' },

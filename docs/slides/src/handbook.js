@@ -46,6 +46,19 @@ const table = (header, rows) => [
 // The anchor Gitea gives a heading (GitHub style), for links within a page.
 const anchor = (t) => '#' + String(t).toLowerCase().replace(/[^a-z0-9 -]/g, '').replace(/ /g, '-');
 const fence = (text, lang = '') => ['```' + lang, String(text).replace(/\n+$/, ''), '```'].join('\n');
+// Joins a page's lines with at most one empty line in a row, except inside code
+// blocks: code keeps its blank lines (Python wants two before a def).
+function squeeze(lines) {
+  let code = false;
+  let blank = false;
+  return lines.join('\n').split('\n').filter((l) => {
+    if (/^\s*```/.test(l)) code = !code;
+    if (code || l.trim() !== '') { blank = false; return true; }
+    if (blank) return false;
+    blank = true;
+    return true;
+  }).join('\n');
+}
 const numbered = (items) => items.map((t, i) => `${i + 1}. ${md(t)}`).join('\n');
 // Inline code, shown exactly as typed (entities are not decoded inside code spans).
 const code = (text) => (String(text).includes('`') ? `\`\` ${text} \`\`` : `\`${text}\``);
@@ -293,7 +306,7 @@ function handbookDay(d) {
   const prev = n > 1 ? `[Day ${n - 1}](../day${n - 1}/README.md)` : null;
   const next = n < 6 ? `[Day ${n + 1}](../day${n + 1}/README.md)` : null;
   out.push('---', '', [prev, '[Contents](../README.md)', next].filter(Boolean).join(' · '), '');
-  return out.join('\n').replace(/\n{3,}/g, '\n\n');
+  return squeeze(out);
 }
 
 function handbookReadme() {
@@ -483,52 +496,103 @@ const slug = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(
 // steps with their instructions and commands; no explanations, outputs or checks.
 // content/simple.js adds sections by topic (Git, IaC, pipelines, guardrails).
 const SIMPLE = require('./content/simple');
+// The days whose short version uses the clearer layout (see simpleStep).
+const SIMPLE_CLEAR = [4, 5, 6];
 
-function simpleStep(step, i, prefix) {
+// The labels of the clearer layout: what to copy, what is only an example, what to edit by hand.
+const CLEAR_COPY = '📋 **Copy and paste this into the terminal:**';
+const CLEAR_SHOT = '👀 **Example only, do not copy.** What it looks like';
+const CLEAR_EDIT = '✏️ **Do this in the editor, not in the terminal.**';
+
+// clear: each box goes right under the line that says to paste it, the file change
+// just before that line, every box and picture says whether to copy it, and a step
+// with no terminal picture says what to expect. A step's simple: {...} replaces its
+// fields here (a shorter text, one box instead of an editor change).
+function simpleStep(step, i, prefix, clear = false) {
+  if (clear && step.simple) step = { ...step, ...step.simple };
   const shotName = (k) => `${prefix}-${i + 1}${k === undefined ? '' : '-' + (k + 1)}-${slug(step.title)}.svg`;
+  const copy = clear ? CLEAR_COPY : '**Copy and paste:**';
+  const shot = (name, cmd, output, where) => {
+    const s = terminalShot(name, cmd, output, where);
+    if (!clear) return s;
+    return s.replace(/^\*[^\n]*\*/, `${CLEAR_SHOT}${output === null || output === undefined ? ' (what it prints depends on your lab)' : ''}:`);
+  };
   const out = [`### ${i + 1}. ${md(step.title)}`, ''];
+  if (clear && step.where) out.push(`**Where:** ${md(step.where)}`, '');
   const items = step.do || (step.browser && step.browser.do) || [];
   const shown = new Set();
+  let pictures = 0;
   const pad = (block) => block.split('\n').map((l) => (l ? '   ' + l : l)).join('\n');
-  items.forEach((d, k) => {
+  const parts = items.map((d, k) => {
     const text = typeof d === 'string' ? d : d.text;
     const cmd = typeof d === 'string' ? null : d.cmd;
     let s = `${k + 1}. ${md(text)}`;
     if (cmd) {
-      s += '\n\n' + pad('**Copy and paste:**\n\n' + fence(cmd, 'bash'));
+      s += '\n\n' + pad(copy + '\n\n' + fence(cmd, 'bash'));
       cmd.split('\n').forEach((l) => shown.add(l));
       const quiet = /prints nothing/i.test(text) ? '' : null;
-      s += '\n\n' + pad(terminalShot(shotName(k), cmd, d.out !== undefined ? d.out : quiet, d.where));
+      s += '\n\n' + pad(shot(shotName(k), cmd, d.out !== undefined ? d.out : quiet, d.where));
+      pictures++;
     }
     if (typeof d !== 'string') for (const p of [].concat(d.shot || [])) s += '\n\n' + pad(`![${p.caption}](../images/${p.src})`) + '\n\n' + pad(`*${md(p.caption)}*`);
-    out.push(s, '');
+    return s;
   });
-  if (!items.length) for (const t of [].concat(step.say || [])) out.push(md(t), '');
-  if (step.file) out.push(`\`${step.file.path}\`:`, '', fence(step.file.text, step.file.lang || ''), '');
-  if (step.change) out.push(`In \`${step.change.file}\`, change:`, '', fence(step.change.before), '', 'to:', '', fence(step.change.after), '');
-    // The step's own output belongs to its first box (step.run); a then box has its own.
+  const edits = [];
+  if (step.file) edits.push(`\`${step.file.path}\`:\n\n${fence(step.file.text, step.file.lang || '')}`);
+  if (step.change) edits.push(`${clear ? CLEAR_EDIT + ' ' : ''}In \`${step.change.file}\`, change:\n\n${fence(step.change.before)}\n\nto:\n\n${fence(step.change.after)}`);
+  // The step's own output belongs to its first box (step.run); a then box has its own.
   const inItems = items.some((d) => typeof d !== 'string' && d.out);
   const thens = [].concat(step.then || []);
+  const boxes = [];
   [step.run, ...thens.map((t) => t.run)].forEach((b, k) => {
     if (!b || b.split('\n').every((l) => shown.has(l))) return;
     const output = k === 0 ? (inItems ? null : step.out) : thens[k - 1].out;
-    out.push('**Copy and paste:**', '', fence(b, 'bash'), '', terminalShot(shotName(100 + k), b, output === undefined ? null : output), '');
+    boxes.push(`${copy}\n\n${fence(b, 'bash')}\n\n${shot(shotName(100 + k), b, output === undefined ? null : output)}`);
+    pictures++;
   });
-  if (step.out && step.run && !inItems && step.run.split('\n').every((l) => shown.has(l))) out.push(terminalShot(shotName(), step.run, step.out), '');
+  const asks = clear ? items.map((d, k) => k).filter((k) => /paste the (first |second )?box|\(the box\)/i.test(typeof items[k] === 'string' ? items[k] : items[k].text)) : [];
+  if (asks.length) {
+    // An edit belongs before the line that runs it; inside the item above, so the numbering holds.
+    if (edits.length) {
+      if (asks[0] === 0) out.push(...edits.flatMap((e) => [e, '']));
+      else parts[asks[0] - 1] += edits.map((e) => '\n\n' + pad(e)).join('');
+    }
+    asks.forEach((k) => { if (boxes.length) parts[k] += '\n\n' + pad(boxes.shift()); });
+    parts.forEach((s) => out.push(s, ''));
+    boxes.forEach((b) => out.push(b, ''));
+  } else {
+    parts.forEach((s) => out.push(s, ''));
+    if (!items.length) for (const t of [].concat(step.say || [])) out.push(md(t), '');
+    edits.forEach((e) => out.push(e, ''));
+    boxes.forEach((b) => out.push(b, ''));
+  }
+  if (step.out && step.run && !inItems && step.run.split('\n').every((l) => shown.has(l))) { out.push(shot(shotName(), step.run, step.out), ''); pictures++; }
+  const see = step.see || (step.browser && step.browser.see);
+  if (clear && see && !pictures) out.push(`**You should see:** ${md(see.replace(/:\s*$/, '.'))}`, '');
   return out;
 }
 
 function simpleDay(d) {
+  const clear = SIMPLE_CLEAR.includes(Number(d));
   const out = [`# Day ${d}: ${md(DAYS[d].title)}: the steps`, '',
     'Only the steps and the commands, to follow along with your instructor. Every step is explained in full in [README.md](README.md).', '',
-    'Each command comes twice. **Copy and paste:** is the grey box to copy (the copy button is at its top right). Under it, a picture of the terminal marked EXAMPLE shows what it looks like: do not copy from the picture. Where the lab was tested, the picture shows what the command printed (your ids, times, names and team are your own); a picture titled "type this" shows only the command.', ''];
+    ...(clear ? [
+      'How to read this page:', '',
+      `- ${CLEAR_COPY} A grey box. Click the copy button at its top right, click in the workspace terminal, paste (Ctrl+V, on a Mac Cmd+V) and press Enter. Copy only from these boxes.`,
+      `- ${CLEAR_SHOT}: a picture of the terminal, marked EXAMPLE · DO NOT COPY. It shows what you should see; your ids, times, names and team are your own.`,
+      `- ${CLEAR_EDIT} A line to change by hand in a file, in the editor. Do not paste it into the terminal.`,
+      '- Everything else (open, click, read) you do yourself, in the browser or the editor: nothing to copy.', '',
+    ] : [
+      'Each command comes twice. **Copy and paste:** is the grey box to copy (the copy button is at its top right). Under it, a picture of the terminal marked EXAMPLE shows what it looks like: do not copy from the picture. Where the lab was tested, the picture shows what the command printed (your ids, times, names and team are your own); a picture titled "type this" shows only the command.', '',
+    ])];
   // Topic sections: before the labs, or after them (after: true). A section's
-  // say is a sentence, or a list of short points.
+  // say is a sentence, or a list of short points; figure is a diagram from labs/images.
   const section = (x) => {
     out.push(`## ${md(x.title)}`, '');
+    if (x.figure) out.push(`![${x.figure.caption}](../images/${x.figure.src})`, '', `*${md(x.figure.caption)}*`, '');
     if (Array.isArray(x.say)) out.push(bullets(x.say), '');
     else if (x.say) out.push(md(x.say), '');
-    (x.steps || []).forEach((s, i) => out.push(...simpleStep(s, i, `day${d}-${slug(x.title).slice(0, 20)}`)));
+    (x.steps || []).forEach((s, i) => out.push(...simpleStep(s, i, `day${d}-${slug(x.title).slice(0, 20)}`, clear)));
   };
   const extra = SIMPLE[d] || [];
   extra.filter((x) => !x.after).forEach(section);
@@ -536,10 +600,10 @@ function simpleDay(d) {
     const lab = LABS[spec.title];
     out.push(`## ${md(spec.title)}`, '', md(lab.goal), '');
     const labNo = (spec.title.match(/^Lab (\d+)/) || [null, slug(spec.title).slice(0, 12)])[1];
-    lab.steps.forEach((s, i) => out.push(...simpleStep(s, i, `day${d}-lab${labNo}`)));
+    lab.steps.forEach((s, i) => out.push(...simpleStep(s, i, `day${d}-lab${labNo}`, clear)));
   }
   extra.filter((x) => x.after).forEach(section);
-  return out.join('\n').replace(/\n{3,}/g, '\n\n');
+  return squeeze(out);
 }
 
 function write(dir, name, text) {

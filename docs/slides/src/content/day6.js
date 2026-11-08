@@ -85,7 +85,7 @@ replicas:
     notes: 'Show the real file. The long tag looks intimidating; explain it is the commit id, so the reviewer can click through to the exact code, the pipeline run and the scan. That click-through is the traceability the brief asks for.',
   },
   {
-    type: 'steps', section: 'Lab 1: promote to staging and prod', time: '40 min · per team',
+    type: 'steps', section: 'Lab 1: promote to staging and prod', time: '40 min · on your own',
     title: 'Lab 1: promote hello to staging, then prod',
     steps: [
       { do: 'In Harbor (signed in as studentNN), open teamNN/hello and copy the tag of the newest scanned image (the commit id).', expect: 'A 40-character tag on your clipboard.' },
@@ -256,7 +256,35 @@ export default function () {
     notes: 'This list is also the answer to the brief\'s "required evidence" column for Labs 2 to 8. Delegates who keep links as they go finish the capstone in time; those who look for evidence afterwards do not. Say so at 09:00.',
   },
   {
-    type: 'diagram', section: 'Capstone',
+    type: 'steps', section: 'Final lab', time: '30 min · on your own',
+    title: 'Final lab: your name in dev, staging and prod',
+    steps: [
+      { do: 'Type your name: read -p "Your name: " NAME', expect: 'Your name is kept in $NAME.' },
+      { do: 'Paste the box: a branch, your name in app/graduates/studentNN.txt, the party on the page, the tests.', expect: '"Added the party to the page" and 6 passed.' },
+      { do: 'Commit, push, open the pull request.', expect: 'A pull request with two files changed; the pipeline runs.' },
+      { do: 'The reviewer approves in a private window; you merge.', expect: 'Green pipeline, one approval, merged.' },
+      { do: 'Open https://hello-teamNN-dev.<domain>/ a few minutes after the merge.', expect: 'DEV glowing red, confetti, a rainbow Congratulations, your name on a badge, "you are done with Platform Engineering!" and five things from the week.' },
+      { do: 'Release to staging (newTag = the newest commit on main). The reviewer approves; merge.', expect: 'STAGING in yellow, with your name.' },
+      { do: 'Release to prod (newTag = what staging runs). The reviewer approves; merge.', expect: 'PROD in green, with your name.' },
+      { do: 'Put dev, staging and prod side by side and take a screenshot.', expect: 'One image, three environments, an approval at every step.' },
+    ],
+    notes: 'The week in one change, done alone: commit, pull request, approval, pipeline, dev, then two approved releases. Each delegate plays the reviewer in a private window, as all week. Run it after the capstone presentations, as the celebration: put everyone\'s prod page on the big screen.',
+  },
+  {
+    type: 'picture', section: 'Looking back, and ahead', src: 'platform-week.svg',
+    title: 'The week on one page: how the pieces come together',
+    // No caption: the diagram says it in its own headline, and keeps the whole height of the slide.
+    points: [
+      'A, a service change: golden path, workspace, pull request, CI pipeline and Harbor, then Argo CD.',
+      'B, an environment: the same moves, with OpenTofu and the platform applier.',
+      'C, an exception to a rule: the same moves again, with Kyverno.',
+      'Grey is what people do; blue is what the platform does by itself.',
+      'Underneath: watch it in Grafana, recover from Git, keep the evidence.',
+    ],
+    notes: 'Walk one row at a time, left to right, and ask the room which lab each box was (the yellow tags say the day). Then point at the columns, not the rows: every flow has a template, a pull request, a check and an automatic apply. That pattern, not any one tool, is the platform. End on the bottom row: the capstone evidence pack is simply what each box left on record.',
+  },
+  {
+    type: 'diagram', section: 'Looking back, and ahead',
     title: 'What we built this week: the whole platform, used end to end',
     tools: [
       { name: 'Workspace', tool: 'Linux, Docker, Git', what: 'Days 1 and 4' },
@@ -274,7 +302,40 @@ export default function () {
     notes: 'Put this beside the Day 1 delivery maps on the wall. Ask the room how many of their bottlenecks the platform removed, and which remain (they are usually organisational, not technical). That conversation is the brief\'s "lead platform transformation" outcome, at awareness level.',
   },
   {
-    type: 'rows', section: 'Capstone',
+    type: 'picture', section: 'Looking back, and ahead', src: 'platform-before.svg',
+    title: 'Before platform engineering',
+    // No caption: the diagram says it, and keeps the whole width of the slide.
+    points: [
+      'Every team sets up every tool itself: 3 teams × 6 tools = 18 set-ups, each a little different.',
+      'What a team cannot do itself waits in the ops team\'s ticket queue: days to weeks.',
+      'What it costs: slow, risky, inconsistent, overloaded teams, and evidence gathered afterwards.',
+    ],
+    notes: 'This is Day 1: ask the room to point at where their own Lab 1 delivery map sits in this picture, usually the ticket queue. Read the right-hand column slowly; the next slide answers each line in the same row.',
+  },
+  {
+    type: 'picture', section: 'Looking back, and ahead', src: 'platform-after.svg',
+    title: 'After platform engineering',
+    points: [
+      'Teams use one way in: the portal, templates and a pull request. No tickets.',
+      'A platform team wires the tools once, with guardrails built in, and runs it as a product, with feedback from the teams.',
+      'Each cost becomes a gain: faster, safer, consistent, less to learn, audit-ready.',
+    ],
+    notes: 'Go back and forth with the previous slide: slow becomes faster, risky becomes safer, inconsistent becomes consistent, overloaded becomes less to learn, audit pain becomes audit-ready. Then ask which box of the platform they used in which lab this week. The next slide puts both side by side and adds where the road can go next.',
+  },
+  {
+    type: 'picture', section: 'Looking back, and ahead', src: 'platform-why.svg',
+    title: 'Platform engineering: where it was, is, and can go',
+    // No caption: the three numbered parts of the diagram say it, and it keeps the whole height.
+    points: [
+      'Where it was: every team wires every tool itself, and waits on tickets for the rest.',
+      'Where it is now: one way in, built once by a platform team, with the checks built in.',
+      'What it gives the bank: faster, safer, consistent, less to learn, audit-ready.',
+      'Where it can go next: single sign-on, signed images, canary releases, APIs and events, cost per team.',
+    ],
+    notes: 'Left is Day 1: put it next to the delivery maps the teams drew in Lab 1 and ask which of their waits it shows. Right is what they used all week; ask them to name the lab where they met each box. The bottom row is the road ahead: each dashed box is one setting in the lab build, already prepared but switched off. The next slide says what each one would bring.',
+  },
+  {
+    type: 'rows', section: 'Looking back, and ahead',
     title: 'What you would add next: the platform roadmap',
     intro: 'Every capstone presentation ends with this. Some options the lab already contains, switched off.',
     rows: [

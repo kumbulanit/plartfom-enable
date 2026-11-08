@@ -3,7 +3,7 @@
 // versions (pytest, gitleaks, hadolint, Kyverno CLI 1.19, the exception check).
 'use strict';
 
-const { TERMINAL, OPEN_LINK, PRIVATE_WINDOW } = require('./common');
+const { TERMINAL, OPEN_LINK, PRIVATE_WINDOW, privateWindowAs } = require('./common');
 
 module.exports = {
   'Lab 1: read the pipeline and its evidence': {
@@ -46,8 +46,8 @@ module.exports = {
           'Click the step Unit tests (pytest): its log unfolds under it.',
           'Then click Secret scan (gitleaks).',
         ],
-        see: 'In the tests, "5 passed"; in the secret scan, "no leaks found":',
-        out: '.....                                                                    [100%]\n5 passed in 0.59s\n...\nINF scanned ~20739 bytes (20.74 KB) in 138ms\nINF no leaks found',
+        see: 'In the tests, "6 passed"; in the secret scan, "no leaks found":',
+        out: '......                                                                   [100%]\n6 passed in 0.57s\n...\nINF scanned ~20739 bytes (20.74 KB) in 138ms\nINF no leaks found',
       },
       {
         title: 'Find the image tag',
@@ -138,7 +138,7 @@ module.exports = {
           ['git diff', 'show the change: one line red, one green.'],
         ],
         see: 'The pipeline is red at Unit tests (pytest). The log names the test and shows the actual and the expected value:',
-        out: 'FAILED tests/test_main.py::test_root_describes_the_service - assert 200 == 201\n1 failed, 4 passed in 0.59s',
+        out: 'FAILED tests/test_main.py::test_root_describes_the_service - assert 200 == 201\n1 failed, 5 passed in 0.58s',
         read: [
           'assert 200 == 201: the service answered 200 (OK), the test expected 201. Here the test is wrong; often it is the code.',
           'The steps after the failure did not run: nothing was built from broken code.',
@@ -201,7 +201,7 @@ module.exports = {
         where: 'Workspace terminal, then Gitea',
         why: 'Finish with a clean change that also adds a test, so the pipeline now checks one more thing on every future change.',
         do: [
-          'Paste the box. It puts USER 10001 back, adds a new test for the health check, runs the tests (6 now), commits and pushes.',
+          'Paste the box. It puts USER 10001 back, adds a new test for the health check, runs the tests (7 now), commits and pushes.',
           'In the pull request, wait for green. Approve it as reviewer in a private window, then merge as yourself with Create squash commit.',
         ],
         run: 'sed -i \'s/^USER root/USER 10001/\' Dockerfile\ncat >> tests/test_main.py <<\'EOF\'\n\n\ndef test_health_check_says_ok():\n    status, _, body = main.route("/healthz")\n    assert status == 200\n    assert body == "ok\\n"\nEOF\npytest -q\ngit commit -am "Run as an ordinary user again, and test the health check"\ngit push',
@@ -210,8 +210,8 @@ module.exports = {
           ['cat >> tests/test_main.py <<\'EOF\' ... EOF', 'add a new test at the end of the tests file: it calls /healthz and checks the answer is 200 with the body ok. (The two empty lines before def are the Python style the lint step expects.)'],
           ['pytest -q', 'run the tests yourself before you push.'],
         ],
-        see: '6 passed, then a green pipeline; after the merge, the run on main pushes a new image to Harbor:',
-        out: '......                                                                   [100%]\n6 passed in 0.03s',
+        see: '7 passed, then a green pipeline; after the merge, the run on main pushes a new image to Harbor:',
+        out: '.......                                                                  [100%]\n7 passed in 0.56s',
         ifnot: [
           ['Lint (ruff) is red after this push', 'the new test was pasted with different spacing. Run ruff format . then git commit -am "Format" and git push.'],
         ],
@@ -475,7 +475,7 @@ module.exports = {
         do: [
           'Paste the box: it commits only your exception file and pushes.',
           'Open the pulls/new link it prints and click Create Pull Request (title: Exception: status page for teamNN).',
-          'Now play the platform team: ' + PRIVATE_WINDOW + ' Sign in as platform-approver. In Files Changed, read who asks, why and until when, as a reviewer would, then Review → Approve.',
+          'Now play the platform team: ' + privateWindowAs('platform-approver') + ' In Files Changed, read who asks, why and until when, as a reviewer would, then Review → Approve.',
           'When the test pipeline is green and the approval is there, merge in your own window.',
           'Two minutes later, open platform/policies → Commits and click the tick next to your merge commit.',
         ],

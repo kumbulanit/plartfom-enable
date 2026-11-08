@@ -3,7 +3,7 @@
 // files/grafana-golden-path.json.
 'use strict';
 
-const { TERMINAL, OPEN_LINK, PRIVATE_WINDOW } = require('./common');
+const { TERMINAL, OPEN_LINK, PRIVATE_WINDOW, privateWindowAs } = require('./common');
 
 module.exports = {
   'Lab 1: promote hello to staging, then prod': {
@@ -515,5 +515,136 @@ module.exports = {
       },
     ],
     done: 'Your service runs in prod, your evidence pack is complete, and you have presented.',
+  },
+
+  // One last change through the whole platform, done alone: the delegate makes the change
+  // and both releases, and plays the reviewer in a private window. The name goes in a file
+  // of its own (app/graduates/<user>.txt), so running the box again only updates the name
+  // (and people sharing a repository would not conflict).
+  'Final lab: your name in dev, staging and prod': {
+    goal: 'One last change through the whole platform: put your name on hello\'s page, see it in dev, then release it to staging and prod, with an approval each time.',
+    learn: [
+      'The whole path in one go: commit, push, pull request, approval, pipeline, dev, then two approved releases.',
+      'That staging and prod get the very image dev ran: only a tag in Git changes.',
+    ],
+    words: [
+      ['Graduates file', 'app/graduates/studentNN.txt: a small file with your name in it. The page shows the name it finds there.'],
+    ],
+    start: [
+      ...TERMINAL,
+      'Lab 1 done: you have staging and prod, and know how a release works.',
+      'You do every step yourself, and approve as the reviewer in a private window, as all week.',
+      'Use one terminal for steps 1 to 3: step 1 keeps your name in $NAME, which a new terminal would not know.',
+    ],
+    steps: [
+      {
+        title: 'Type your name',
+        where: 'Workspace terminal',
+        why: 'Your name goes on the page in every environment, so type it the way you want it shown.',
+        do: ['Paste the box on its own. It asks for your name: type it as you want it on the page, for example Thandi Mokoena, and press Enter.'],
+        run: 'read -p "Your name: " NAME',
+        explain: [
+          ['read -p "Your name: " NAME', 'ask a question and keep the answer in a variable called NAME, for the next steps.'],
+        ],
+        see: 'Your name: with your answer after it, and the prompt back.',
+      },
+      {
+        title: 'Put your name on the page',
+        where: 'Workspace terminal',
+        why: 'A small change to the code, made on a branch, tested before it is pushed: the same as every change this week.',
+        do: ['Paste the box. It makes a branch, writes your name in a file of its own, adds the party to the page and runs the tests.'],
+        run: "cd ~/hello\ngit switch main && git pull\ngit switch -c congrats-$ME\nmkdir -p app/graduates\necho \"$NAME\" > app/graduates/$ME.txt\npython3 - <<'EOF'\nfrom pathlib import Path\n\nmain = Path(\"app/main.py\")\ncode = main.read_text()\nif \"def congrats()\" in code:\n    print(\"The party is already on the page (you ran this before). Only your name is updated.\")\nelse:\n    block = r'''\n# The end of the course: the names in app/graduates/ (one file each), and what they did.\nWEEK = [\n    (\"🐧\", \"Linux and Git: every change by pull request, with a review\"),\n    (\"🏗️\", \"Infrastructure as code: environments asked for in OpenTofu\"),\n    (\"📦\", \"Containers, and a new service from the golden path template\"),\n    (\"🛡️\", \"A pipeline that tests and scans, and guardrails in the cluster\"),\n    (\"🚀\", \"Releases to dev, staging and prod with GitOps, watched in Grafana\"),\n]\nPARTY = \"\"\"<style>\n  .env { animation: party-glow 2.4s ease-in-out infinite; }\n  .env, .message, .facts, .party { position: relative; z-index: 1; }\n  .party { display: flex; flex-direction: column; align-items: center; gap: 1rem; }\n  .party-trophy { font-size: 4.5rem; animation: party-bounce 1.6s ease-in-out infinite; }\n  .party-title {\n    font-size: clamp(2rem, 9vw, 6.5rem); font-weight: 900; letter-spacing: 0.02em;\n    background: linear-gradient(90deg, #ff4d6d, #ffd166, #06d6a0, #4cc9f0, #b388ff, #ff4d6d);\n    background-size: 200% auto; -webkit-background-clip: text; background-clip: text;\n    color: transparent; animation: party-pop 0.9s ease-out both, party-shine 3s linear infinite;\n  }\n  .party-names { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.7rem; }\n  .party-name {\n    padding: 0.5rem 1.2rem; border-radius: 999px; font-weight: 800;\n    font-size: clamp(1.2rem, 3.2vw, 2rem); color: #1a1a2e;\n    background: linear-gradient(135deg, #ffd166, #ff8fab);\n    box-shadow: 0 0 28px rgba(255, 209, 102, 0.55);\n    animation: party-pop 0.7s ease-out both, party-float 3s ease-in-out infinite;\n  }\n  .party-done { font-size: clamp(1.3rem, 3.6vw, 2.3rem); font-weight: 600; }\n  .party-week {\n    list-style: none; padding: 0; margin: 0.5rem 0 0; display: flex; flex-wrap: wrap;\n    justify-content: center; gap: 0.7rem; width: min(64rem, 92vw);\n  }\n  .party-week li {\n    flex: 0 1 19rem; display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem 1.1rem;\n    box-sizing: border-box; text-align: left; color: #e8e8f0; border-radius: 16px;\n    background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.16);\n    backdrop-filter: blur(6px); animation: party-rise 0.7s ease-out both;\n  }\n  .party-week b { font-size: 1.8rem; }\n  .party-confetti { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }\n  .party-confetti i {\n    position: absolute; top: -6vh; width: 10px; height: 16px; opacity: 0.9;\n    animation: party-fall linear infinite;\n  }\n  @keyframes party-fall { to { transform: translateY(112vh) rotate(760deg); } }\n  @keyframes party-pop { 0% { scale: 0; opacity: 0; } 70% { scale: 1.15; } 100% { scale: 1; } }\n  @keyframes party-shine { to { background-position: 200% center; } }\n  @keyframes party-float { 50% { translate: 0 -8px; } }\n  @keyframes party-rise { from { translate: 0 24px; opacity: 0; } }\n  @keyframes party-bounce { 50% { transform: translateY(-16px) rotate(-8deg); } }\n  @keyframes party-glow { 50% { text-shadow: 0 0 48px currentColor; } }\n  @media (prefers-reduced-motion: reduce) {\n    .party-confetti { display: none; }\n    .env, .party, .party * { animation: none !important; }\n  }\n</style>\"\"\"\n\n\ndef congrats() -> str:\n    \"\"\"Return a party for everyone in app/graduates/ (one file per person), or nothing.\"\"\"\n    from html import escape\n    from pathlib import Path\n\n    folder = Path(__file__).parent / \"graduates\"\n    people = sorted(n for p in folder.glob(\"*.txt\") if (n := p.read_text().strip()))\n    if not people:\n        return \"\"\n    colours = [\"#ff4d6d\", \"#ffd166\", \"#06d6a0\", \"#4cc9f0\", \"#b388ff\", \"#ff8fab\"]\n    shapes = [\"50%\", \"2px\", \"0\"]\n    confetti = \"\".join(\n        f'<i style=\"left: {i * 37 % 100}%; background: {colours[i % 6]}; '\n        f\"border-radius: {shapes[i % 3]}; animation-duration: {3 + i % 5 * 0.7:.1f}s; \"\n        f'animation-delay: -{i * 0.23 % 4:.2f}s\"></i>'\n        for i in range(70)\n    )\n    names = \"\".join(\n        f'<span class=\"party-name\" style=\"animation-delay: {0.5 + i * 0.3:.1f}s, {i * 0.4:.1f}s\">'\n        f\"{escape(name)}</span>\"\n        for i, name in enumerate(people)\n    )\n    week = \"\".join(\n        f'<li style=\"animation-delay: {1.2 + i * 0.2:.1f}s\"><b>{icon}</b>{escape(text)}</li>'\n        for i, (icon, text) in enumerate(WEEK)\n    )\n    return (\n        f'{PARTY}\\n  <div class=\"party-confetti\" aria-hidden=\"true\">{confetti}</div>\\n'\n        '  <div class=\"party\">\\n'\n        '    <div class=\"party-trophy\" aria-hidden=\"true\">🏆</div>\\n'\n        '    <div class=\"party-title\">Congratulations</div>\\n'\n        f'    <div class=\"party-names\">{names}</div>\\n'\n        '    <div class=\"party-done\">you are done with Platform Engineering!</div>\\n'\n        f'    <ul class=\"party-week\">{week}</ul>\\n'\n        \"  </div>\"\n    )\n\n'''\n    env = '  <div class=\"env\">{text[\"environment\"]}</div>\\n'\n    code = code.replace(\"\\ndef render_page(\", block + \"\\ndef render_page(\", 1)\n    code = code.replace(env, env + \"  {congrats()}\\n\", 1)\n    main.write_text(code)\n    print(\"Added the party to the page.\")\nEOF\npytest -q\ngit status --short",
+        explain: [
+          ['git switch -c congrats-$ME', 'a branch of your own for this change.'],
+          ['echo "$NAME" > app/graduates/$ME.txt', 'your name, in a file named after you.'],
+          ["python3 - <<'EOF' ... EOF", 'add a party to app/main.py, under the environment\'s name: falling confetti, a trophy, a rainbow Congratulations, your name as a glowing badge, and five things you did this week. If the party is already there (you ran this before), only your name is updated.'],
+          ['pytest -q', 'run the tests before you push.'],
+          ['git status --short', 'what changed: app/main.py (M) and the new folder app/graduates/ (??).'],
+        ],
+        see: '"Added the party to the page.", the tests passing, and the two changes:',
+        out: "Already on 'main'\nYour branch is up to date with 'origin/main'.\nAlready up to date.\nSwitched to a new branch 'congrats-student01'\nAdded the party to the page.\n......                                                                   [100%]\n6 passed in 0.57s\n M app/main.py\n?? app/graduates/",
+        ifnot: [
+          ['The party is already on the page (you ran this before)', 'nothing is wrong: only your name file is updated. Carry on with step 3.'],
+          ['Your name does not show in dev later', 'the name file was empty: $NAME was lost (a new terminal). Run step 1 again, then echo "$NAME" > app/graduates/$ME.txt, commit and push.'],
+        ],
+      },
+      {
+        title: 'Commit, push, and open the pull request',
+        where: 'Workspace terminal, then Gitea',
+        why: 'Nothing reaches an environment without a pull request.',
+        do: [
+          'Paste the box to commit and push.',
+          'Open the pulls/new link it prints (' + OPEN_LINK.replace(/:.*$/, '') + ') and click Create Pull Request.',
+        ],
+        run: 'git add -A\ngit commit -m "Congratulations $NAME"\ngit push -u origin congrats-$ME',
+        explain: [
+          ['git add -A', 'put both changes, the page and your name file, into the commit.'],
+        ],
+        see: 'A pull request with two files changed, and the pipeline running on it.',
+      },
+      {
+        title: 'The reviewer approves; you merge',
+        where: 'Gitea',
+        why: 'Someone else agrees before anything is merged.',
+        do: [
+          'Approve as reviewer: ' + privateWindowAs('reviewer') + ' Then Files Changed → Review → Approve, and close the private window.',
+          'When "All checks were successful", merge with Create squash commit.',
+        ],
+        see: 'Merged: the pipeline was green and the reviewer approved.',
+      },
+      {
+        title: 'See your name in dev',
+        where: 'Browser',
+        why: 'dev follows main: a merged change appears there by itself.',
+        do: [
+          'Wait a few minutes: the pipeline on main builds the new image (Actions tab, green tick), then Argo CD puts it in dev.',
+          'Open https://hello-teamNN-dev.<lab domain>/ in a new tab (your team instead of teamNN).',
+        ],
+        see: 'DEV glowing red, falling confetti, a bouncing trophy, a rainbow Congratulations, your name on a glowing badge, "you are done with Platform Engineering!" and five cards with what you did this week.',
+      },
+      {
+        title: 'Release it to staging',
+        where: 'Workspace terminal, then Gitea',
+        why: 'staging gets the very image that dev runs, through an approved two-line change, as in Lab 1.',
+        do: [
+          'When your name shows in dev, paste the box.',
+          'Open the pulls/new link it prints and click Create Pull Request. The reviewer approves (private window, as in step 4); then merge.',
+          'A minute after the merge, open https://hello-teamNN-staging.<lab domain>/ in a new tab.',
+        ],
+        run: 'cd ~/hello\ngit switch main && git pull\nTAG=$(git rev-parse HEAD)\ngit switch -c congrats-staging-$ME\nsed -i "s/newTag: .*/newTag: $TAG/; s/count: 0/count: 1/" deploy/staging/kustomization.yaml\ngit commit -am "Release the congratulations to staging"\ngit push -u origin congrats-staging-$ME',
+        explain: [
+          ['TAG=$(git rev-parse HEAD)', 'the newest commit on main: its image is the one dev runs.'],
+          ['sed -i "s/newTag: .*/newTag: $TAG/; s/count: 0/count: 1/" ...', 'staging runs that image, with one copy (if it was still off).'],
+        ],
+        see: 'STAGING in yellow, with your name.',
+      },
+      {
+        title: 'Release it to prod',
+        where: 'Workspace terminal, then Gitea',
+        why: 'prod gets exactly what staging runs, after one more approval.',
+        do: [
+          'Paste the box. It takes the tag that staging runs, so prod gets the same image.',
+          'Open the pulls/new link, Create Pull Request, the reviewer approves, merge.',
+          'A minute after the merge, open https://hello-teamNN-prod.<lab domain>/ in a new tab.',
+        ],
+        run: 'cd ~/hello\ngit switch main && git pull\nTAG=$(awk \'/newTag:/ {print $2}\' deploy/staging/kustomization.yaml)\ngit switch -c congrats-prod-$ME\nsed -i "s/newTag: .*/newTag: $TAG/; s/count: 0/count: 2/" deploy/prod/kustomization.yaml\ngit commit -am "Release the congratulations to prod"\ngit push -u origin congrats-prod-$ME',
+        explain: [
+          ["TAG=$(awk '/newTag:/ {print $2}' deploy/staging/kustomization.yaml)", 'read the tag staging runs, from Git.'],
+          ['sed -i "s/newTag: .*/newTag: $TAG/; s/count: 0/count: 2/" ...', 'prod runs that same image, with two copies (if it was still off).'],
+        ],
+        see: 'PROD in green, with your name.',
+      },
+      {
+        title: 'Three environments, one image',
+        where: 'Browser',
+        why: 'The whole week on three tabs: one change, reviewed, tested, built once and released twice.',
+        do: [
+          'Put the three tabs side by side: dev (red), staging (yellow), prod (green).',
+          'Take a screenshot of the three for your evidence pack.',
+        ],
+        see: 'The same page and your name in all three, each in its own colour. Congratulations: you are done.',
+      },
+    ],
+    done: 'Your name is on hello\'s page in dev, staging and prod: one change, from commit to prod, with an approval at every step.',
   },
 };

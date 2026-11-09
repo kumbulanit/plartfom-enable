@@ -16,7 +16,8 @@ on the VM. See the setup guide, "Before you clone".
 A second login, `reviewer`, lets a delegate approve their own pull request as a
 second person, and `platform-approver` lets them play the platform team. The
 same playbook still builds one shared host for a whole cohort (set
-`pelab_cohort_size`, `pelab_team_count` and `pelab_runner_count`).
+`pelab_cohort_size` and `pelab_runner_count`; every delegate still gets a team of
+their own, because `pelab_team_count` follows the cohort size).
 
 The lab is a small but complete **Internal Developer Platform (IDP)**. At the end of
 the build, every team has a simple web service that it changes, ships and runs

@@ -4,7 +4,7 @@
 // twice (Day 5's CI/CD) is one topic. Used by the "agenda" slide and the handbook.
 'use strict';
 
-// What delegates see of a lab's time: who does it ("in teams", "on your own"), not
+// What delegates see of a lab's time: who does it ("on your own", "whole room"), not
 // how long it takes. Durations change with the room; the instructor guide keeps them.
 function who(time) {
   return (time || '').replace(/^\s*\d+\s*min\b\s*(·\s*)?/, '').trim();

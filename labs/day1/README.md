@@ -10,7 +10,7 @@ Each day adds one layer of the platform. The same hello app travels all the way:
 | --- | --- | --- |
 | 1 | Platform engineering and Linux basics | The hello app runs by hand in your workspace and reports its environment |
 | 2 | Git and working together | An approved change of yours is live in dev |
-| 3 | Infrastructure as Code from a template | Your team has staging and prod, built from code |
+| 3 | Infrastructure as Code from a template | You have staging and prod, built from code |
 | 4 | Containers and the packaging template | A second service exists, in the catalog and in dev |
 | 5 | CI/CD, testing and security | Pipeline green, image scanned with an SBOM, a bad deployment blocked |
 | 6 | Deploy, observe and the capstone | The new service runs in prod, with an evidence pack, presented to a panel |
@@ -29,41 +29,40 @@ One small app, hello, travels the whole week. Today: what a platform is, then en
 
 | Topic | Labs |
 | --- | --- |
-| Getting to know each other | [Icebreaker: two truths and a lie](#icebreaker-two-truths-and-a-lie) (in teams) |
-| Platform engineering | [Lab 1: map how a change reaches production today](#lab-1-map-how-a-change-reaches-production-today) (in teams) |
+| Getting to know each other | [Icebreaker: two truths and a lie](#icebreaker-two-truths-and-a-lie) (whole room) |
+| Platform engineering | [Lab 1: map how a change reaches production today](#lab-1-map-how-a-change-reaches-production-today) (alone, then the room) |
 | Linux basics | [Lab 2: Linux warm-up in your workspace](#lab-2-linux-warm-up-in-your-workspace)<br>[Lab 3: run hello by hand, and count the steps](#lab-3-run-hello-by-hand-and-count-the-steps) |
 
 ## Getting to know each other
 
-*One short icebreaker before any technology: two truths and a lie, in your team. By the end you will know who you are working with all week.*
+*One short icebreaker before any technology: two truths and a lie, around the room. By the end you will know who you are spending the week with.*
 
 ### Icebreaker: two truths and a lie
 
-*in teams*
+*whole room*
 
 #### The idea, in plain words
 
-Before any technology, meet the people you will work with all week. Each of you tells your team three short things about your work, two true and one false, and the team guesses which is false. It is a gentle way to learn names, roles and a bit about each other.
+Before any technology, meet the people you will spend the week with. Each of you tells the room three short things about your work, two true and one false, and the room guesses which is false. It is a gentle way to learn names, roles and a bit about each other.
 
 Then each person names one tool they wish existed at work. Those wishes matter: most of them are about not waiting, and not waiting is exactly what a platform gives teams. You will come back to them in Lab 1 and on Day 2.
 
-**What you do:** Get to know your own team: share two true facts and one false one about your work, and the one tool you wish existed.
+**What you do:** Get to know the people in the room: share two true facts and one false one about your work, and the one tool you wish existed.
 
-**At the end you will have:** A team that knows each other, a team name, and a list of wishes for the platform.
+**At the end you will have:** People who know each other a little, and a board of wishes for the platform.
 
 **You will learn:**
 
-- The names and roles of your teammates.
-- What your team wishes it had at work: the start of thinking about a platform as a product.
+- The names and roles of the people around you.
+- What people wish they had at work: the start of thinking about a platform as a product.
 
 **Words you will meet:**
 
-- **Wish list:** The tools you wish existed. On Day 2 it becomes what your team's platform must make easy.
+- **Wish list:** The tools you wish existed. On Day 2 it becomes what your platform must make easy.
 
 **Before you start:**
 
-1. Sit with your team: 4 or 5 people.
-2. A note or a sheet, a pen and your table card.
+1. A note, a sticky note and a pen.
 
 #### Step 1. Write two truths and one lie
 
@@ -84,73 +83,72 @@ Then each person names one tool they wish existed at work. Those wishes matter: 
 
 #### Step 2. Take turns and guess
 
-> **In plain words:** Introduce yourself and read your three statements; the team guesses the false one.
+> **In plain words:** Introduce yourself and read your three statements; the room guesses the false one.
 
-*Where: Your team*
+*Where: The whole room*
 
 **Why:** Everyone speaks once, and you all learn names and roles.
 
 **Do this:**
 
-1. Take turns: say your name and your role in FMD, then read your three statements.
-2. The team agrees on a guess. Then reveal which one was false.
+1. In turn, around the room: say your name and your role in FMD, then read your three statements.
+2. The room calls out a guess. Then reveal which one was false.
 
 **You should see:** Everyone has had a turn, with a few surprises.
 
-**Check before you go on:** You know every teammate's name and role.
+**Check before you go on:** You know the names and roles of the people around you.
 
 #### Step 3. One tool you wish existed
 
-> **In plain words:** Each person says one tool they wish they had at work.
+> **In plain words:** Write one tool you wish you had at work.
 
-*Where: Your team*
+*Where: On your own*
 
 **Why:** The wishes show what a platform should do for real people. Most are about removing a wait or a ticket.
 
 **Do this:**
 
-1. Each person names one tool they wish existed at work, for example "a button that gives me a test environment" or "a report that builds itself".
-2. One person writes all the wishes on a sheet.
+1. On a sticky note, write one tool you wish existed at work, for example "a button that gives me a test environment" or "a report that builds itself".
 
-**You should see:** One wish per person on the sheet.
+**You should see:** One wish on your sticky note.
 
-**Check before you go on:** Every teammate's wish is written down.
+**Check before you go on:** Your wish is written down.
 
-#### Step 4. Choose a team name
+#### Step 4. Read your wish to the room
 
-> **In plain words:** Agree a name for your team for the week.
-
-*Where: Your team*
-
-**Why:** A name makes the team yours; you will use it all week.
-
-**Do this:**
-
-1. Agree a team name, inspired by your wishes if you like.
-2. Write it on your table card.
-
-**You should see:** A team name on the table card.
-
-**Check before you go on:** Your table card shows your team name.
-
-#### Step 5. Share with the room
-
-> **In plain words:** Tell the room your team name and your favourite wish.
+> **In plain words:** Read your wish out, and put it on the board next to any wish like it.
 
 *Where: In front of the room*
 
-**Why:** Hearing every team's wishes shows which ones the whole of FMD shares: those are where a common platform pays off.
+**Why:** Hearing everyone's wishes shows which ones the whole of FMD shares: those are where a common platform pays off.
 
 **Do this:**
 
-1. One person reads your team name and your favourite wish.
-2. The instructor writes the wishes on the board.
+1. In turn, read your wish out.
+2. Stick it on the board, next to any wish like it.
 
-**You should see:** Every team's wish on the board.
+**You should see:** Every wish on the board, in groups.
 
-**Check before you go on:** Your team's wish is on the board. Keep your sheet: you need it in Lab 1 and on Day 2.
+**Check before you go on:** Your wish is on the board.
 
-**Done when:** Your team has a name, knows each other, and has a written list of wishes.
+#### Step 5. Which wishes do many people share?
+
+> **In plain words:** Look at the biggest groups of wishes.
+
+*Where: The board*
+
+**Why:** A wish many people share is a job the platform should do once, for everyone.
+
+**Do this:**
+
+1. The instructor reads out the biggest groups.
+2. Note your own wish: you need it in Lab 1 and on Day 2.
+
+**You should see:** Two or three big groups, usually about waiting: for an environment, a sign-off, an answer.
+
+**Check before you go on:** You can name the wish most people share.
+
+**Done when:** You know the people around you, and the room has a board of wishes for the platform.
 
 **What this lab showed:** Most wishes are about not waiting: for an environment, a sign-off, an answer. Those wishes are what a platform is for. You meet them again in Lab 1 (the waits on your map) and on Day 2 (your platform charter).
 
@@ -343,7 +341,7 @@ A template is a golden path packaged so a team fills in a few values and gets th
 
 ### What a delegate does on this platform: the week in five steps
 
-- **Find:** Open the portal; see your team, its services, who owns them and where they run.
+- **Find:** Open the portal; see your services, who owns them and where they run.
 - **Create:** Make a new service or request an environment from a template. A few values, no ticket.
 - **Change:** Edit on a branch, open a pull request, get one approval, merge. Nothing reaches main any other way.
 - **Ship:** The pipeline checks and builds; the registry scans; Argo CD deploys to dev, and to staging and prod after an approved promotion.
@@ -455,7 +453,7 @@ Flow efficiency: 2 / 20 = 10%
 
 ### Lab 1: map how a change reaches production today
 
-*in teams*
+*alone, then the room*
 
 **This lab puts into practice:** [Value streams: where the time really goes](#value-streams-where-the-time-really-goes) · [A value stream, mapped: where the time goes](#a-value-stream-mapped-where-the-time-goes) · [A change before and after the platform](#a-change-before-and-after-the-platform) · [Measuring delivery: the four DORA metrics](#measuring-delivery-the-four-dora-metrics)
 
@@ -465,15 +463,15 @@ Think of the last time something you needed changed at work: a new column in a r
 
 In this lab every team draws that road on paper, then looks at the other teams' roads. You will find that everyone built almost the same road, each in their own way. That discovery, made by the room itself, is the whole case for a platform. No computer is needed.
 
-**What you do:** As a team, map your road from a request to a live change, mark where it waits, compare it with the other teams' roads, and see that the shared steps are what a platform builds once.
+**What you do:** Map your own road from a request to a live change, mark where it waits, compare it with the other delegates' roads, and see that the shared steps are what a platform builds once.
 
-**At the end you will have:** Your road with its waits, ticks from the other teams on what is the same, and one shared road on the wall with what the platform does instead of each shared step.
+**At the end you will have:** Your road with its waits, ticks from the other delegates on what is the same, and one shared road on the wall with what the platform does instead of each shared step.
 
 **You will learn:**
 
 - How to see delivery as a chain of steps, with waits and hand-offs between them.
 - That most of the time a change takes is waiting, not working.
-- That different teams build almost the same road, each on its own: the case for a platform.
+- That different units build almost the same road, each on its own: the case for a platform.
 
 **Words you will meet:**
 
@@ -485,15 +483,15 @@ In this lab every team draws that road on paper, then looks at the other teams' 
 
 **Before you start:**
 
-1. Your team around one table, with an A3 sheet, yellow and pink sticky notes, and markers. No computer needed.
-2. Choose a timekeeper: the instructor tells you how long each of the four steps takes.
-3. Every team maps the same job: a small change to a report or a script, from "someone asks for it" to "it is live".
+1. Your own A3 sheet, yellow and pink sticky notes, and a marker. No computer needed.
+2. The instructor keeps the time: each of the four steps has its own.
+3. Everyone maps the same job: a small change to a report or a script, from "someone asks for it" to "it is live", the way it happens in your unit today.
 
 #### Step 1. List your road, and mark the waits
 
 > **In plain words:** Draw every step your change goes through, and mark where it waits and why.
 
-*Where: Your team, on the A3 sheet*
+*Where: On your own, on the A3 sheet*
 
 **Why:** You cannot improve a road you have not drawn. Writing every step makes the hidden ones visible: the e-mails, the queues, the sign-off nobody remembers.
 
@@ -517,38 +515,36 @@ Total: 14 days.  Working: 2 days.
 
 #### Step 2. Walk round and tick what you recognise
 
-> **In plain words:** One of you looks at the other teams' roads and ticks every step you recognise.
+> **In plain words:** Look at other delegates' roads and tick every step you recognise.
 
-*Where: The other teams' boards*
+*Where: Other delegates' sheets*
 
-**Why:** Seeing another team's road is the fastest way to notice that yours is not unique.
+**Why:** Seeing someone else's road is the fastest way to notice that yours is not unique.
 
 **Do this:**
 
-1. Your team chooses one walker. Everyone else stays at your board to explain it to visitors.
-2. The walker takes a pen and visits every other team's board in turn.
-3. On each board, tick ✓ every step your team does too, and star ★ anything your team never does but maybe should.
+1. Leave your sheet on your table, take a pen, and visit at least four other sheets.
+2. On each sheet, tick ✓ every step you do too, and star ★ anything you never do but maybe should.
 
-**You should see:** Ticks and stars on every board, including yours, from the other teams' walkers.
+**You should see:** Ticks and stars on every sheet, including yours, from the other delegates.
 
-**Check before you go on:** Your walker has visited every other board.
+**Check before you go on:** You have visited at least four other sheets.
 
 #### Step 3. Same or different?
 
-> **In plain words:** Back in your team, sort your steps into "the same as others" and "only ours".
+> **In plain words:** Back at your sheet, sort your steps into "the same as others" and "only mine".
 
-*Where: Your team, back at your board*
+*Where: Back at your own sheet*
 
 **Why:** A difference is only real if it is a different job. Most turn out to be the same job with another name, tool or person.
 
 **Do this:**
 
-1. The walker tells the team what they saw on the other boards.
-2. Sort your notes into two groups: ticked by other teams (the same), and no ticks (only ours).
-3. For each "only ours" note, ask: is it really a different job, or the same job done another way?
-4. Look at the stars on your board: a step another team has and you do not. Is it a check you are missing?
+1. Sort your notes into two groups: ticked by others (the same), and no ticks (only yours).
+2. For each "only yours" note, ask: is it really a different job, or the same job done another way?
+3. Look at the stars on your sheet: a step someone else has and you do not. Is it a check you are missing?
 
-**You should see:** Two groups of notes. Usually the "same" group is much bigger than the "only ours" group.
+**You should see:** Two groups of notes. Usually the "same" group is much bigger than the "only yours" group.
 
 **Check before you go on:** Every note is in one of the two groups.
 
@@ -558,29 +554,29 @@ Total: 14 days.  Working: 2 days.
 
 *Where: The wall, with the whole room*
 
-**Why:** When every team's shared steps sit in one place, you can see what each team built for itself, and what could be built once for everyone.
+**Why:** When everyone's shared steps sit in one place, you can see what each unit built for itself, and what could be built once for everyone.
 
 **Do this:**
 
-1. Each team brings its ticked notes to the wall. The same step from different teams goes into the same column.
-2. Above each column, write how many teams had that step.
+1. Bring your ticked notes to the wall. The same step from different people goes into the same column.
+2. Above each column, write how many people had that step.
 3. The instructor places a card over each column: what the platform does instead (the table on the slide).
-4. Together, count what disappears: set-up done once per team, waiting, and checks that only some teams remembered.
+4. Together, count what disappears: set-up done again in every unit, waiting, and checks that only some people remembered.
 
-**You should see:** One long road on the wall, made of columns that most teams share, each with a platform card over it.
+**You should see:** One long road on the wall, made of columns that most people share, each with a platform card over it.
 
 **How to read it:**
 
-- Every team built and keeps its own copy of almost the same road. A platform builds the shared steps once, with the checks inside, and every team uses them by self-service: that is platform engineering.
+- Every unit built and keeps its own copy of almost the same road. A platform builds the shared steps once, with the checks inside, and every team uses them by self-service: that is platform engineering.
 - The pink waits are what the platform removes first. On Day 6 you come back to this wall and cross off every note the platform now does.
 
-> **Tip:** Take a photo of your team's board and of the wall: both go into your Day 6 evidence pack.
+> **Tip:** Take a photo of your sheet and of the wall: both go into your Day 6 evidence pack.
 
-**Check before you go on:** You can say in one sentence what a platform would change for your team.
+**Check before you go on:** You can say in one sentence what a platform would change for your unit.
 
-**Done when:** Your road is mapped with its waits, compared with every other team's, and the shared steps are on one wall with what the platform does instead.
+**Done when:** Your road is mapped with its waits, compared with the other delegates', and the shared steps are on one wall with what the platform does instead.
 
-**What this lab showed:** Every team drew almost the same road: the same steps, with different names, tools and people. Each team built and keeps its own copy of that road, and not every copy has the same checks. Building the shared steps once, with the checks inside, and letting every team use them by self-service is platform engineering. The waits you marked are what it removes first.
+**What this lab showed:** Everyone drew almost the same road: the same steps, with different names, tools and people. Each unit built and keeps its own copy of that road, and not every copy has the same checks. Building the shared steps once, with the checks inside, and letting every team use them by self-service is platform engineering. The waits you marked are what it removes first.
 
 **If you are stuck**
 
@@ -836,7 +832,7 @@ echo "I am $ME, in $TEAM, on $DOMAIN"
 
 **What each line does:**
 
-- `echo "I am $ME, in $TEAM, on $DOMAIN"`: print a sentence. $ME, $TEAM and $DOMAIN are filled in by the workspace with your user name, your team and the lab domain.
+- `echo "I am $ME, in $TEAM, on $DOMAIN"`: print a sentence. $ME, $TEAM and $DOMAIN are filled in by the workspace with your user name, your team name and the lab domain.
 
 **You should see:** Your own user name and team (here student01 in team01):
 
@@ -1201,13 +1197,13 @@ It writes one JSON line per request to its log. That is enough to practise every
 
 #### The idea, in plain words
 
-hello is a very small website: when you visit it, it answers with a short greeting and a few facts about itself. Your team will ship it all week, through the platform.
+hello is a very small website: when you visit it, it answers with a short greeting and a few facts about itself. You will ship it all week, through the platform.
 
 Today you run it yourself, by hand, the way it was done before platforms existed: copy the code, start it in a terminal, visit it, change its settings, restart it. Think of it as running a market stall yourself: you carry the table, set it up, open, close, and set up again somewhere else. Every manual step you count today is one the platform takes over later in the week.
 
 You will use two terminals at the same time: one runs the website and stays busy, the other visits it. Step 3 shows how to open the second.
 
-**What you do:** Get your team's service, hello, and run it by hand on your workspace in two settings. Count every manual step: on the next days the platform takes them over.
+**What you do:** Get your service, hello, and run it by hand on your workspace in two settings. Count every manual step: on the next days the platform takes them over.
 
 **At the end you will have:** hello running on your workspace, twice, with two different settings; and a written list of every step it took by hand.
 
@@ -1236,13 +1232,13 @@ You will use two terminals at the same time: one runs the website and stays busy
 4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
 5. You will need two terminals at the same time: one runs the service, the other talks to it. Step 3 shows how to open the second.
 
-#### Step 1. Tell Git who you are, then copy your team's repository
+#### Step 1. Tell Git who you are, then copy your repository
 
-> **In plain words:** Tell Git your name, then copy your team's code from Gitea (the place where the bank keeps code) into your workspace.
+> **In plain words:** Tell Git your name, then copy your code from Gitea (the place where the bank keeps code) into your workspace.
 
 *Where: Workspace terminal*
 
-**Why:** Git records who made every change, so you tell it your name once. Then you copy your team's service from Gitea to your workspace.
+**Why:** Git records who made every change, so you tell it your name once. Then you copy your service from Gitea to your workspace.
 
 **Do this:**
 
@@ -1271,7 +1267,7 @@ You will use two terminals at the same time: one runs the website and stays busy
    git config --global credential.helper "cache --timeout=36000"
    ```
 
-4. Go to your home folder and copy (clone) your team's code from Gitea. Git asks for a Username: type student01 and press Enter. Then a Password: type your password (from your logins file, cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type a password: that is normal, keep typing.
+4. Go to your home folder and copy (clone) your code from Gitea. Git asks for a Username: type student01 and press Enter. Then a Password: type your password (from your logins file, cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type a password: that is normal, keep typing.
 
    ```bash
    cd ~
@@ -1312,7 +1308,7 @@ You will use two terminals at the same time: one runs the website and stays busy
 - `git config --global user.email "$ME@$DOMAIN"`: tell Git your e-mail address in the lab, for example student01@<lab domain>.
 - `git config --global credential.helper "cache --timeout=36000"`: make Git remember your password for 10 hours (36,000 seconds), so you type it once a day.
 - `cd ~`: go to your home folder.
-- `git clone https://gitea.$DOMAIN/$TEAM/hello`: copy your team's repository hello, with its whole history, into a new folder called hello.
+- `git clone https://gitea.$DOMAIN/$TEAM/hello`: copy your repository hello, with its whole history, into a new folder called hello.
 - `cd hello`: go into it.
 - `ls`: list what is inside.
 
@@ -1651,10 +1647,10 @@ For 25 people, three environments and a change every day, this would take:
 You can now:
 
 - Explain platform engineering, an IDP and a golden path in plain words
-- Find your team and its services in the portal
+- Find your services in the portal
 - Work in your browser workspace and use the everyday Linux commands
 - Run hello by hand and make it report a different environment
-- Name your team's biggest delivery bottleneck
+- Name your unit's biggest delivery bottleneck
 
 **Tomorrow:** Git and working together. You will make a change to hello on a branch, open a pull request, get it reviewed and approved, and watch it go live in dev without touching a server.
 

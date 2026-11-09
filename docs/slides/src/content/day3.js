@@ -12,7 +12,7 @@ module.exports = [
   },
   {
     type: 'goal', section: 'Opening',
-    goal: 'Describe infrastructure in code, read a plan, and request your team\'s staging and prod environments from the environment template.',
+    goal: 'Describe infrastructure in code, read a plan, and request your own staging and prod environments from the environment template.',
     outcomes: [
       'Explain Infrastructure as Code: plan, apply, destroy, state and drift',
       'Run OpenTofu yourself on a small example',
@@ -24,7 +24,7 @@ module.exports = [
   {
     type: 'agenda', section: 'Opening',
     title: "Today's plan",
-    bridge: 'Yesterday your change reached dev through a pull request. Today the infrastructure gets the same treatment: your team\'s staging and prod, requested as code.',
+    bridge: 'Yesterday your change reached dev through a pull request. Today the infrastructure gets the same treatment: your own staging and prod, requested as code.',
     notes: 'Same loop as yesterday (branch, pull request, review, merge), now for infrastructure. Lab 1 is a harmless warm-up; Lab 2 is the real request.',
   },
   {
@@ -110,7 +110,7 @@ resource "local_file" "note" {
   {
     type: 'section', section: 'Environments',
     title: 'Environments',
-    subtitle: 'You have used OpenTofu on a file. Now the same four moves on real infrastructure: request your team\'s staging and prod from the environment template (Lab 2), then see drift found and an environment rebuilt from code (Lab 3).',
+    subtitle: 'You have used OpenTofu on a file. Now the same four moves on real infrastructure: request your own staging and prod from the environment template (Lab 2), then see drift found and an environment rebuilt from code (Lab 3).',
     notes: 'Bridge from the warm-up: the file was harmless practice; the next plan creates real namespaces, quotas and access for the team.',
   },
   {
@@ -119,14 +119,14 @@ resource "local_file" "note" {
     icon: 'FiLayers',
     idea: [
       'An environment is a fenced area where one copy of your application runs: it has its own address, its own settings, a budget of CPU and memory, access rules and network rules.',
-      'dev is where every merge lands automatically, for the team to see its work. staging is where a release is checked before production. prod is what users rely on; it changes only through an approved promotion.',
+      'dev is where every merge lands automatically, for you to see your work. staging is where a release is checked before production. prod is what users rely on; it changes only through an approved promotion.',
       'The application is identical in all three. Only its settings differ, which is why hello can tell you which environment it is in.',
     ],
     lab: [
       'On the cluster, an environment is a namespace: teamNN-dev, teamNN-staging, teamNN-prod.',
       'Each has a ResourceQuota (the budget), default limits, network policy and access rules.',
       'dev was created with the lab. Staging and prod you request today.',
-      'The team can change dev and staging; prod is read-only for people. Only the platform deploys there.',
+      'You can change dev and staging; prod is read-only for people. Only the platform deploys there.',
     ],
     oneLiner: 'An environment is a fenced area with a budget and rules; the same app runs in all three with different settings.',
     notes: 'Make the governance point: prod being read-only for people is not distrust, it is the brief\'s "least privilege" and "controlled promotion". Deployments to prod happen through Git and Argo CD, which keeps the evidence.',
@@ -155,11 +155,11 @@ resource "local_file" "note" {
     notes: 'This is "architecting a golden path" for infrastructure: the hard, risky part (what a safe environment looks like) is done once by the platform team and reviewed by security; the easy part (asking for one) is left to the teams. Compare with the ticket: a form that goes to a person who does it by hand, differently each time.',
   },
   {
-    type: 'steps', section: 'Lab 2: request staging and prod', time: '45 min · per team',
+    type: 'steps', section: 'Lab 2: request staging and prod', time: '45 min · on your own',
     title: 'Lab 2: request staging and prod from the template',
     steps: [
       { do: `git clone https://gitea.${DOMAIN}/platform/environments && cd environments && git switch -c teamNN-environments`, expect: 'main.tf, a modules/team-environment folder and team00.tf.example.' },
-      { do: 'cp team00.tf.example teamNN.tf, then replace team00 with your team in both places.', expect: 'One new file of six lines (git status shows it).' },
+      { do: 'cp team00.tf.example teamNN.tf, then replace team00 with your team name in both places.', expect: 'One new file of six lines (git status shows it).' },
       { do: 'git add teamNN.tf, commit, push, and open a pull request. Open its plan pipeline run.', expect: 'Plan: 16 to add, 0 to change, 0 to destroy: two namespaces, each with a budget, defaults, four network rules and access.' },
       { do: 'Approve as the platform team (platform-approver, in a private window); your own or the reviewer\'s approval does not count here. Merge.', expect: 'Within two minutes the merge commit gets a green platform/apply status: "Applied: 16 added".' },
       { do: 'kubectl -n teamNN-staging get resourcequota,limitrange', expect: 'team-quota with requests.cpu 0/1 and requests.memory 0/2Gi, and team-defaults.' },
@@ -184,8 +184,8 @@ resource "local_file" "note" {
     title: 'Lab 3: drift, and destroy and recreate',
     steps: [
       { do: 'The instructor changes your staging quota by hand on the cluster (the way a well-meaning admin might).', expect: 'kubectl -n teamNN-staging get resourcequota shows a different number.' },
-      { do: 'In Gitea, open the environments repository, Actions, plan, and Run workflow on main.', expect: 'The plan shows one change per team (5 to change): each quota back to what the code says. This is drift, detected.' },
-      { do: 'Wait up to two minutes and look at the quota again.', expect: 'Back to the code\'s value. The commit status says "Applied: 0 added, 5 changed": one repair per team.' },
+      { do: 'In Gitea, open the environments repository, Actions, plan, and Run workflow on main.', expect: 'The plan shows one change per team name (one per delegate): each quota back to what the code says. This is drift, detected.' },
+      { do: 'Wait up to two minutes and look at the quota again.', expect: 'Back to the code\'s value. The commit status says "Applied: 0 added, N changed": one repair per team name.' },
       { do: 'Open a pull request that removes "staging" from your environments list. Read the plan.', expect: 'Plan: 0 to add, 0 to change, 8 to destroy. The reviewer can see exactly what would disappear.' },
       { do: 'Merge it, confirm staging is gone, then open a pull request that adds it back and merge that.', expect: 'Staging is recreated, identical to before. Nothing was done by hand.' },
     ],
@@ -231,7 +231,7 @@ resource "local_file" "note" {
     questions: [
       'What is the difference between plan and apply, and which one would you show an auditor?',
       'What is drift, and how did you detect and fix it today?',
-      'Why does the team write six lines instead of the whole environment definition?',
+      'Why do you write six lines instead of the whole environment definition?',
       'Why is prod read-only for people, and how does a change still reach it?',
       'What does size = "small" decide, and why is that a cost control?',
     ],
@@ -248,6 +248,6 @@ resource "local_file" "note" {
       'Say what a budget is and why it lives in the template',
     ],
     tomorrow: 'Containers. You will build the hello image with Docker, run it with different settings, and then create a brand-new service from the packaging template and see it appear in the catalog and in dev.',
-    notes: 'Each team now has three environments. Tomorrow the app gets packaged so that the same image can run in all three.',
+    notes: 'Each delegate now has three environments. Tomorrow the app gets packaged so that the same image can run in all three.',
   },
 ];

@@ -74,7 +74,7 @@ The same notes are in the deck's speaker notes; quiz answers are under the quiz 
 
 ### 1. Deploy, observe and the capstone
 
-The last day completes the path: the same hello app that ran by hand on Monday is promoted to staging and prod by pull request, watched on a dashboard, load-tested, broken and recovered. The afternoon is the capstone: each team takes its own Day 4 service through the same path and presents the evidence.
+The last day completes the path: the same hello app that ran by hand on Monday is promoted to staging and prod by pull request, watched on a dashboard, load-tested, broken and recovered. The afternoon is the capstone: each delegate takes their own Day 4 service through the same path and presents the evidence.
 
 ### 2. Today's goal
 

@@ -217,7 +217,7 @@ ls
 
 ## Lab 2: request staging and prod from the template
 
-Get your team's staging and prod environments the platform way: fill in the environment template, open a pull request, read the plan, and let the platform team approve and apply it.
+Get your own staging and prod environments the platform way: fill in the environment template, open a pull request, read the plan, and let the platform team approve and apply it.
 
 ### 1. Copy the environments repository and make a branch
 
@@ -243,7 +243,7 @@ ls
 
 1. Paste the box and press Enter. The first two lines make your file; the last two show it.
 
-2. Read your file with the team: check that your team name appears twice.
+2. Read your file: check that your team name appears twice.
 
 In `teamNN.tf`, change:
 
@@ -286,13 +286,13 @@ git status
 
 2. In what git push prints, find the line remote:   https://gitea.<lab domain>/platform/environments/pulls/new/teamNN-environments. Hold Ctrl (on a Mac Cmd) and click it: Gitea opens in a new browser tab, signed in as you. (Or in Gitea: platform/environments → Pull Requests → New Pull Request, and choose your branch on the right.)
 
-3. The page shows your change and a form under it. The title is already filled in with your commit message; in the box below it, write one line on why your team needs the environments. Click Create Pull Request.
+3. The page shows your change and a form under it. The title is already filled in with your commit message; in the box below it, write one line on why you need the environments. Click Create Pull Request.
 
 4. Wait about a minute. Near the bottom of the pull request, a check called plan / plan (pull_request) appears: first a yellow dot (running), then a green tick.
 
 5. Click Details next to it. The run opens. On the left, click the job plan; on the right, click the step called Plan to unfold its output.
 
-6. Scroll to the end of the Plan step and read the summary line. Then scroll up and read the list with your team.
+6. Scroll to the end of the Plan step and read the summary line. Then scroll up and read the list.
 
 7. The same plan is also posted as a comment on the pull request, by the pipeline: reviewers read it there, without opening the run.
 
@@ -312,7 +312,7 @@ git push -u origin $TEAM-environments
 
 1. Now you play the platform team: open a private window (Ctrl+Shift+N; on a Mac Cmd+Shift+N; in Firefox Ctrl+Shift+P), go to https://gitea.<lab domain>, click Sign In and sign in as platform-approver with its password from cat /etc/pelab/logins.md.
 
-2. In that window, open the pull request (platform/environments → Pull Requests → yours). Click Files Changed: there must be exactly one new file, teamNN.tf, with your team in both places.
+2. In that window, open the pull request (platform/environments → Pull Requests → yours). Click Files Changed: there must be exactly one new file, teamNN.tf, with your team name in both places.
 
 3. Check the plan (as in step 3): 16 to add, 0 to change, 0 to destroy.
 
@@ -342,7 +342,7 @@ kubectl -n $TEAM-staging describe resourcequota team-quota
 
 2. Sign in as delegate, with its password from cat /etc/pelab/logins.md (not your studentNN password).
 
-3. In the search box at the top of the application list, type your team, for example team03.
+3. In the search box at the top of the application list, type your team name, for example team03.
 
 4. Click teamNN-hello-staging, then go back and click teamNN-hello-prod.
 

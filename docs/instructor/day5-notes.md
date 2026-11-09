@@ -66,7 +66,7 @@ ansible pelab -b -m ansible.builtin.shell -a "ls -1t /opt/pelab/backups | head -
 | Lab 2: break the pipeline three ways, and fix it | 45 min |
 | Lab 3: watch the guardrails refuse a bad deployment | 35 min |
 | Lab 4: test a policy like code, with the Kyverno CLI | 25 min |
-| Lab 5: ask for an exception, and watch it expire | 25 min · per team |
+| Lab 5: ask for an exception, and watch it expire | 25 min · on your own |
 
 ## Slide by slide
 

@@ -6,7 +6,7 @@ Deck: `Day1-Platform-engineering-and-Linux-basics.pptx`. Delegates follow the ha
 
 - [ ] The morning checks in the run-book (portal, a workspace, a dev address, Argo CD, Grafana), on every VM: ansible pelab -m ping first. 30 minutes before the start.
 - [ ] Every delegate has built their own VM (prelab-setup/BUILD-YOUR-VM.md): PLAY RECAP said failed=0. Know which VM is whose: one line per delegate in inventory/all-vms.yml on your machine (pelab01, pelab02...), and export ANSIBLE_INVENTORY=inventory/all-vms.yml in your terminal. On every VM the delegate is student01 in team01, and their logins are in /etc/pelab/logins.md on the VM. Keep one VM aside as a spare, and one as your demo VM.
-- [ ] For Lab 1, per team: an A3 sheet, yellow and pink sticky notes, markers. For the room: a long empty wall (or a row of flipcharts) for step 4, and the platform cards from the slide "Your shared steps, done once by the platform", printed one row per card.
+- [ ] For Lab 1, per delegate: an A3 sheet, yellow and pink sticky notes, a marker. For the room: a long empty wall (or a row of flipcharts) for step 4, and the platform cards from the slide "Your shared steps, done once by the platform", printed one row per card.
 - [ ] Seat the room at tables of four or five for the two Day 1 games (the icebreaker and Lab 1). These table groups are only for the games: every lab on a computer is done alone, on the delegate's own VM.
 - [ ] Open your demo VM's portal, Gitea and Argo CD on the presenter screen: Gitea as student01 (you show the delegate's view), Argo CD as delegate. The passwords are in /etc/pelab/logins.md on the demo VM.
 
@@ -65,8 +65,8 @@ ansible pelab -b -m ansible.builtin.shell -a "ls -1t /opt/pelab/backups | head -
 
 | Lab | Time |
 | --- | --- |
-| Icebreaker: two truths and a lie | 20 min · in teams |
-| Lab 1: map how a change reaches production today | 45 min · in teams |
+| Icebreaker: two truths and a lie | 20 min · whole room |
+| Lab 1: map how a change reaches production today | 45 min · alone, then the room |
 | Lab 2: Linux warm-up in your workspace | 30 min |
 | Lab 3: run hello by hand, and count the steps | 45 min |
 
@@ -88,11 +88,11 @@ Three outcomes, all checkable at the end of the day. The third one matters most:
 
 ### 4. Today's plan
 
-Walk the plan once, then point at the last line: every lab is in the handbook, step by step, with the commands to paste and what they should see. Today opens with one icebreaker (two truths and a lie, in teams), then three labs; the first is on paper, in teams.
+Walk the plan once, then point at the last line: every lab is in the handbook, step by step, with the commands to paste and what they should see. Today opens with one icebreaker (two truths and a lie, around the room), then three labs; the first is on paper, on your own and then with the whole room.
 
 ### 5. Getting to know each other
 
-Teams of 4 to 5 are already seated, mixing levels and tracks (use the pre-course questionnaire summary). Make sure every table has notes, pens and a table card. Put a 20-minute timer on the screen.
+Every delegate works alone all week, on their own workspace; the icebreaker is the one time the whole room works together. Make sure every seat has a note, a sticky note and a pen. Put a 20-minute timer on the screen; with more than 15 delegates keep each turn to a minute.
 
 ### 6. Icebreaker: two truths and a lie
 
@@ -100,7 +100,7 @@ The wish list is the hook for the whole course: most wishes ("an environment in 
 
 ### 7. Why platform engineering exists
 
-Theory, spoken practically. Ask the room: when you last needed a server, a database or a pipeline, how long did it take and how many people were involved? Those waits are the cost of everyone building their own road. Then open the portal live and show the list of hello services, one per team, already running. The point: a platform makes the common things boring. Mention the brief: "paved roads, reusable platform products and policy-as-code" is its own wording for the same idea.
+Theory, spoken practically. Ask the room: when you last needed a server, a database or a pipeline, how long did it take and how many people were involved? Those waits are the cost of everyone building their own road. Then open the portal live and show the list of hello services, one per delegate, already running. The point: a platform makes the common things boring. Mention the brief: "paved roads, reusable platform products and policy-as-code" is its own wording for the same idea.
 
 ### 8. How we got here: from silos to platforms
 
@@ -116,7 +116,7 @@ The model also names three ways teams interact: collaboration (working closely f
 
 ### 11. How the teams work together
 
-Ask each team to place their own FMD unit on the picture. Most will be stream-aligned; a few may be complicated-subsystem (for example a pricing or payments engine). Then ask: who is the platform team in FMD today? Usually the answer is "nobody, or every team a bit": the brief's starting point.
+Ask each delegate to place their own FMD unit on the picture. Most will be stream-aligned; a few may be complicated-subsystem (for example a pricing or payments engine). Then ask: who is the platform team in FMD today? Usually the answer is "nobody, or every team a bit": the brief's starting point.
 
 ### 12. Who builds and runs a platform: the brief's eight role families
 
@@ -184,23 +184,23 @@ This is the model answer for Lab 1, with invented numbers. Show it, then hide it
 
 ### 28. Lab 1: map how a change reaches production today
 
-A four-step game that is also the brief's Lab 1, the baseline and value-stream diagnostic. Show this overview once, then one slide per step. Materials per team: an A3 sheet, yellow and pink sticky notes, markers; plus a long empty wall or a row of flipcharts for step 4. Keep the wall: on Day 6 teams cross off every note the platform now does.
+A four-step game that is also the brief's Lab 1, the baseline and value-stream diagnostic. Show this overview once, then one slide per step. Materials per delegate: an A3 sheet, yellow and pink sticky notes, a marker; plus a long empty wall or a row of flipcharts for step 4. Keep the wall: on Day 6 delegates cross off every note the platform now does.
 
 ### 29. bigstep
 
-Hand every team an A3 sheet and sticky notes in two colours (yellow for a step, pink for a wait). Read the job out loud so every team maps the same thing; that is what makes the boards comparable. Stop them at 12 minutes even if unfinished: a rough road is enough.
+Hand every delegate an A3 sheet and sticky notes in two colours (yellow for a step, pink for a wait). Read the job out loud so everyone maps the same thing; that is what makes the sheets comparable. Stop them at 12 minutes even if unfinished: a rough road is enough.
 
 ### 30. bigstep
 
-Choose the walker quickly: the person who knows the team's process least is a good choice, because they ask the plain questions. Two or three minutes per board. The stars matter: a star is usually a check or a control one team has and another is missing.
+About two minutes per sheet; in a small room everyone can visit every sheet. The stars matter: a star is usually a check or a control one team has and another is missing.
 
 ### 31. bigstep
 
-Most teams find that almost all their steps were ticked, and that most "differences" are the same job with a different name, tool or order. Let them say it themselves; do not give the answer yet.
+Most people find that almost all their steps were ticked, and that most "differences" are the same job with a different name, tool or order. Let them say it themselves; do not give the answer yet.
 
 ### 32. bigstep
 
-Build one long line on the wall from "someone asks" to "live". Cluster the notes into columns and write above each one how many teams had it. Then place the platform cards from the next slide over the columns. Finish with the question: what did each team build for itself that it could have used instead? That is the case for platform engineering, in the room's own words.
+Build one long line on the wall from "someone asks" to "live". Cluster the notes into columns and write above each one how many people had it. Then place the platform cards from the next slide over the columns. Finish with the question: what did each unit build for itself that it could have used instead? That is the case for platform engineering, in the room's own words.
 
 ### 33. Your shared steps, done once by the platform
 

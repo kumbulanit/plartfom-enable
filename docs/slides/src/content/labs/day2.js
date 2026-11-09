@@ -69,7 +69,7 @@ module.exports = {
         why: 'A change goes through three places on your workspace: the working folder (you edit), the staging area (git add) and the repository (git commit). git status shows where it is at each moment.',
         run: 'echo "Hello from $TEAM" > greeting.txt\ngit status',
         explain: [
-          ['echo "Hello from $TEAM" > greeting.txt', 'create the file greeting.txt with one line in it. $TEAM becomes your team, team01.'],
+          ['echo "Hello from $TEAM" > greeting.txt', 'create the file greeting.txt with one line in it. $TEAM becomes your team name, team01.'],
           ['git status', 'Git sees a new file it does not follow yet.'],
         ],
         see: 'The new file is untracked: Git sees it, but does not record it:',
@@ -231,7 +231,7 @@ module.exports = {
   },
 
   'Lab 2: your first change, on a branch': {
-    goal: 'Change the greeting of your team\'s service on a branch of your own, check it, save it as a commit and send it to Gitea.',
+    goal: 'Change the greeting of your service on a branch of your own, check it, save it as a commit and send it to Gitea.',
     learn: [
       'The everyday Git loop: get the latest version, make a branch, change, check, commit, push.',
       'Why every change starts on a branch of its own.',
@@ -291,7 +291,7 @@ module.exports = {
           'Find line 22, which starts with GREETING. The line numbers are on the left of the editor.',
           'Change only the text in the second pair of quotes, for example to Hello from team01. Keep the quotes.',
           'Save with Ctrl+S (on a Mac Cmd+S). The dot next to the file name at the top disappears when it is saved.',
-          { text: 'Editor not working for you? Instead of the four instructions above, paste this in the terminal: it makes the same change (a greeting with your team and your name) and shows the new line.', cmd: 'sed -i "s/^GREETING = .*/GREETING = os.environ.get(\\"GREETING\\", \\"Hello from $TEAM, by $ME\\")/" app/main.py\ngrep -n "^GREETING" app/main.py' },
+          { text: 'Editor not working for you? Instead of the four instructions above, paste this in the terminal: it makes the same change (a greeting with your team name and your name) and shows the new line.', cmd: 'sed -i "s/^GREETING = .*/GREETING = os.environ.get(\\"GREETING\\", \\"Hello from $TEAM, by $ME\\")/" app/main.py\ngrep -n "^GREETING" app/main.py' },
           { text: 'Back in the terminal, run this to see that Git noticed:', cmd: 'git status' },
         ],
         change: {
@@ -499,7 +499,7 @@ module.exports = {
         where: 'Workspace terminal',
         run: 'curl -s https://hello-$TEAM-dev.$DOMAIN/',
         explain: [
-          ['curl -s https://hello-$TEAM-dev.$DOMAIN/', 'call your team\'s service in dev, at its dev address. A program (like curl) gets the facts as data (JSON); a browser gets the coloured page.'],
+          ['curl -s https://hello-$TEAM-dev.$DOMAIN/', 'call your service in dev, at its dev address. A program (like curl) gets the facts as data (JSON); a browser gets the coloured page.'],
         ],
         see: '"environment": "dev" and your new greeting:',
         out: '{"app": "hello", "version": "b70e47f...", "environment": "dev", "message": "Hello from team01"}',

@@ -64,7 +64,7 @@ ansible pelab -b -m ansible.builtin.shell -a "ls -1t /opt/pelab/backups | head -
 | --- | --- |
 | Lab 1: build and run the hello image | 40 min |
 | Lab 2: one image, three environments | 25 min |
-| Lab 3: create a new service from the template | 40 min · per team |
+| Lab 3: create a new service from the template | 40 min · on your own |
 | Lab 4: a first change to the new service | 25 min |
 | Lab 5: add a pipeline from a template | 25 min |
 
@@ -96,54 +96,74 @@ Name the commands as you go. The image is the artefact in the brief's language: 
 
 Explain that the Dockerfile is in the template, so every service built from the golden path starts with a good one: small base image, non-root user, nothing extra. Delegates rarely need to write one from scratch; they need to read one.
 
-### 7. Lab 1: build and run the hello image
+### 7. Containers and virtual machines
+
+Not either-or: most banks run containers inside virtual machines, and so does this lab (your workspace is itself a container on the lab host, and Docker runs containers inside it). The point for delegates: a container is cheap enough to throw away and recreate, which is what makes "replace, never repair" possible.
+
+### 8. How a container is kept apart: namespaces, cgroups and layers
+
+Keep it conceptual: nobody needs to configure namespaces. Two practical consequences: anything written inside a container is lost when it is replaced (keep data outside it), and the build cache is why a second docker build takes seconds.
+
+### 9. What you can do with containers
+
+Each row is something delegates do by hand in Labs 1 and 2, and that the platform then does for them: the pipeline packages, Argo CD runs and replaces, Kyverno and Harbor protect.
+
+### 10. How: the Docker commands you need
+
+Delegates type the first eight this morning. push and pull are what the pipeline and the cluster do with Harbor; prune is the one to know when a workspace runs out of space.
+
+### 11. Lab 1: build and run the hello image
 
 The container runs the exact same code as yesterday, but now it carries its own Python and needs nothing from the workspace. Point at docker exec hello id: the non-root user matters on Day 5. If the build cannot pull the base image, the Harbor cache is not warm; the lab assistant checks.
 
-### 8. Lab 2: one image, three environments
+### 12. Lab 2: one image, three environments
 
 This is the whole promotion model in miniature: build once, run the same image everywhere, change only the settings. Never reuse a tag: hello:1 must always mean the same image. The pipeline uses the commit id as the tag for exactly this reason, and a guardrail on Day 5 refuses the "latest" tag.
 
-### 9. Build once, run anywhere: why settings live outside the image
+### 13. Build once, run anywhere: why settings live outside the image
 
 This is the brief's "artefact integrity" and "traceable to source" in practice. Show the three kustomization files in the repository: the differences are a handful of lines.
 
-### 10. The packaging template
+### 14. What makes a good container image
+
+This is the checklist behind the template's Dockerfile and behind the Day 5 checks: hadolint for the Dockerfile, gitleaks for secrets, Trivy for weaknesses, and a guardrail for the tag. A delegate who remembers these five can review any Dockerfile.
+
+### 15. The packaging template
 
 The afternoon moves from doing it by hand to getting it from the golden path.
 
-### 11. What every new service gets from the template
+### 16. What every new service gets from the template
 
 Everything on this slide is the "minimum standard" the brief's Lab 4 requires, and the team gets it without knowing how any of it works. That is cognitive load removed, which the brief names as a goal.
 
-### 12. Architecting a golden path: how the platform team built it
+### 17. Architecting a golden path: how the platform team built it
 
 This is where "architect golden paths" lives in the course. Give the delegates the five verbs: pick, build, embed, hand over, measure. Then ask a few delegates for one more job in FMD that deserves a golden path (a report, a data pipeline, an API). That answer feeds the capstone.
 
-### 13. Your service is also an API, with an owner and a promise
+### 18. Your service is also an API, with an owner and a promise
 
 Outcome 7 of the brief (API, data and integration platforms) is only introduced in this course. This slide is the hook: a service built on the golden path is already a governed API in miniature. An API gateway (APISIX) is an optional extra in the lab for a follow-on module.
 
-### 14. Lab 3: create a new service from the template
+### 19. Lab 3: create a new service from the template
 
 Time from clicking Create to a running service in dev: a few minutes, no ticket, no privileged user. That is the brief's Lab 4 pass criterion, witnessed. The catalog entry is not decoration: it is where the owner, the links and the support path live. The template wrote catalog-info.yaml for the team; registering it is one more self-service click. (Each team's first service, hello, was registered by the platform.)
 
-### 15. Lab 4: a first change to the new service
+### 20. Lab 4: a first change to the new service
 
 The new service follows exactly the same loop as hello. Nothing new to learn: that is what a standard path buys.
 
-### 16. Lab 5: add a pipeline from a template
+### 21. Lab 5: add a pipeline from a template
 
 This is the payoff of the day. Ask for the minutes from step 1 to the green run: usually ten to fifteen, most of it review and the main pipeline. Then ask how long it would take a team to write, review and secure a pipeline like ci.yaml from nothing: days, and different in every team. The platform team did it once and handed it over as a template; small pipelines go the same way. Last step: point at the list "by hand → in the pipeline" in the handbook. Every manual step of Day 1 and this morning is now a pipeline step or the deploy folder.
 
-### 17. This morning by hand versus this afternoon from the template
+### 22. This morning by hand versus this afternoon from the template
 
 Close the loop between the morning and the afternoon. The by-hand steps were not wasted: they are what the template does, and now the delegates can read it.
 
-### 18. Check your understanding
+### 23. Check your understanding
 
 Answers. 1: An image is the frozen package; a container is a running copy of it. 2: So that the image that was tested and scanned is the one that runs; settings come from the environment. 3: A tag must always mean one image so that a running container can be traced to its code; the commit id. 4: Any four of: tests, a safe Dockerfile, the pipeline, deployment for three environments, a catalog entry with an owner, a dashboard, an alert, a README. 5: Pick a common job, build it once with the controls inside, hand it over as a template, measure its use, improve it.
 
-### 19. What we built today
+### 24. What we built today
 
 Most of the platform has now been used, even if not yet understood in detail. Tomorrow opens up the pipeline and the policies.

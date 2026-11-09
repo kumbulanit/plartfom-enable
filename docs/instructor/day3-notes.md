@@ -81,7 +81,7 @@ ansible pelab -b -m ansible.builtin.shell -a "ls -1t /opt/pelab/backups | head -
 | Lab | Time |
 | --- | --- |
 | Lab 1: plan, apply, change, destroy | 30 min |
-| Lab 2: request staging and prod from the template | 45 min · per team |
+| Lab 2: request staging and prod from the template | 45 min · on your own |
 | Lab 3: drift, and destroy and recreate | 30 min |
 
 ## Slide by slide
@@ -162,4 +162,4 @@ Answers. 1: plan shows what would change without changing it; apply changes it. 
 
 ### 19. What we built today
 
-Each team now has three environments. Tomorrow the app gets packaged so that the same image can run in all three.
+Each delegate now has three environments. Tomorrow the app gets packaged so that the same image can run in all three.

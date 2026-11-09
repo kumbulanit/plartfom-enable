@@ -256,7 +256,7 @@ git diff
 
 **Do this:**
 
-1. Open https://hello-teamNN-staging.<lab domain>/ in a new tab (your team instead of teamNN).
+1. Open https://hello-teamNN-staging.<lab domain>/ in a new tab (your team name instead of teamNN).
 
 **You should see:** STAGING in big yellow letters, staging's own greeting ("Hello from staging"), and the version: your tag.
 
@@ -325,7 +325,7 @@ curl -s https://hello-$TEAM-staging.$DOMAIN/
 
 **How to read it:**
 
-- kubectl in prod works, but only for reading: your team may look at prod, not change it by hand. Changes go through Git.
+- kubectl in prod works, but only for reading: you may look at prod, not change it by hand. Changes go through Git.
 
 **Then see it in the browser:**
 
@@ -404,7 +404,7 @@ Observability is what lets a team say "it works" with evidence, and lets an inci
 1. Open https://grafana.<lab domain> in a new tab. On the sign-in page, type delegate in Email or username, its password from cat /etc/pelab/logins.md in Password (the same read-only login as Argo CD), and click Log in.
 2. Open the menu on the left (if it is closed, click the ☰ icon at the top left) and click Dashboards.
 3. The list shows folders. Click the folder PE Lab to open it, then click Golden path services.
-4. At the top left of the dashboard there are two lists. Team: choose your team, teamNN. Service: choose hello.
+4. At the top left of the dashboard there are two lists. Team: choose your team name, teamNN. Service: choose hello.
 5. At the top right, leave the time range (Last 1 hour) and the refresh (30s) as they are: the dashboard updates itself every 30 seconds. The round arrow button refreshes it now.
 
 **You should see:** Five panels: What runs where (version = commit SHA), Healthy pods, Requests per second, Failed requests (share of 4xx and 5xx), and Logs. What runs where lists dev, staging and prod, each with its tag.
@@ -462,7 +462,7 @@ for i in $(seq 1 50); do curl -s -o /dev/null https://hello-$TEAM-staging.$DOMAI
 
 #### Step 5. Write a service-level report
 
-*Where: Your team notes*
+*Where: Your notes*
 
 **Why:** A report turns what you saw into something a service owner can act on.
 
@@ -477,7 +477,7 @@ for i in $(seq 1 50); do curl -s -o /dev/null https://hello-$TEAM-staging.$DOMAI
 **If you are stuck**
 
 - Grafana asks for a login: delegate, with its password from cat /etc/pelab/logins.md (the same as Argo CD). It is read-only: you can look at everything and change nothing.
-- Empty panels: pick your team and app at the top of the dashboard, and look at the last 15 minutes.
+- Empty panels: pick your team name (teamNN) and app at the top of the dashboard, and look at the last 15 minutes.
 
 ## Performance engineering
 
@@ -496,7 +496,7 @@ The platform makes these numbers a by-product: Git gives lead time, Argo CD give
 **In the lab**
 
 - Lead time: from first commit to live in dev, read from Git and Argo CD.
-- Deployment frequency: count your team's deployments this week.
+- Deployment frequency: count your deployments this week.
 - Runtime: a two-minute k6 load test against staging, watched on the dashboard.
 - Time to restore: measured in the next lab.
 
@@ -571,13 +571,13 @@ cat load.js
 
 **What each line does:**
 
-- `cat > load.js <<EOF ... EOF`: write the lines into load.js. Because EOF has no quotes here, $TEAM and $DOMAIN are filled in with your team and the lab domain.
+- `cat > load.js <<EOF ... EOF`: write the lines into load.js. Because EOF has no quotes here, $TEAM and $DOMAIN are filled in with your team name and the lab domain.
 - `options = { vus: 20, duration: '2m' }`: 20 virtual users, for two minutes.
 - `http.get(...)`: each user calls staging...
 - `check(r, { 'status is 200': ... })`: ...checks the answer is 200...
 - `sleep(0.5)`: ...and waits half a second: so about 40 calls a second in all.
 
-**You should see:** The script, with your team and the lab domain in the address:
+**You should see:** The script, with your team name and the lab domain in the address:
 
 ```
   const r = http.get('https://hello-team03-staging.<lab domain>/');
@@ -668,7 +668,7 @@ hello-5c7d9b8f6c-8v2kq   187m         31Mi
 
 #### Step 5. Turn the numbers into a decision
 
-*Where: Your team notes*
+*Where: Your notes*
 
 **Why:** Numbers are only useful if they lead to a decision.
 
@@ -683,7 +683,7 @@ hello-5c7d9b8f6c-8v2kq   187m         31Mi
 
 **If you are stuck**
 
-- Use your team's staging address, never prod.
+- Use your staging address, never prod.
 - Many failed checks: your staging may have 0 replicas. Check Lab 1 was merged and synced.
 
 ## Resilience
@@ -1346,7 +1346,7 @@ Added the party to the page.
 **Do this:**
 
 1. Wait a few minutes: the pipeline on main builds the new image (Actions tab, green tick), then Argo CD puts it in dev.
-2. Open https://hello-teamNN-dev.<lab domain>/ in a new tab (your team instead of teamNN).
+2. Open https://hello-teamNN-dev.<lab domain>/ in a new tab (your team name instead of teamNN).
 
 **You should see:** DEV glowing red, falling confetti, a bouncing trophy, a rainbow Congratulations, your name on a glowing badge, "you are done with Platform Engineering!" and five cards with what you did this week.
 

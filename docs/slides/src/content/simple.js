@@ -37,7 +37,7 @@ module.exports = {
         {
           title: 'Find it in Gitea',
           do: [
-            { text: 'Open your team\'s hello in Gitea: Ctrl+click the address this prints.', cmd: 'echo "https://gitea.$DOMAIN/$TEAM/hello/src/branch/warm-up-$ME"', out: 'https://gitea.<lab domain>/team01/hello/src/branch/warm-up-student01' },
+            { text: 'Open your hello in Gitea: Ctrl+click the address this prints.', cmd: 'echo "https://gitea.$DOMAIN/$TEAM/hello/src/branch/warm-up-$ME"', out: 'https://gitea.<lab domain>/team01/hello/src/branch/warm-up-student01' },
             { text: 'Click app/main.py: line 22 has your greeting. Switch the branch menu to main: main still has the old one.', shot: { src: 'gitea-21-warm-up-branch.png', caption: 'Your branch in Gitea: the branch menu says warm-up-studentNN, the last commit is yours ("Say hello from studentNN"), and line 22 has your greeting. The green bar offers a pull request: not today, Lab 2 does that.' } },
           ],
         },
@@ -175,7 +175,7 @@ module.exports = {
         {
           title: 'Run it now',
           do: [
-            { text: 'In your team\'s rates, click Actions, then nightly-scan, then Run Workflow, and Run Workflow again in the box.', shot: { src: 'gitea-27-run-nightly-scan.png', caption: 'nightly-scan in the list on the left, and the Run Workflow box: use the workflow from main.' } },
+            { text: 'In your rates (teamNN/rates), click Actions, then nightly-scan, then Run Workflow, and Run Workflow again in the box.', shot: { src: 'gitea-27-run-nightly-scan.png', caption: 'nightly-scan in the list on the left, and the Run Workflow box: use the workflow from main.' } },
             { text: 'Open the run, then the Scan it (trivy) step. Green: no fixable HIGH or CRITICAL weaknesses. Red: the step lists them.', shot: { src: 'gitea-28-nightly-scan-result.png', caption: 'A green nightly scan: trivy\'s report summary, 0 vulnerabilities in the operating system (debian) and in the Python packages. In the lab the image name starts with harbor.<lab domain>.' } },
           ],
         },

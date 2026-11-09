@@ -95,7 +95,7 @@ The third outcome is the governance point. In a bank, "four eyes" and an audit t
 
 ### 3. Today's plan
 
-Link back to yesterday's list of manual steps: today removes the first of them. The morning starts with the theory of Git and a practice lab where nothing can break; then the team workflow in four labs, and the charter in the afternoon.
+Link back to yesterday's list of manual steps: today removes the first of them. The morning starts with the theory of Git and a practice lab where nothing can break; then the pull-request workflow in four labs, and the charter in the afternoon.
 
 ### 4. Git basics
 

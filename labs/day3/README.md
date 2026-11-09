@@ -1,6 +1,6 @@
 # Day 3: Infrastructure as Code from a template
 
-**Goal:** Describe infrastructure in code, read a plan, and request your team's staging and prod environments from the environment template.
+**Goal:** Describe infrastructure in code, read a plan, and request your own staging and prod environments from the environment template.
 
 By the end of the day you can:
 
@@ -10,12 +10,12 @@ By the end of the day you can:
 
 ### Today's plan
 
-Yesterday your change reached dev through a pull request. Today the infrastructure gets the same treatment: your team's staging and prod, requested as code.
+Yesterday your change reached dev through a pull request. Today the infrastructure gets the same treatment: your own staging and prod, requested as code.
 
 | Topic | Labs |
 | --- | --- |
 | Infrastructure as Code | [Lab 1: plan, apply, change, destroy](#lab-1-plan-apply-change-destroy) |
-| Environments | [Lab 2: request staging and prod from the template](#lab-2-request-staging-and-prod-from-the-template) (per team)<br>[Lab 3: drift, and destroy and recreate](#lab-3-drift-and-destroy-and-recreate) |
+| Environments | [Lab 2: request staging and prod from the template](#lab-2-request-staging-and-prod-from-the-template) (on your own)<br>[Lab 3: drift, and destroy and recreate](#lab-3-drift-and-destroy-and-recreate) |
 | Budgets | Concepts and discussion, no lab |
 
 ## Infrastructure as Code
@@ -444,13 +444,13 @@ main.tf  terraform.tfstate  terraform.tfstate.backup
 
 ## Environments
 
-*You have used OpenTofu on a file. Now the same four moves on real infrastructure: request your team's staging and prod from the environment template (Lab 2), then see drift found and an environment rebuilt from code (Lab 3).*
+*You have used OpenTofu on a file. Now the same four moves on real infrastructure: request your own staging and prod from the environment template (Lab 2), then see drift found and an environment rebuilt from code (Lab 3).*
 
 ### Environments: dev, staging and prod
 
 An environment is a fenced area where one copy of your application runs: it has its own address, its own settings, a budget of CPU and memory, access rules and network rules.
 
-dev is where every merge lands automatically, for the team to see its work. staging is where a release is checked before production. prod is what users rely on; it changes only through an approved promotion.
+dev is where every merge lands automatically, for you to see your work. staging is where a release is checked before production. prod is what users rely on; it changes only through an approved promotion.
 
 The application is identical in all three. Only its settings differ, which is why hello can tell you which environment it is in.
 
@@ -461,7 +461,7 @@ The application is identical in all three. Only its settings differ, which is wh
 - On the cluster, an environment is a namespace: teamNN-dev, teamNN-staging, teamNN-prod.
 - Each has a ResourceQuota (the budget), default limits, network policy and access rules.
 - dev was created with the lab. Staging and prod you request today.
-- The team can change dev and staging; prod is read-only for people. Only the platform deploys there.
+- You can change dev and staging; prod is read-only for people. Only the platform deploys there.
 
 ### The environment template
 
@@ -495,9 +495,9 @@ module "team01" {
 
 ### Lab 2: request staging and prod from the template
 
-*per team*
+*on your own*
 
-**What you do:** Get your team's staging and prod environments the platform way: fill in the environment template, open a pull request, read the plan, and let the platform team approve and apply it.
+**What you do:** Get your own staging and prod environments the platform way: fill in the environment template, open a pull request, read the plan, and let the platform team approve and apply it.
 
 **You will learn:**
 
@@ -510,7 +510,7 @@ module "team01" {
 - **Environment:** A fenced area of the cluster for one stage of your service: dev, staging or prod. In Kubernetes it is a namespace, for example team03-staging.
 - **Template (module):** Infrastructure code written once by the platform team. You fill in a few values; it builds the same, safe environment for every team.
 - **Budget (quota):** How much CPU and memory an environment may use in total.
-- **platform/environments:** The repository in Gitea where every team's environment request lives, one file per team.
+- **platform/environments:** The repository in Gitea where every environment request lives, one file per team name (teamNN.tf).
 - **platform/apply:** The status the platform writes on a commit after it has applied it: what it added, changed or destroyed.
 
 **Before you start:**
@@ -546,7 +546,7 @@ module "team01" {
 - `cd ~`: go to your home folder.
 - `git clone https://gitea.$DOMAIN/platform/environments`: copy the repository from Gitea into a new folder called environments. $DOMAIN is filled in for you with the lab's address.
 - `cd environments`: go into that folder.
-- `git switch -c $TEAM-environments`: make a new branch and switch to it. $TEAM is filled in with your team, so the branch is called, for example, team03-environments.
+- `git switch -c $TEAM-environments`: make a new branch and switch to it. $TEAM is filled in with your team name, so the branch is called, for example, team03-environments.
 - `ls`: list what the repository contains.
 
 **You should see:** Git says it switched to your new branch, then four entries:
@@ -561,7 +561,7 @@ README.md  main.tf  modules  team00.tf.example
 - main.tf: settings shared by every request, for example that OpenTofu keeps its state inside the cluster.
 - modules: the environment template, written and owned by the platform team. You use it; you never change it.
 - team00.tf.example: an example request, ready to copy.
-- Each team's request will be one more file here, teamNN.tf.
+- Each delegate's request will be one more file here, teamNN.tf.
 
 **If you see something else:**
 
@@ -572,7 +572,7 @@ README.md  main.tf  modules  team00.tf.example
 
 *Where: Workspace terminal*
 
-**Why:** You do not write infrastructure code from scratch. You copy the example under your team's name and put your team in it; the template does the rest, the same way for every team.
+**Why:** You do not write infrastructure code from scratch. You copy the example under your team name and put your team name in it; the template does the rest, the same way for everyone.
 
 **Do this:**
 
@@ -585,9 +585,9 @@ README.md  main.tf  modules  team00.tf.example
    git status
    ```
 
-2. Read your file with the team: check that your team name appears twice.
+2. Read your file: check that your team name appears twice.
 
-**What changes in `teamNN.tf`:** the copy of the example, with your team in both places.
+**What changes in `teamNN.tf`:** the copy of the example, with your team name in both places.
 
 Before:
 
@@ -613,8 +613,8 @@ module "team03" {
 
 **What each line does:**
 
-- `cp team00.tf.example $TEAM.tf`: copy the example to a new file named after your team, for example team03.tf.
-- `sed -i "s/team00/$TEAM/g" $TEAM.tf`: in your new file, replace every team00 with your team. g means "every time on the line", not just the first.
+- `cp team00.tf.example $TEAM.tf`: copy the example to a new file named after your team name, for example team03.tf.
+- `sed -i "s/team00/$TEAM/g" $TEAM.tf`: in your new file, replace every team00 with your team name. g means "every time on the line", not just the first.
 - `cat $TEAM.tf`: show the file.
 - `git status`: show what is new or changed in your copy of the repository.
 
@@ -639,9 +639,9 @@ Untracked files:
 
 **How to read it:**
 
-- module "team03": one request, named after your team.
+- module "team03": one request, named after your team name.
 - source: which template to use, the environment template in modules.
-- team: whose environments these are. It must be your team: the template checks it.
+- team: whose environments these are. It must be your team name: the template checks it.
 - environments = ["staging", "prod"]: which environments you want. dev already exists.
 - size = "small": the budget of each environment, 1 CPU and 2 GB of memory to reserve (medium is double). Choosing the size is where cost control (FinOps) starts, and it is on record.
 - git status lists your file under "Untracked files": it is new, and not yet saved in Git.
@@ -669,13 +669,13 @@ Untracked files:
 
 2. In what git push prints, find the line remote:   https://gitea.<lab domain>/platform/environments/pulls/new/teamNN-environments. Hold Ctrl (on a Mac Cmd) and click it: Gitea opens in a new browser tab, signed in as you. (Or in Gitea: platform/environments → Pull Requests → New Pull Request, and choose your branch on the right.)
 
-3. The page shows your change and a form under it. The title is already filled in with your commit message; in the box below it, write one line on why your team needs the environments. Click Create Pull Request.
+3. The page shows your change and a form under it. The title is already filled in with your commit message; in the box below it, write one line on why you need the environments. Click Create Pull Request.
 
 4. Wait about a minute. Near the bottom of the pull request, a check called plan / plan (pull_request) appears: first a yellow dot (running), then a green tick.
 
 5. Click Details next to it. The run opens. On the left, click the job plan; on the right, click the step called Plan to unfold its output.
 
-6. Scroll to the end of the Plan step and read the summary line. Then scroll up and read the list with your team.
+6. Scroll to the end of the Plan step and read the summary line. Then scroll up and read the list.
 
 7. The same plan is also posted as a comment on the pull request, by the pipeline: reviewers read it there, without opening the run.
 
@@ -693,7 +693,7 @@ Plan: 16 to add, 0 to change, 0 to destroy.
 
 **How to read it:**
 
-- 16 things, 8 for each environment: the namespace (the fenced area), its budget (team-quota), its container defaults (team-defaults), four network rules (who may talk to it) and your team's access.
+- 16 things, 8 for each environment: the namespace (the fenced area), its budget (team-quota), its container defaults (team-defaults), four network rules (who may talk to it) and your access.
 - Every line starts with +: only creations. Nothing of anyone else is changed or destroyed. That is the first thing a reviewer checks.
 - The pipeline only reads: its credentials can look at the cluster but change nothing. Nothing exists yet.
 - A second check, pipeline, also turns green: it is the check that main requires before anyone may merge.
@@ -712,7 +712,7 @@ Plan: 16 to add, 0 to change, 0 to destroy.
 **Do this:**
 
 1. Now you play the platform team: open a private window (Ctrl+Shift+N; on a Mac Cmd+Shift+N; in Firefox Ctrl+Shift+P), go to https://gitea.<lab domain>, click Sign In and sign in as platform-approver with its password from cat /etc/pelab/logins.md.
-2. In that window, open the pull request (platform/environments → Pull Requests → yours). Click Files Changed: there must be exactly one new file, teamNN.tf, with your team in both places.
+2. In that window, open the pull request (platform/environments → Pull Requests → yours). Click Files Changed: there must be exactly one new file, teamNN.tf, with your team name in both places.
 3. Check the plan (as in step 3): 16 to add, 0 to change, 0 to destroy.
 4. Click Review (top right of Files Changed), then Approve. Close the private window.
 5. Back in your own window, signed in as yourself, reload the pull request. When it shows one approval and "All checks were successful", click the merge button (Create merge commit) and confirm.
@@ -744,11 +744,11 @@ kubectl -n $TEAM-staging describe resourcequota team-quota
 
 **What each line does:**
 
-- `kubectl get namespaces | grep $TEAM`: list every namespace in the cluster, and keep (grep) only the lines with your team.
+- `kubectl get namespaces | grep $TEAM`: list every namespace in the cluster, and keep (grep) only the lines with your team name.
 - `kubectl -n $TEAM-staging get resourcequota,limitrange`: in your staging namespace (-n), show the budget (resourcequota) and the container defaults (limitrange).
 - `kubectl -n $TEAM-staging describe resourcequota team-quota`: show the budget in detail: what is used and what is allowed, line by line.
 
-**You should see:** Three namespaces for your team, then the budget with nothing used yet:
+**You should see:** Your three namespaces, then the budget with nothing used yet:
 
 ```
 team03-dev       Active   2d
@@ -790,7 +790,7 @@ requests.memory         0     2Gi
 
 2. Sign in as delegate, with its password from cat /etc/pelab/logins.md (not your studentNN password).
 
-3. In the search box at the top of the application list, type your team, for example team03.
+3. In the search box at the top of the application list, type your team name, for example team03.
 
 4. Click teamNN-hello-staging, then go back and click teamNN-hello-prod.
 
@@ -802,7 +802,7 @@ requests.memory         0     2Gi
 
 > **Tip:** If the safety net is on: kubectl -n $TEAM-staging get deployments shows hello with 0/0, and the latest hello commit in Gitea shows safety-net/staging "Deployed to teamNN-staging: not-released-yet, 0 replicas".
 
-**Done when:** Your team has teamNN-staging and teamNN-prod, created by an approved pull request, and the plan is your design record.
+**Done when:** You have teamNN-staging and teamNN-prod, created by an approved pull request, and the plan is your design record.
 
 **If you are stuck**
 
@@ -840,7 +840,7 @@ Plan in the pipeline, apply by the platform. The pipeline in your pull request c
 
 **Before you start:**
 
-1. Lab 2 is done: your team has staging (kubectl get namespaces | grep $TEAM shows it).
+1. Lab 2 is done: you have staging (kubectl get namespaces | grep $TEAM shows it).
 2. Keep your copy of platform/environments: cd ~/environments.
 3. The instructor will tell you when to start steps 1 and 3: they pause and restart the platform's automatic repairs on every VM at once.
 
@@ -1152,7 +1152,7 @@ The size setting in the template is the simplest FinOps control: a team picks sm
 
 1. What is the difference between plan and apply, and which one would you show an auditor?
 2. What is drift, and how did you detect and fix it today?
-3. Why does the team write six lines instead of the whole environment definition?
+3. Why do you write six lines instead of the whole environment definition?
 4. Why is prod read-only for people, and how does a change still reach it?
 5. What does size = "small" decide, and why is that a cost control?
 

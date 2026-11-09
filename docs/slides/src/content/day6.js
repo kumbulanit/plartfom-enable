@@ -6,9 +6,9 @@ module.exports = [
   {
     type: 'title', section: 'Opening',
     title: 'Deploy, observe and the capstone',
-    subtitle: 'Release to staging and prod safely, see the service running, measure it under load, and present your team\'s work.',
+    subtitle: 'Release to staging and prod safely, see the service running, measure it under load, and present your work.',
     highlight: ['GitOps', 'Environments', 'Observe'],
-    notes: 'The last day completes the path: the same hello app that ran by hand on Monday is promoted to staging and prod by pull request, watched on a dashboard, load-tested, broken and recovered. The afternoon is the capstone: each team takes its own Day 4 service through the same path and presents the evidence.',
+    notes: 'The last day completes the path: the same hello app that ran by hand on Monday is promoted to staging and prod by pull request, watched on a dashboard, load-tested, broken and recovered. The afternoon is the capstone: each delegate takes their own Day 4 service through the same path and presents the evidence.',
   },
   {
     type: 'goal', section: 'Opening',
@@ -126,7 +126,7 @@ replicas:
     type: 'steps', section: 'Observability', time: '30 min',
     title: 'Lab 2: read the dashboard',
     steps: [
-      { do: `Open Grafana at https://grafana.${DOMAIN} (sign in as delegate: the password is in cat /etc/pelab/logins.md), folder PE Lab, dashboard Golden path services. Pick your team and the app hello.`, expect: 'A table of running versions per environment: dev, staging and prod with their tags.' },
+      { do: `Open Grafana at https://grafana.${DOMAIN} (sign in as delegate: the password is in cat /etc/pelab/logins.md), folder PE Lab, dashboard Golden path services. Pick your team name (teamNN) and the app hello.`, expect: 'A table of running versions per environment: dev, staging and prod with their tags.' },
       { do: 'In your workspace, generate traffic: for i in $(seq 1 300); do curl -s https://hello-teamNN-staging.<domain>/ > /dev/null; sleep 0.2; done', expect: 'The requests-per-second panel rises for staging within a minute.' },
       { do: 'Request a page that does not exist 50 times: curl -s .../missing', expect: 'The failed-share panel shows a small percentage of 404s.' },
       { do: 'Open the logs panel and filter for "missing".', expect: 'One JSON log line per failed request, with the path and status.' },
@@ -151,7 +151,7 @@ replicas:
     ],
     lab: [
       'Lead time: from first commit to live in dev, read from Git and Argo CD.',
-      'Deployment frequency: count your team\'s deployments this week.',
+      'Deployment frequency: count your deployments this week.',
       'Runtime: a two-minute k6 load test against staging, watched on the dashboard.',
       'Time to restore: measured in the next lab.',
     ],
@@ -186,7 +186,7 @@ export default function () {
     type: 'steps', section: 'Performance engineering', time: '30 min',
     title: 'Lab 3: load-test staging and watch the dashboard',
     steps: [
-      { do: 'Create ~/day6/load.js from the previous slide with your team\'s staging address. Open the dashboard beside the terminal.', expect: 'Two windows: terminal and Grafana.' },
+      { do: 'Create ~/day6/load.js from the previous slide with your staging address. Open the dashboard beside the terminal.', expect: 'Two windows: terminal and Grafana.' },
       { do: 'k6 run load.js', expect: 'A live progress bar; after two minutes a summary with http_reqs, http_req_duration p(95) and checks.' },
       { do: 'On the dashboard, watch requests per second and the failed share during the run.', expect: 'Traffic rises to roughly 40 requests per second; failures stay at 0%.' },
       { do: 'Run again with vus: 100. Watch the healthy-pods and CPU panels.', expect: 'Higher traffic; response time rises; CPU approaches the environment\'s budget.' },

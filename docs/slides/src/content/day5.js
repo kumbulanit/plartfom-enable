@@ -106,7 +106,7 @@ steps:
       { do: 'Open the Build step and find the image tag at the end.', expect: 'harbor.../teamNN/hello:<commit id>.' },
       { do: `Open Harbor (sign in as studentNN with your lab password), project teamNN, repository hello, newest image.`, expect: 'The Vulnerabilities tab with a count by severity; the SBOM as an attached artefact.' },
       { do: 'Open the SBOM and search for "python".', expect: 'The exact Python version and packages inside your image: the ingredients list.' },
-      { do: 'Write down: the run link, the tag, the vulnerability count. This is evidence.', expect: 'Three lines in your team notes.' },
+      { do: 'Write down: the run link, the tag, the vulnerability count. This is evidence.', expect: 'Three lines in your notes.' },
     ],
     notes: 'Most delegates have never looked inside an image. The SBOM makes the supply chain real: they can see that most of the image is not their code. Discuss what a "critical" finding in the base image would mean and who fixes it (the platform team updates the base image in the template; every service gets the fix on its next build).',
   },
@@ -130,7 +130,7 @@ steps:
     idea: [
       'A unit test is a small automatic check with a known answer: call /healthz, expect 200 and "ok". pytest runs every test and reports green or red.',
       'Tests are the safety net that lets anyone change code: if the change breaks something, a test says so in seconds, before a reviewer spends time.',
-      'One test per behaviour, named for what it checks. The template ships with five; every new behaviour deserves one more.',
+      'One test per behaviour, named for what it checks. The template ships with six; every new behaviour deserves one more.',
     ],
     labCode: `def test_healthz_is_ok(client):
     code, body = client.get("/healthz")
@@ -211,7 +211,7 @@ spec:
     type: 'steps', section: 'Lab 3: the guardrails', time: '35 min',
     title: 'Lab 3: watch the guardrails refuse a bad deployment',
     steps: [
-      { do: `git clone https://gitea.${DOMAIN}/platform/policies && cd policies. Copy examples/bad.yaml to ~/shortcut.yaml with your team in place of team01.`, expect: 'A Deployment named shortcut: image nginx:latest, no labels.' },
+      { do: `git clone https://gitea.${DOMAIN}/platform/policies && cd policies. Copy examples/bad.yaml to ~/shortcut.yaml with your team name in place of team01.`, expect: 'A Deployment named shortcut: image nginx:latest, no labels.' },
       { do: 'kubectl apply -f ~/shortcut.yaml', expect: 'Refused by three policies: harbor-only (not from the lab registry), no-latest, required-labels. Each says how to fix it.' },
       { do: `Fix the image: harbor.${DOMAIN}/dockerhub/library/python:3.12-slim. Apply again.`, expect: 'One refusal left: the labels.' },
       { do: 'Add the labels app.kubernetes.io/name: shortcut and app.kubernetes.io/part-of: teamNN under metadata. Apply again.', expect: 'Accepted: deployment.apps/shortcut created.' },
@@ -227,7 +227,7 @@ spec:
       { do: 'The same with examples/bad.yaml', expect: 'pass: 1, fail: 3, with the same messages as on the cluster.' },
       { do: 'kyverno test tests/', expect: 'Test Summary: 11 tests passed and 0 tests failed. The pipeline runs exactly this on every change.' },
       { do: 'Break a test: in tests/kyverno-test.yaml change one shortcut result from fail to pass. Run kyverno test tests/ again, then undo it.', expect: '1 test failed: the tests catch a policy that stops refusing.' },
-      { do: 'Discuss: what else would you turn into a policy? One idea per team.', expect: 'One rule per team on the board (cost, naming, data, resilience).' },
+      { do: 'Think: what else would you turn into a policy? Write one idea on the board.', expect: 'One rule per person on the board (cost, naming, data, resilience).' },
     ],
     notes: 'This is the brief\'s "policy source, tests, decision log" evidence in miniature: the policy files, the good and bad test cases, and the CLI output. The policies live in platform/policies; its pipeline runs kyverno test tests/ on every pull request, and the platform applies main to the cluster within two minutes. Why the values file: the policies only apply in namespaces labelled pelab.io/tier=team; the cluster knows the labels, the command line does not.',
   },
@@ -277,11 +277,11 @@ spec:
     notes: 'This closes the policy-as-code story. Governance people in the room will recognise their own exception register; the difference is that here the register is the mechanism, not a spreadsheet next to it.',
   },
   {
-    type: 'steps', section: 'Lab 5: ask for an exception', time: '25 min · per team',
+    type: 'steps', section: 'Lab 5: ask for an exception', time: '25 min · on your own',
     title: 'Lab 5: ask for an exception, and watch it expire',
     steps: [
-      { do: 'In the policies folder, copy examples/status-page.yaml to ~/status-page.yaml with your team in it, then kubectl apply -f ~/status-page.yaml', expect: 'Refused by harbor-only only: the image comes from Docker Hub. The tag and labels are fine.' },
-      { do: 'git switch -c teamNN-status-page. Copy examples/exception-template.yaml to exceptions/teamNN-status-page.yaml and fill in every CHANGE.', expect: 'Your team in the name and namespace, your user, a reason, an end date at most 30 days ahead.' },
+      { do: 'In the policies folder, copy examples/status-page.yaml to ~/status-page.yaml with your team name in it, then kubectl apply -f ~/status-page.yaml', expect: 'Refused by harbor-only only: the image comes from Docker Hub. The tag and labels are fine.' },
+      { do: 'git switch -c teamNN-status-page. Copy examples/exception-template.yaml to exceptions/teamNN-status-page.yaml and fill in every CHANGE.', expect: 'Your team name in the file name and namespace, your user, a reason, an end date at most 30 days ahead.' },
       { do: 'python3 tests/check-exceptions.py', expect: '"ok exceptions/teamNN-status-page.yaml ..., until <date>". Try a date 60 days ahead: the check refuses it.' },
       { do: 'Commit, push and open a pull request. Play the platform team: as platform-approver, in a private window, read the reason and approve. Merge.', expect: 'The test pipeline is green; within two minutes the merge commit gets platform/apply: "3 policies, 1 exceptions in force".' },
       { do: 'kubectl apply -f ~/status-page.yaml again', expect: 'deployment.apps/status-page created: allowed, by an exception anyone can read in Git.' },
@@ -310,7 +310,7 @@ spec:
       'Watch the guardrails refuse a bad deployment, and test a policy with the CLI',
       'Ask for a time-limited exception, get it approved, and see it expire',
     ],
-    tomorrow: 'Deploy, observe and the capstone. You will promote hello to staging and then prod by pull request, read the dashboard, load-test staging, break and recover a service, and present your team\'s service with its evidence pack.',
+    tomorrow: 'Deploy, observe and the capstone. You will promote hello to staging and then prod by pull request, read the dashboard, load-test staging, break and recover a service, and present your own service with its evidence pack.',
     notes: 'Every piece of the platform except Observe has now been used and explained. Tomorrow completes the path and the course.',
   },
 ];

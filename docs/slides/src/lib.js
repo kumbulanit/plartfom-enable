@@ -482,7 +482,7 @@ class Deck {
     const s = this.slide('CONTENT');
     s.addText(spec.title || 'Check your understanding', { placeholder: 'title' });
     await this.circleIcon(s, 'FiHelpCircle', 11.6, 0.5, 0.7, THEME.colors.accent4, 'FFFFFF');
-    s.addText('Answer with your team. Answers are in the notes.', { x: X0, y: YT, w: W, h: 0.4, fontSize: 13, color: C.accent5, margin: 0, isTextBox: true });
+    s.addText('Answer on your own. Answers are in the notes.', { x: X0, y: YT, w: W, h: 0.4, fontSize: 13, color: C.accent5, margin: 0, isTextBox: true });
     const qs = spec.questions.map((q, i) => ({ text: `${i + 1}.  ${q}`, options: { breakLine: i < spec.questions.length - 1, paraSpaceAfter: 18 } }));
     s.addText(qs, { x: X0, y: YT + 0.55, w: W, h: H - 0.55, fontSize: 18, color: C.text1, valign: 'top', margin: 0, isTextBox: true });
     s.addNotes(spec.notes || '');

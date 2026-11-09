@@ -67,7 +67,7 @@ Read what the pipeline did to your last change, and find the evidence it left: t
 
 1. Open https://harbor.<lab domain> in a new tab. On the sign-in page, type your studentNN in Username and your own password in Password (the same as Gitea), and click LOG IN.
 
-2. On the Projects page, click your team, teamNN, in the Project Name column.
+2. On the Projects page, click your team name, teamNN, in the Project Name column.
 
 3. On the Repositories tab, click teamNN/hello.
 
@@ -93,7 +93,7 @@ Read what the pipeline did to your last change, and find the evidence it left: t
 
 ### 6. Write down the evidence
 
-**Where:** Your team notes
+**Where:** Your notes
 
 1. Copy three things into your notes: the link to the pipeline run (from the browser's address bar), the image tag (the commit id), and the vulnerability counts.
 
@@ -289,7 +289,7 @@ kubectl apply -f ~/shortcut.yaml
 
 2. Find the first metadata block at the top: the lines name: shortcut and namespace: teamNN-dev.
 
-3. Under the namespace line, add the three lines labels:, app.kubernetes.io/name: shortcut and app.kubernetes.io/part-of: teamNN (your team), with exactly the spaces shown below: 2 spaces before labels, 4 before the two labels. Save with Ctrl+S (Mac Cmd+S).
+3. Under the namespace line, add the three lines labels:, app.kubernetes.io/name: shortcut and app.kubernetes.io/part-of: teamNN (your team name), with exactly the spaces shown below: 2 spaces before labels, 4 before the two labels. Save with Ctrl+S (Mac Cmd+S).
 
    ✏️ **Do this in the editor, not in the terminal.** In `~/shortcut.yaml`, change:
 
@@ -402,13 +402,13 @@ git checkout tests/kyverno-test.yaml
 
 ### 5. Think of one more rule
 
-**Where:** Your team
+**Where:** On your own
 
 1. Choose one more rule you would turn into a policy, and say in one sentence what it would refuse. Compare with your neighbour.
 
 2. Ideas: cost (every workload has a budget), naming, data (no production data in dev), resilience (prod runs at least two copies).
 
-**You should see:** One rule per team on the board.
+**You should see:** One rule per person on the board.
 
 ## Lab 5: ask for an exception, and watch it expire
 
@@ -435,7 +435,7 @@ kubectl apply -f ~/status-page.yaml
 
 **Where:** Workspace terminal, then the editor
 
-1. Paste the box. It makes a branch, copies the template under your team's name, fills in your team and your user name, sets the end date to one week from today, and shows the file.
+1. Paste the box. It makes a branch, copies the template under your team name, fills in your team name and your user name, sets the end date to one week from today, and shows the file.
 
    📋 **Copy and paste this into the terminal:**
 
@@ -634,7 +634,7 @@ The same copy-a-template loop as the smoke test on Day 4, this time with Git in 
 
 ### 5. Run it now
 
-1. In your team's rates, click Actions, then nightly-scan, then Run Workflow, and Run Workflow again in the box.
+1. In your rates (teamNN/rates), click Actions, then nightly-scan, then Run Workflow, and Run Workflow again in the box.
 
    ![nightly-scan in the list on the left, and the Run Workflow box: use the workflow from main.](../images/gitea-27-run-nightly-scan.png)
 

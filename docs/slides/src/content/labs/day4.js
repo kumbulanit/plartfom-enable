@@ -46,7 +46,7 @@ module.exports = {
         ],
         run: 'cd ~/hello\ngit switch main && git pull\ndocker build --build-arg BASE_IMAGE=' + BASE + ' -t hello:1 .',
         explain: [
-          ['git switch main && git pull', 'build from the latest main, with your team\'s merged changes.'],
+          ['git switch main && git pull', 'build from the latest main, with your merged changes.'],
           ['docker build', 'build an image by following the Dockerfile in this folder.'],
           ['--build-arg BASE_IMAGE=harbor.$DOMAIN/dockerhub/library/python:3.12-slim', 'which image to start from: a small Python 3.12, fetched through the lab\'s Harbor (dockerhub is Harbor\'s copy of Docker Hub). The Dockerfile\'s first line uses this setting.'],
           ['-t hello:1', 'name (tag) the result hello, version 1.'],
@@ -319,7 +319,7 @@ module.exports = {
         why: 'One form creates a complete service. Nobody raises a ticket or copies files by hand.',
         do: [
           'In Gitea, click + (top right, next to your picture) → New Repository.',
-          'Owner: open the list and choose your team, teamNN (not your own name).',
+          'Owner: open the list and choose your team name, teamNN (not your user name).',
           'Repository Name: rates (in small letters).',
           'Template: click "Select a template.", type golden and choose platform/golden-path. (Clicking Use this template on platform/golden-path opens the same form with this already chosen.)',
           'Template Items appears: tick Git Content (Default Branch) and Branch Protection. Leave the others.',
@@ -332,7 +332,7 @@ module.exports = {
           'Branch Protection copied the template\'s rule: main takes pull requests only, with an approval and a green pipeline, from the first minute.',
         ],
         ifnot: [
-          ['Your team is not in the Owner list', 'you are not signed in as yourself, or not in the team. Check the picture at the top right; if it is right, tell the instructor.'],
+          ['teamNN is not in the Owner list', 'you are not signed in as yourself. Check the picture at the top right; if it is right, tell the instructor.'],
           ['The repository has only a README', 'Git Content was not ticked. Ask the instructor to delete it, and create it again.'],
         ],
       },
@@ -360,7 +360,7 @@ module.exports = {
         why: 'The pipeline\'s result is an image in Harbor, scanned, with its list of ingredients. That is the evidence of what will run.',
         do: [
           'Open https://harbor.<lab domain> in a new tab. On the sign-in page, type your studentNN in Username and your own password in Password (the same as Gitea), and click LOG IN.',
-          'You land on Projects: a table with one line per project. In the Project Name column, click your team, teamNN.',
+          'You land on Projects: a table with one line per project. In the Project Name column, click your team name, teamNN.',
           'The project opens on its Repositories tab: one line per image name. Click teamNN/rates.',
           'You now see the artifacts list: one line per image built. Read the line from left to right: Artifacts (the image\'s fingerprint, sha256:...), Tags (the commit id), Size, Vulnerabilities (a coloured bar; move the mouse over it to see how many weaknesses of each severity) and Push Time.',
         ],
@@ -376,7 +376,7 @@ module.exports = {
         why: 'Argo CD finds new services by itself and deploys them to dev. Nobody configures anything.',
         do: [
           'Open https://argocd.<lab domain> and sign in as delegate, with its password from cat /etc/pelab/logins.md.',
-          'Type your team in the search box at the top.',
+          'Type your team name in the search box at the top.',
           'Wait up to a minute: Argo CD looks for new repositories every minute.',
         ],
         see: 'teamNN-rates-dev appears, then shows Synced and Healthy.',
@@ -387,7 +387,7 @@ module.exports = {
         why: 'The new service answers on its own dev address, made for it by the template.',
         browser: {
           where: 'Browser',
-          do: ['Open https://rates-teamNN-dev.<lab domain>/ in a new tab (your team instead of teamNN).'],
+          do: ['Open https://rates-teamNN-dev.<lab domain>/ in a new tab (your team name instead of teamNN).'],
           see: 'The same kind of page as hello: DEV in big red letters, the greeting "Hello from the PE Lab golden path", and under it "rates · version" with the commit id. Same template, so the same page, with the new service\'s name.',
           ifnot: [['A 404 page, or the browser cannot find the address', 'Argo CD has not deployed it yet (step 5). Wait a minute and reload.']],
         },
@@ -410,7 +410,7 @@ module.exports = {
           'Open https://backstage.<lab domain> in a new tab. A page asks how to sign in: on the Guest card, click Enter. No password is needed.',
           'In the menu on the left (Home, Catalog, APIs, Docs, Create...), click Create.... The page lists templates.',
           'At the top right of that page, click Register Existing Component.',
-          'A form with one box, Select URL (the repository URL), opens. Paste this address in it, with your team: https://gitea.<lab domain>/teamNN/rates/src/branch/main/catalog-info.yaml',
+          'A form with one box, Select URL (the repository URL), opens. Paste this address in it, with your team name: https://gitea.<lab domain>/teamNN/rates/src/branch/main/catalog-info.yaml',
           'Click Analyze. Backstage reads the file and shows what it will add: one component, rates.',
           'Click Import, wait a few seconds, then click View Component.',
           'Read the component\'s page: the About card (owner teamNN, the description) and the links to its environments, pipeline, Argo CD, Harbor and Grafana. Click Catalog on the left: rates is now listed next to hello.',
@@ -420,7 +420,7 @@ module.exports = {
           'catalog-info.yaml in the repository is where the portal reads all this from: the template wrote it for you.',
         ],
         ifnot: [
-          ['Analyze reports an error', 'check the address: your team, rates, and catalog-info.yaml at the end. Open it in a new tab first: it should show the file.'],
+          ['Analyze reports an error', 'check the address: your team name, rates, and catalog-info.yaml at the end. Open it in a new tab first: it should show the file.'],
         ],
       },
       {
@@ -600,7 +600,7 @@ module.exports = {
         where: 'Browser: Gitea',
         why: 'A new pipeline is a change like any other: it goes through a pull request, a review and the main pipeline before it can run.',
         do: [
-          'Open your team\'s rates repository: https://gitea.<lab domain>/teamNN/rates.',
+          'Open your rates repository: https://gitea.<lab domain>/teamNN/rates.',
           'Above the file list, click Add File, then New File.',
           'In the box "Name your file…" at the top, type .gitea/workflows/smoke-test.yaml (each / makes a folder as you type).',
           'Click in the big empty editor below and paste with Ctrl+V (Mac Cmd+V). The template appears, about 45 lines.',

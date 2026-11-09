@@ -16,7 +16,7 @@ module.exports = {
     5: { 3: { src: 'gitea-33-conflict-resolved.png', caption: `B after the merge commit: no conflict message any more, and the checks run again (yellow dot). Because the line kept is A's, Gitea notes that the branch adds nothing new. ${own}` } },
   },
   'Lab 3: create a new service from the template': {
-    2: { 6: { src: 'gitea-41-new-repo-from-template.png', caption: 'The New Repository form, filled in: owner team01 (your team), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.' } },
+    2: { 6: { src: 'gitea-41-new-repo-from-template.png', caption: 'The New Repository form, filled in: owner team01 (your team name), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.' } },
     3: { 3: { src: 'gitea-42-run-golden-path.png', caption: 'The Run Workflow box of golden-path: use the workflow from main. Your list of runs is empty the first time.' } },
     8: { 2: { src: 'gitea-46-rates-ci-yaml.png', caption: 'rates/.gitea/workflows/ci.yaml: the same file, line for line, as in hello and in the template, from the template\'s first commit.' } },
   },

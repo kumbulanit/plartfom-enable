@@ -16,7 +16,7 @@ Yesterday the template built and deployed your new service without anyone being 
 | --- | --- |
 | CI/CD and DevSecOps | [Lab 1: read the pipeline and its evidence](#lab-1-read-the-pipeline-and-its-evidence)<br>[Lab 2: break the pipeline three ways, and fix it](#lab-2-break-the-pipeline-three-ways-and-fix-it) |
 | Policy-as-code | [Lab 3: watch the guardrails refuse a bad deployment](#lab-3-watch-the-guardrails-refuse-a-bad-deployment)<br>[Lab 4: test a policy like code, with the Kyverno CLI](#lab-4-test-a-policy-like-code-with-the-kyverno-cli) |
-| Scenarios and exceptions | [Lab 5: ask for an exception, and watch it expire](#lab-5-ask-for-an-exception-and-watch-it-expire) (per team) |
+| Scenarios and exceptions | [Lab 5: ask for an exception, and watch it expire](#lab-5-ask-for-an-exception-and-watch-it-expire) (on your own) |
 
 ## CI/CD and DevSecOps
 
@@ -203,7 +203,7 @@ Pushed harbor.<lab domain>/team03/hello:b70e47f7a1c2.... Argo CD deploys it to d
 **Do this:**
 
 1. Open https://harbor.<lab domain> in a new tab. On the sign-in page, type your studentNN in Username and your own password in Password (the same as Gitea), and click LOG IN.
-2. On the Projects page, click your team, teamNN, in the Project Name column.
+2. On the Projects page, click your team name, teamNN, in the Project Name column.
 3. On the Repositories tab, click teamNN/hello.
 4. In the artifacts list, find the line whose Tags column shows the commit id from step 3. The newest is usually at the top (look at Push Time). If the tag is cut short, move the mouse over it to see it whole.
 5. On that line, move the mouse over the coloured bar in the Vulnerabilities column: a box shows the counts by severity.
@@ -232,7 +232,7 @@ Pushed harbor.<lab domain>/team03/hello:b70e47f7a1c2.... Argo CD deploys it to d
 
 #### Step 6. Write down the evidence
 
-*Where: Your team notes*
+*Where: Your notes*
 
 **Why:** An evidence pack shows, for one change, every check it passed. You assemble it for the Day 6 capstone.
 
@@ -484,7 +484,7 @@ A unit test is a small automatic check with a known answer: call /healthz, expec
 
 Tests are the safety net that lets anyone change code: if the change breaks something, a test says so in seconds, before a reviewer spends time.
 
-One test per behaviour, named for what it checks. The template ships with five; every new behaviour deserves one more.
+One test per behaviour, named for what it checks. The template ships with six; every new behaviour deserves one more.
 
 > **In one sentence:** A test is a check with a known answer that runs itself; green means the behaviour still holds.
 
@@ -586,13 +586,13 @@ spec:
 2. A terminal is open at the bottom of the workspace. If not: menu ☰ (top left) → Terminal → New Terminal. You are ready when you see a prompt that ends in $, for example student01@student01:~$
 3. To run a command: copy it from this page (the copy button at the top right of each grey box), click in the terminal, paste with Ctrl+V (on a Mac Cmd+V, or right-click → Paste), and press Enter. You can paste a whole box at once: the lines run one after the other.
 4. If Git asks for a Username (the first time each day: it then remembers your password for 10 hours), type student01 and press Enter; for the Password, type your password (from cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type the password: that is normal.
-5. kubectl already points at your team's dev namespace (try kubectl get pods).
+5. kubectl already points at your dev namespace (try kubectl get pods).
 
 #### Step 1. Get the guardrails repository and a copy of the bad example
 
 *Where: Workspace terminal*
 
-**Why:** platform/policies holds the guardrails and their examples. You work on a copy of the bad example, with your team in it, so the repository stays as it is.
+**Why:** platform/policies holds the guardrails and their examples. You work on a copy of the bad example, with your team name in it, so the repository stays as it is.
 
 ```bash
 cd ~
@@ -605,7 +605,7 @@ cat ~/shortcut.yaml
 **What each line does:**
 
 - `git clone https://gitea.$DOMAIN/platform/policies`: copy the guardrails repository into ~/policies.
-- `sed "s/team01/$TEAM/g" examples/bad.yaml > ~/shortcut.yaml`: copy the bad example to ~/shortcut.yaml in your home folder, with your team instead of team01.
+- `sed "s/team01/$TEAM/g" examples/bad.yaml > ~/shortcut.yaml`: copy the bad example to ~/shortcut.yaml in your home folder, with your team name instead of team01.
 - `cat ~/shortcut.yaml`: show it.
 
 **You should see:** A Deployment called shortcut in your dev namespace, with image nginx:latest and no name or owner labels.
@@ -677,7 +677,7 @@ kubectl apply -f ~/shortcut.yaml
 
 2. Find the first metadata block at the top: the lines name: shortcut and namespace: teamNN-dev.
 
-3. Under the namespace line, add the three lines labels:, app.kubernetes.io/name: shortcut and app.kubernetes.io/part-of: teamNN (your team), with exactly the spaces shown below: 2 spaces before labels, 4 before the two labels. Save with Ctrl+S (Mac Cmd+S).
+3. Under the namespace line, add the three lines labels:, app.kubernetes.io/name: shortcut and app.kubernetes.io/part-of: teamNN (your team name), with exactly the spaces shown below: 2 spaces before labels, 4 before the two labels. Save with Ctrl+S (Mac Cmd+S).
 
 4. Apply again (the box).
 
@@ -685,7 +685,7 @@ kubectl apply -f ~/shortcut.yaml
    kubectl apply -f ~/shortcut.yaml
    ```
 
-**What changes in `~/shortcut.yaml`:** three new lines under namespace, with your team. Spaces, not tabs.
+**What changes in `~/shortcut.yaml`:** three new lines under namespace, with your team name. Spaces, not tabs.
 
 Before:
 
@@ -739,14 +739,14 @@ rm ~/shortcut.yaml
 - `kubectl -n $TEAM-dev delete deployment shortcut`: remove the test deployment from your dev namespace.
 - `rm ~/shortcut.yaml`: delete your copy of the file.
 
-**You should see:** deployment.apps "shortcut" deleted. Copy the three refusal messages from step 2 into your team notes for the evidence pack.
+**You should see:** deployment.apps "shortcut" deleted. Copy the three refusal messages from step 2 into your notes for the evidence pack.
 
 **Done when:** You saw three refusals, fixed them, and removed the test deployment.
 
 **If you are stuck**
 
-- Error from server (Forbidden) without a policy name: check the namespace is your team's dev namespace (team01-dev).
-- Accepted too early? Check you changed team01 to your team: the rules only apply in team namespaces.
+- Error from server (Forbidden) without a policy name: check the namespace is your dev namespace (team01-dev).
+- Accepted too early? Check you changed team01 to your team name: the rules only apply in team namespaces.
 
 ### Lab 4: test a policy like code, with the Kyverno CLI
 
@@ -871,7 +871,7 @@ Updated 1 path from the index
 
 #### Step 5. Think of one more rule
 
-*Where: Your team*
+*Where: On your own*
 
 **Why:** Guardrails turn a written rule into one that is checked every time. Which of FMD's rules would you automate first?
 
@@ -880,7 +880,7 @@ Updated 1 path from the index
 1. Choose one more rule you would turn into a policy, and say in one sentence what it would refuse. Compare with your neighbour.
 2. Ideas: cost (every workload has a budget), naming, data (no production data in dev), resilience (prod runs at least two copies).
 
-**You should see:** One rule per team on the board.
+**You should see:** One rule per person on the board.
 
 **Done when:** You ran the policies and their tests on your machine and saw a broken test caught.
 
@@ -930,7 +930,7 @@ The brief asks for exactly this: every exception must record scope, rationale, a
 
 ### Lab 5: ask for an exception, and watch it expire
 
-*per team*
+*on your own*
 
 **What you do:** Ask, the proper way, to break one rule for a short time: a written, reviewed, time-limited exception. Then see what happens when it expires.
 
@@ -956,7 +956,7 @@ The brief asks for exactly this: every exception must record scope, rationale, a
 
 *Where: Workspace terminal*
 
-**Why:** examples/status-page.yaml is a ready-made web page straight from Docker Hub. Your team "needs it for a demo": see what the guardrails say.
+**Why:** examples/status-page.yaml is a ready-made web page straight from Docker Hub. You "need it for a demo": see what the guardrails say.
 
 ```bash
 cd ~/policies
@@ -967,7 +967,7 @@ kubectl apply -f ~/status-page.yaml
 
 **What each line does:**
 
-- `sed "s/team01/$TEAM/g" examples/status-page.yaml > ~/status-page.yaml`: copy the example to your home folder, with your team in it.
+- `sed "s/team01/$TEAM/g" examples/status-page.yaml > ~/status-page.yaml`: copy the example to your home folder, with your team name in it.
 - `kubectl apply -f ~/status-page.yaml`: try to deploy it to your dev namespace.
 
 **You should see:** Refused by one rule only, pelab-trusted-registry: the image comes from Docker Hub. Its tag and labels are fine.
@@ -980,7 +980,7 @@ kubectl apply -f ~/status-page.yaml
 
 **Do this:**
 
-1. Paste the box. It makes a branch, copies the template under your team's name, fills in your team and your user name, sets the end date to one week from today, and shows the file.
+1. Paste the box. It makes a branch, copies the template under your team name, fills in your team name and your user name, sets the end date to one week from today, and shows the file.
 
    ```bash
    git switch -c $TEAM-status-page
@@ -995,12 +995,12 @@ kubectl apply -f ~/status-page.yaml
 **What each line does:**
 
 - `git switch -c $TEAM-status-page`: a branch for the request.
-- `cp examples/exception-template.yaml exceptions/$TEAM-status-page.yaml`: copy the template into the exceptions folder, named after your team.
-- `sed -i "s/team01/$TEAM/g; s/student01/$ME/" ...`: put your team and your user name in it.
+- `cp examples/exception-template.yaml exceptions/$TEAM-status-page.yaml`: copy the template into the exceptions folder, named after your team name.
+- `sed -i "s/team01/$TEAM/g; s/student01/$ME/" ...`: put your team name and your user name in it.
 - `sed -i "s/pelab.io\/expires: .*/pelab.io\/expires: \"$(date -d '+7 days' +%F)\"/" ...`: set the end date (pelab.io/expires) to one week from today. $(date -d '+7 days' +%F) is replaced by that date, for example 2026-11-09.
 - `cat exceptions/$TEAM-status-page.yaml`: show the request.
 
-**You should see:** Your request: your team in its name and namespace, your user name, a reason and an end date a week ahead:
+**You should see:** Your request: your team name in its name and namespace, your user name, a reason and an end date a week ahead:
 
 ```
 metadata:
@@ -1199,7 +1199,7 @@ You can now:
 - Watch the guardrails refuse a bad deployment, and test a policy with the CLI
 - Ask for a time-limited exception, get it approved, and see it expire
 
-**Tomorrow:** Deploy, observe and the capstone. You will promote hello to staging and then prod by pull request, read the dashboard, load-test staging, break and recover a service, and present your team's service with its evidence pack.
+**Tomorrow:** Deploy, observe and the capstone. You will promote hello to staging and then prod by pull request, read the dashboard, load-test staging, break and recover a service, and present your own service with its evidence pack.
 
 ---
 

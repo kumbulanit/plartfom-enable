@@ -17,12 +17,12 @@ module.exports = {
       'Think of the last time something you needed changed at work: a new column in a report, a fix to a spreadsheet model, a new script. You asked, and some days or weeks later it was there. In between it passed through several people, waited in queues, and was checked by hand. Most of that time nobody was working on it: it was waiting.',
       'In this lab every team draws that road on paper, then looks at the other teams\' roads. You will find that everyone built almost the same road, each in their own way. That discovery, made by the room itself, is the whole case for a platform. No computer is needed.',
     ],
-    end: 'Your road with its waits, ticks from the other teams on what is the same, and one shared road on the wall with what the platform does instead of each shared step.',
+    end: 'Your road with its waits, ticks from the other delegates on what is the same, and one shared road on the wall with what the platform does instead of each shared step.',
     steps: {
       0: { plain: 'Draw every step your change goes through, and mark where it waits and why.', check: 'Your road goes from "someone asks" to "live", with at least one pink wait and two numbers in the corner.' },
-      1: { plain: 'One of you looks at the other teams\' roads and ticks every step you recognise.', check: 'Your walker has visited every other board.' },
-      2: { plain: 'Back in your team, sort your steps into "the same as others" and "only ours".', check: 'Every note is in one of the two groups.' },
-      3: { plain: 'Put everyone\'s shared steps on one wall, and see that this one road is what a platform builds once, for everyone.', check: 'You can say in one sentence what a platform would change for your team.' },
+      1: { plain: 'Look at other delegates\' roads and tick every step you recognise.', check: 'You have visited at least four other sheets.' },
+      2: { plain: 'Back at your sheet, sort your steps into "the same as others" and "only mine".', check: 'Every note is in one of the two groups.' },
+      3: { plain: 'Put everyone\'s shared steps on one wall, and see that this one road is what a platform builds once, for everyone.', check: 'You can say in one sentence what a platform would change for your unit.' },
     },
   },
 
@@ -87,19 +87,19 @@ module.exports = {
 
   'Lab 3: run hello by hand, and count the steps': {
     story: [
-      'hello is a very small website: when you visit it, it answers with a short greeting and a few facts about itself. Your team will ship it all week, through the platform.',
+      'hello is a very small website: when you visit it, it answers with a short greeting and a few facts about itself. You will ship it all week, through the platform.',
       'Today you run it yourself, by hand, the way it was done before platforms existed: copy the code, start it in a terminal, visit it, change its settings, restart it. Think of it as running a market stall yourself: you carry the table, set it up, open, close, and set up again somewhere else. Every manual step you count today is one the platform takes over later in the week.',
       'You will use two terminals at the same time: one runs the website and stays busy, the other visits it. Step 3 shows how to open the second.',
     ],
     end: 'hello running on your workspace, twice, with two different settings; and a written list of every step it took by hand.',
     steps: {
       0: {
-        plain: 'Tell Git your name, then copy your team\'s code from Gitea (the place where the bank keeps code) into your workspace.',
+        plain: 'Tell Git your name, then copy your code from Gitea (the place where the bank keeps code) into your workspace.',
         do: [
           { text: 'Paste this one line on its own and press Enter. It asks "Your full name:": type your name (for example Thandi Nkosi) and press Enter. Git puts this name on every change you save. It then prints the name back so you can check it.', cmd: 'read -p "Your full name: " NAME && git config --global user.name "$NAME" && git config --global user.name', see: 'Your question, your answer, and the name printed back:', out: 'Your full name: Thandi Nkosi\nThandi Nkosi' },
           { text: 'Tell Git your e-mail address in the lab. Prints nothing.', cmd: 'git config --global user.email "$ME@$DOMAIN"' },
           { text: 'Let Git remember your password for today, so you type it only once. Prints nothing.', cmd: 'git config --global credential.helper "cache --timeout=36000"' },
-          { text: 'Go to your home folder and copy (clone) your team\'s code from Gitea. Git asks for a Username: type student01 and press Enter. Then a Password: type your password (from your logins file, cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type a password: that is normal, keep typing.', cmd: 'cd ~\ngit clone https://gitea.$DOMAIN/$TEAM/hello', see: 'Git asks who you are, then copies the code (your numbers may differ a little):', out: 'Cloning into \'hello\'...\nUsername for \'https://gitea.<lab domain>\': student01\nPassword for \'https://student01@gitea.<lab domain>\':\nremote: Enumerating objects: 31, done.\nremote: Counting objects: 100% (31/31), done.\nremote: Compressing objects: 100% (24/24), done.\nremote: Total 31 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)\nReceiving objects: 100% (31/31), 11.00 KiB | 11.00 MiB/s, done.\nResolving deltas: 100% (1/1), done.' },
+          { text: 'Go to your home folder and copy (clone) your code from Gitea. Git asks for a Username: type student01 and press Enter. Then a Password: type your password (from your logins file, cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type a password: that is normal, keep typing.', cmd: 'cd ~\ngit clone https://gitea.$DOMAIN/$TEAM/hello', see: 'Git asks who you are, then copies the code (your numbers may differ a little):', out: 'Cloning into \'hello\'...\nUsername for \'https://gitea.<lab domain>\': student01\nPassword for \'https://student01@gitea.<lab domain>\':\nremote: Enumerating objects: 31, done.\nremote: Counting objects: 100% (31/31), done.\nremote: Compressing objects: 100% (24/24), done.\nremote: Total 31 (delta 1), reused 0 (delta 0), pack-reused 0 (from 0)\nReceiving objects: 100% (31/31), 11.00 KiB | 11.00 MiB/s, done.\nResolving deltas: 100% (1/1), done.' },
           { text: 'Go into the copy and list what is inside.', cmd: 'cd hello\nls', see: 'The files and folders of the website, and your prompt now ends in ~/hello$:', out: 'Dockerfile  README.md  app  catalog-info.yaml  deploy  pyproject.toml  tests' },
         ],
         check: 'Your prompt ends in ~/hello$, and ls shows app, tests and Dockerfile among others.',
@@ -167,7 +167,7 @@ module.exports = {
     end: 'Your own branch in Gitea with one saved change: a new greeting, checked on your workspace first.',
     steps: {
       0: {
-        plain: 'Go into your copy of the code, switch to the main line, and fetch whatever your team added since yesterday.',
+        plain: 'Go into your copy of the code, switch to the main line, and fetch whatever was added since yesterday.',
         do: [
           { text: 'Go into your copy of hello. Prints nothing; the prompt ends in ~/hello$.', cmd: 'cd ~/hello' },
           { text: 'Switch to the main line, the one that gets deployed.', cmd: 'git switch main', see: 'Git says you are on main:', out: 'Already on \'main\'\nYour branch is up to date with \'origin/main\'.' },
@@ -198,7 +198,7 @@ module.exports = {
         check: 'Git printed one line with your branch name and your note, and "1 file changed".',
       },
       5: {
-        plain: 'Upload your branch to Gitea, so your team can see it and review it.',
+        plain: 'Upload your branch to Gitea, so the reviewer can see it and review it.',
         check: 'In Gitea, team01/hello → Branches lists greeting-student01.',
       },
     },

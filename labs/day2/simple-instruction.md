@@ -155,7 +155,7 @@ A first pass through the whole Git loop, together. Lab 2 then does it again, pro
 
 ### 8. Find it in Gitea
 
-1. Open your team's hello in Gitea: Ctrl+click the address this prints.
+1. Open your hello in Gitea: Ctrl+click the address this prints.
 
    **Copy and paste:**
 
@@ -588,7 +588,7 @@ git branch -a
 
 ## Lab 2: your first change, on a branch
 
-Change the greeting of your team's service on a branch of your own, check it, save it as a commit and send it to Gitea.
+Change the greeting of your service on a branch of your own, check it, save it as a commit and send it to Gitea.
 
 ### 1. Go to main and get the latest version
 
@@ -650,7 +650,7 @@ git switch -c greeting-$ME
 
 4. Save with Ctrl+S (on a Mac Cmd+S). The dot next to the file name at the top disappears when it is saved.
 
-5. Editor not working for you? Instead of the four instructions above, paste this in the terminal: it makes the same change (a greeting with your team and your name) and shows the new line.
+5. Editor not working for you? Instead of the four instructions above, paste this in the terminal: it makes the same change (a greeting with your team name and your name) and shows the new line.
 
    **Copy and paste:**
 

@@ -23,7 +23,7 @@ You have a virtual machine of your own, with the whole platform on it: nobody el
 | --- | --- |
 | [Day 1: Platform engineering and Linux basics](day1/README.md) | Understand what a platform and an Internal Developer Platform are, and be at home on a Linux command line. |
 | [Day 2: Git and working together](day2/README.md) | Every change goes through Git, a pull request and a review, and the approved change goes live in dev by itself. |
-| [Day 3: Infrastructure as Code from a template](day3/README.md) | Describe infrastructure in code, read a plan, and request your team's staging and prod environments from the environment template. |
+| [Day 3: Infrastructure as Code from a template](day3/README.md) | Describe infrastructure in code, read a plan, and request your own staging and prod environments from the environment template. |
 | [Day 4: Containers and the packaging template](day4/README.md) | Build and run a container, and create a new service from the packaging template without a ticket. |
 | [Day 5: CI/CD, testing and security](day5/README.md) | Read a pipeline and its results, fix a failing check, and explain how guardrails and evidence protect production. |
 | [Day 6: Deploy, observe and the capstone](day6/README.md) | Release to staging and prod through Git, read the dashboard, recover from a bad change, and present your service with its evidence. |
@@ -42,14 +42,14 @@ Each day has concepts and a live demo, then hands-on labs, then a short quiz. Wo
   - **You should see**: the real output, and **How to read it**;
   - **If you see something else**: the usual surprises and what to do about each.
 - Open a terminal in your workspace with the menu (☰) → Terminal → New Terminal. Paste with Ctrl+V or right-click → Paste. A second terminal: the + button at the top right of the terminal panel.
-- Your workspace knows who you are. `$ME` is your user name, `$TEAM` your team and `$DOMAIN` the lab's domain, so the commands work as pasted. Try `echo "$ME $TEAM $DOMAIN"`.
-- In addresses you type into the browser, replace `teamNN` with your team and `studentNN` with your user name, for example `team03` and `student12`.
+- Your workspace knows who you are. `$ME` is your user name, `$TEAM` your team name (every delegate is a team of one) and `$DOMAIN` the lab's domain, so the commands work as pasted. Try `echo "$ME $TEAM $DOMAIN"`.
+- In addresses you type into the browser, replace `teamNN` with your team name and `studentNN` with your user name, for example `team03` and `student12`.
 - **You work alone, and play the second person.** A few steps need someone else: a reviewer who approves your change, or the platform team who approves your request. You play them: open a private window (Ctrl+Shift+N; on a Mac Cmd+Shift+N; Firefox Ctrl+Shift+P), sign in to Gitea as `reviewer` or as `platform-approver` with the password from `cat /etc/pelab/logins.md`, do the step, and close the window. At work you never share a login, and the second person is a real colleague; here it is role-play, so every step can be done alone.
 - If your instructor says the safety net is on, Argo CD is paused and the platform deploys for it. Work exactly as written; where a step says to look at Argo CD, look at the commit in Gitea instead: click the tick next to it and read `safety-net/dev`, `safety-net/staging` or `safety-net/prod`.
 
 ## Working on the platform, in five verbs
 
-1. **Find**: open the portal and see your team, its services, who owns them and where they run.
+1. **Find**: open the portal and see your services, who owns them and where they run.
 2. **Create**: make a new service or request an environment from a template. A few values, no ticket.
 3. **Change**: edit on a branch, open a pull request, get one approval, merge.
 4. **Ship**: the pipeline checks and builds; Argo CD deploys to dev, and to staging and prod after an approved promotion.
@@ -59,7 +59,7 @@ Each day has concepts and a live demo, then hands-on labs, then a short quiz. Wo
 
 1. Read the message: most refusals on this platform say what to fix.
 2. Look at "If you are stuck" under the lab.
-3. Ask your team, then the lab assistant. Nothing you do in your workspace can break anyone else's.
+3. Ask your neighbour, then the lab assistant. Nothing you do in your workspace can break anyone else's.
 
 ## The code behind the labs
 

@@ -119,7 +119,7 @@ git diff
 
 **Where:** Workspace terminal
 
-1. Open https://hello-teamNN-staging.<lab domain>/ in a new tab (your team instead of teamNN).
+1. Open https://hello-teamNN-staging.<lab domain>/ in a new tab (your team name instead of teamNN).
 
 📋 **Copy and paste this into the terminal:**
 
@@ -181,7 +181,7 @@ Read your service's health on the Golden path services dashboard: versions, traf
 
 3. The list shows folders. Click the folder PE Lab to open it, then click Golden path services.
 
-4. At the top left of the dashboard there are two lists. Team: choose your team, teamNN. Service: choose hello.
+4. At the top left of the dashboard there are two lists. Team: choose your team name, teamNN. Service: choose hello.
 
 5. At the top right, leave the time range (Last 1 hour) and the refresh (30s) as they are: the dashboard updates itself every 30 seconds. The round arrow button refreshes it now.
 
@@ -227,7 +227,7 @@ for i in $(seq 1 50); do curl -s -o /dev/null https://hello-$TEAM-staging.$DOMAI
 
 ### 5. Write a service-level report
 
-**Where:** Your team notes
+**Where:** Your notes
 
 1. Write three lines: the promise (99% of requests succeed), today's measured success rate (100% minus the failed share on the dashboard), and the one alert that exists (it fires when hello has no healthy copy).
 
@@ -320,7 +320,7 @@ kubectl -n $TEAM-staging top pods
 
 ### 5. Turn the numbers into a decision
 
-**Where:** Your team notes
+**Where:** Your notes
 
 1. Write down p95 and the success rate at 20 and at 100 users.
 
@@ -762,7 +762,7 @@ One last change through the whole platform: put your name on hello's page, see i
 
 1. Wait a few minutes: the pipeline on main builds the new image (Actions tab, green tick), then Argo CD puts it in dev.
 
-2. Open https://hello-teamNN-dev.<lab domain>/ in a new tab (your team instead of teamNN).
+2. Open https://hello-teamNN-dev.<lab domain>/ in a new tab (your team name instead of teamNN).
 
 **You should see:** DEV glowing red, falling confetti, a bouncing trophy, a rainbow Congratulations, your name on a glowing badge, "you are done with Platform Engineering!" and five cards with what you did this week.
 

@@ -25,10 +25,11 @@ pelab_ntp_servers:
 # One delegate per VM (the default): every delegate has a virtual machine of their
 # own with the whole platform on it, and works alone. List one host per delegate in
 # inventory/hosts.yml; each is built the same way, as student01 in team01.
-# A shared server for a whole cohort still works: for example 25 delegates,
-# 5 teams, 2 spares and 5 runners on one host.
+# A shared server for a whole cohort still works: for example 25 delegates on one
+# host, with 2 spares and 5 runners. Every delegate still works alone, in a team of
+# their own (team01 to team25); set pelab_team_count lower only to share teams.
 pelab_cohort_size: 1
-pelab_team_count: 1
+pelab_team_count: "{{ pelab_cohort_size }}"
 pelab_spare_workspaces: 0
 pelab_runner_count: 1
 # Spare workspaces belong to no team until assigned, for example {student26: team03}.

@@ -6,7 +6,7 @@ Each command comes twice. **Copy and paste:** is the grey box to copy (the copy 
 
 ## Icebreaker: two truths and a lie
 
-Get to know your own team: share two true facts and one false one about your work, and the one tool you wish existed.
+Get to know the people in the room: share two true facts and one false one about your work, and the one tool you wish existed.
 
 ### 1. Write two truths and one lie
 
@@ -16,31 +16,29 @@ Get to know your own team: share two true facts and one false one about your wor
 
 ### 2. Take turns and guess
 
-1. Take turns: say your name and your role in FMD, then read your three statements.
+1. In turn, around the room: say your name and your role in FMD, then read your three statements.
 
-2. The team agrees on a guess. Then reveal which one was false.
+2. The room calls out a guess. Then reveal which one was false.
 
 ### 3. One tool you wish existed
 
-1. Each person names one tool they wish existed at work, for example "a button that gives me a test environment" or "a report that builds itself".
+1. On a sticky note, write one tool you wish existed at work, for example "a button that gives me a test environment" or "a report that builds itself".
 
-2. One person writes all the wishes on a sheet.
+### 4. Read your wish to the room
 
-### 4. Choose a team name
+1. In turn, read your wish out.
 
-1. Agree a team name, inspired by your wishes if you like.
+2. Stick it on the board, next to any wish like it.
 
-2. Write it on your table card.
+### 5. Which wishes do many people share?
 
-### 5. Share with the room
+1. The instructor reads out the biggest groups.
 
-1. One person reads your team name and your favourite wish.
-
-2. The instructor writes the wishes on the board.
+2. Note your own wish: you need it in Lab 1 and on Day 2.
 
 ## Lab 1: map how a change reaches production today
 
-As a team, map your road from a request to a live change, mark where it waits, compare it with the other teams' roads, and see that the shared steps are what a platform builds once.
+Map your own road from a request to a live change, mark where it waits, compare it with the other delegates' roads, and see that the shared steps are what a platform builds once.
 
 ### 1. List your road, and mark the waits
 
@@ -52,31 +50,27 @@ As a team, map your road from a request to a live change, mark where it waits, c
 
 ### 2. Walk round and tick what you recognise
 
-1. Your team chooses one walker. Everyone else stays at your board to explain it to visitors.
+1. Leave your sheet on your table, take a pen, and visit at least four other sheets.
 
-2. The walker takes a pen and visits every other team's board in turn.
-
-3. On each board, tick ✓ every step your team does too, and star ★ anything your team never does but maybe should.
+2. On each sheet, tick ✓ every step you do too, and star ★ anything you never do but maybe should.
 
 ### 3. Same or different?
 
-1. The walker tells the team what they saw on the other boards.
+1. Sort your notes into two groups: ticked by others (the same), and no ticks (only yours).
 
-2. Sort your notes into two groups: ticked by other teams (the same), and no ticks (only ours).
+2. For each "only yours" note, ask: is it really a different job, or the same job done another way?
 
-3. For each "only ours" note, ask: is it really a different job, or the same job done another way?
-
-4. Look at the stars on your board: a step another team has and you do not. Is it a check you are missing?
+3. Look at the stars on your sheet: a step someone else has and you do not. Is it a check you are missing?
 
 ### 4. One road: the platform
 
-1. Each team brings its ticked notes to the wall. The same step from different teams goes into the same column.
+1. Bring your ticked notes to the wall. The same step from different people goes into the same column.
 
-2. Above each column, write how many teams had that step.
+2. Above each column, write how many people had that step.
 
 3. The instructor places a card over each column: what the platform does instead (the table on the slide).
 
-4. Together, count what disappears: set-up done once per team, waiting, and checks that only some teams remembered.
+4. Together, count what disappears: set-up done again in every unit, waiting, and checks that only some people remembered.
 
 ## Lab 2: Linux warm-up in your workspace
 
@@ -266,9 +260,9 @@ curl -I https://gitea.$DOMAIN
 
 ## Lab 3: run hello by hand, and count the steps
 
-Get your team's service, hello, and run it by hand on your workspace in two settings. Count every manual step: on the next days the platform takes them over.
+Get your service, hello, and run it by hand on your workspace in two settings. Count every manual step: on the next days the platform takes them over.
 
-### 1. Tell Git who you are, then copy your team's repository
+### 1. Tell Git who you are, then copy your repository
 
 1. Paste this one line on its own and press Enter. It asks "Your full name:": type your name (for example Thandi Nkosi) and press Enter. Git puts this name on every change you save. It then prints the name back so you can check it.
 
@@ -280,7 +274,7 @@ Get your team's service, hello, and run it by hand on your workspace in two sett
 
    *In the terminal it looks like this:*
 
-   ![What you should see in the terminal](../images/terminal/day1-lab3-1-1-tell-git-who-you-are-then-copy-your-team.svg)
+   ![What you should see in the terminal](../images/terminal/day1-lab3-1-1-tell-git-who-you-are-then-copy-your-repo.svg)
 
 2. Tell Git your e-mail address in the lab. Prints nothing.
 
@@ -292,7 +286,7 @@ Get your team's service, hello, and run it by hand on your workspace in two sett
 
    *In the terminal it looks like this:*
 
-   ![What you should see in the terminal](../images/terminal/day1-lab3-1-2-tell-git-who-you-are-then-copy-your-team.svg)
+   ![What you should see in the terminal](../images/terminal/day1-lab3-1-2-tell-git-who-you-are-then-copy-your-repo.svg)
 
 3. Let Git remember your password for today, so you type it only once. Prints nothing.
 
@@ -304,9 +298,9 @@ Get your team's service, hello, and run it by hand on your workspace in two sett
 
    *In the terminal it looks like this:*
 
-   ![What you should see in the terminal](../images/terminal/day1-lab3-1-3-tell-git-who-you-are-then-copy-your-team.svg)
+   ![What you should see in the terminal](../images/terminal/day1-lab3-1-3-tell-git-who-you-are-then-copy-your-repo.svg)
 
-4. Go to your home folder and copy (clone) your team's code from Gitea. Git asks for a Username: type student01 and press Enter. Then a Password: type your password (from your logins file, cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type a password: that is normal, keep typing.
+4. Go to your home folder and copy (clone) your code from Gitea. Git asks for a Username: type student01 and press Enter. Then a Password: type your password (from your logins file, cat /etc/pelab/logins.md) and press Enter. Nothing appears while you type a password: that is normal, keep typing.
 
    **Copy and paste:**
 
@@ -317,7 +311,7 @@ Get your team's service, hello, and run it by hand on your workspace in two sett
 
    *In the terminal it looks like this:*
 
-   ![What you should see in the terminal](../images/terminal/day1-lab3-1-4-tell-git-who-you-are-then-copy-your-team.svg)
+   ![What you should see in the terminal](../images/terminal/day1-lab3-1-4-tell-git-who-you-are-then-copy-your-repo.svg)
 
 5. Go into the copy and list what is inside.
 
@@ -330,7 +324,7 @@ Get your team's service, hello, and run it by hand on your workspace in two sett
 
    *In the terminal it looks like this:*
 
-   ![What you should see in the terminal](../images/terminal/day1-lab3-1-5-tell-git-who-you-are-then-copy-your-team.svg)
+   ![What you should see in the terminal](../images/terminal/day1-lab3-1-5-tell-git-who-you-are-then-copy-your-repo.svg)
 
 ### 2. Start the service
 

@@ -279,7 +279,7 @@ Use the golden path: create a brand-new service called rates from the template, 
 
 1. In Gitea, click + (top right, next to your picture) → New Repository.
 
-2. Owner: open the list and choose your team, teamNN (not your own name).
+2. Owner: open the list and choose your team name, teamNN (not your user name).
 
 3. Repository Name: rates (in small letters).
 
@@ -289,9 +289,9 @@ Use the golden path: create a brand-new service called rates from the template, 
 
 6. Click Create Repository at the bottom.
 
-   ![The New Repository form, filled in: owner team01 (your team), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.](../images/gitea-41-new-repo-from-template.png)
+   ![The New Repository form, filled in: owner team01 (your team name), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.](../images/gitea-41-new-repo-from-template.png)
 
-   *The New Repository form, filled in: owner team01 (your team), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.*
+   *The New Repository form, filled in: owner team01 (your team name), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.*
 
 **You should see:** teamNN/rates with the folders app, deploy and tests and the files Dockerfile, README.md and catalog-info.yaml.
 
@@ -319,7 +319,7 @@ Use the golden path: create a brand-new service called rates from the template, 
 
 1. Open https://harbor.<lab domain> in a new tab. On the sign-in page, type your studentNN in Username and your own password in Password (the same as Gitea), and click LOG IN.
 
-2. You land on Projects: a table with one line per project. In the Project Name column, click your team, teamNN.
+2. You land on Projects: a table with one line per project. In the Project Name column, click your team name, teamNN.
 
 3. The project opens on its Repositories tab: one line per image name. Click teamNN/rates.
 
@@ -333,7 +333,7 @@ Use the golden path: create a brand-new service called rates from the template, 
 
 1. Open https://argocd.<lab domain> and sign in as delegate, with its password from cat /etc/pelab/logins.md.
 
-2. Type your team in the search box at the top.
+2. Type your team name in the search box at the top.
 
 3. Wait up to a minute: Argo CD looks for new repositories every minute.
 
@@ -343,7 +343,7 @@ Use the golden path: create a brand-new service called rates from the template, 
 
 **Where:** Workspace terminal
 
-1. Open https://rates-teamNN-dev.<lab domain>/ in a new tab (your team instead of teamNN).
+1. Open https://rates-teamNN-dev.<lab domain>/ in a new tab (your team name instead of teamNN).
 
 📋 **Copy and paste this into the terminal:**
 
@@ -365,7 +365,7 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 
 3. At the top right of that page, click Register Existing Component.
 
-4. A form with one box, Select URL (the repository URL), opens. Paste this address in it, with your team: https://gitea.<lab domain>/teamNN/rates/src/branch/main/catalog-info.yaml
+4. A form with one box, Select URL (the repository URL), opens. Paste this address in it, with your team name: https://gitea.<lab domain>/teamNN/rates/src/branch/main/catalog-info.yaml
 
 5. Click Analyze. Backstage reads the file and shows what it will add: one component, rates.
 
@@ -549,7 +549,7 @@ Give rates a second pipeline, a smoke test, by copying a template the platform t
 
 **Where:** Browser: Gitea
 
-1. Open your team's rates repository: https://gitea.<lab domain>/teamNN/rates.
+1. Open your rates repository: https://gitea.<lab domain>/teamNN/rates.
 
 2. Above the file list, click Add File, then New File.
 

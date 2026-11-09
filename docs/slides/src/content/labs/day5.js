@@ -68,7 +68,7 @@ module.exports = {
         why: 'Harbor keeps every image the pipeline pushed, scans it again on arrival, and records its ingredients list.',
         do: [
           'Open https://harbor.<lab domain> in a new tab. On the sign-in page, type your studentNN in Username and your own password in Password (the same as Gitea), and click LOG IN.',
-          'On the Projects page, click your team, teamNN, in the Project Name column.',
+          'On the Projects page, click your team name, teamNN, in the Project Name column.',
           'On the Repositories tab, click teamNN/hello.',
           'In the artifacts list, find the line whose Tags column shows the commit id from step 3. The newest is usually at the top (look at Push Time). If the tag is cut short, move the mouse over it to see it whole.',
           'On that line, move the mouse over the coloured bar in the Vulnerabilities column: a box shows the counts by severity.',
@@ -93,7 +93,7 @@ module.exports = {
       },
       {
         title: 'Write down the evidence',
-        where: 'Your team notes',
+        where: 'Your notes',
         why: 'An evidence pack shows, for one change, every check it passed. You assemble it for the Day 6 capstone.',
         do: [
           'Copy three things into your notes: the link to the pipeline run (from the browser\'s address bar), the image tag (the commit id), and the vulnerability counts.',
@@ -235,17 +235,17 @@ module.exports = {
     ],
     start: [
       ...TERMINAL,
-      'kubectl already points at your team\'s dev namespace (try kubectl get pods).',
+      'kubectl already points at your dev namespace (try kubectl get pods).',
     ],
     steps: [
       {
         title: 'Get the guardrails repository and a copy of the bad example',
         where: 'Workspace terminal',
-        why: 'platform/policies holds the guardrails and their examples. You work on a copy of the bad example, with your team in it, so the repository stays as it is.',
+        why: 'platform/policies holds the guardrails and their examples. You work on a copy of the bad example, with your team name in it, so the repository stays as it is.',
         run: 'cd ~\ngit clone https://gitea.$DOMAIN/platform/policies\ncd policies\nsed "s/team01/$TEAM/g" examples/bad.yaml > ~/shortcut.yaml\ncat ~/shortcut.yaml',
         explain: [
           ['git clone https://gitea.$DOMAIN/platform/policies', 'copy the guardrails repository into ~/policies.'],
-          ['sed "s/team01/$TEAM/g" examples/bad.yaml > ~/shortcut.yaml', 'copy the bad example to ~/shortcut.yaml in your home folder, with your team instead of team01.'],
+          ['sed "s/team01/$TEAM/g" examples/bad.yaml > ~/shortcut.yaml', 'copy the bad example to ~/shortcut.yaml in your home folder, with your team name instead of team01.'],
           ['cat ~/shortcut.yaml', 'show it.'],
         ],
         see: 'A Deployment called shortcut in your dev namespace, with image nginx:latest and no name or owner labels.',
@@ -285,12 +285,12 @@ module.exports = {
         do: [
           'In the Explorer on the left, click shortcut.yaml (it is in your home folder) to open it.',
           'Find the first metadata block at the top: the lines name: shortcut and namespace: teamNN-dev.',
-          'Under the namespace line, add the three lines labels:, app.kubernetes.io/name: shortcut and app.kubernetes.io/part-of: teamNN (your team), with exactly the spaces shown below: 2 spaces before labels, 4 before the two labels. Save with Ctrl+S (Mac Cmd+S).',
+          'Under the namespace line, add the three lines labels:, app.kubernetes.io/name: shortcut and app.kubernetes.io/part-of: teamNN (your team name), with exactly the spaces shown below: 2 spaces before labels, 4 before the two labels. Save with Ctrl+S (Mac Cmd+S).',
           'Apply again (the box).',
         ],
         change: {
           file: '~/shortcut.yaml',
-          how: 'three new lines under namespace, with your team. Spaces, not tabs.',
+          how: 'three new lines under namespace, with your team name. Spaces, not tabs.',
           before: 'metadata:\n  name: shortcut\n  namespace: teamNN-dev',
           after: 'metadata:\n  name: shortcut\n  namespace: teamNN-dev\n  labels:\n    app.kubernetes.io/name: shortcut\n    app.kubernetes.io/part-of: teamNN',
         },
@@ -315,7 +315,7 @@ module.exports = {
           ['kubectl -n $TEAM-dev delete deployment shortcut', 'remove the test deployment from your dev namespace.'],
           ['rm ~/shortcut.yaml', 'delete your copy of the file.'],
         ],
-        see: 'deployment.apps "shortcut" deleted. Copy the three refusal messages from step 2 into your team notes for the evidence pack.',
+        see: 'deployment.apps "shortcut" deleted. Copy the three refusal messages from step 2 into your notes for the evidence pack.',
       },
     ],
     done: 'You saw three refusals, fixed them, and removed the test deployment.',
@@ -388,13 +388,13 @@ module.exports = {
       },
       {
         title: 'Think of one more rule',
-        where: 'Your team',
+        where: 'On your own',
         why: 'Guardrails turn a written rule into one that is checked every time. Which of FMD\'s rules would you automate first?',
         do: [
           'Choose one more rule you would turn into a policy, and say in one sentence what it would refuse. Compare with your neighbour.',
           'Ideas: cost (every workload has a budget), naming, data (no production data in dev), resilience (prod runs at least two copies).',
         ],
-        see: 'One rule per team on the board.',
+        see: 'One rule per person on the board.',
       },
     ],
     done: 'You ran the policies and their tests on your machine and saw a broken test caught.',
@@ -418,10 +418,10 @@ module.exports = {
       {
         title: 'Try the status page',
         where: 'Workspace terminal',
-        why: 'examples/status-page.yaml is a ready-made web page straight from Docker Hub. Your team "needs it for a demo": see what the guardrails say.',
+        why: 'examples/status-page.yaml is a ready-made web page straight from Docker Hub. You "need it for a demo": see what the guardrails say.',
         run: 'cd ~/policies\ngit switch main && git pull\nsed "s/team01/$TEAM/g" examples/status-page.yaml > ~/status-page.yaml\nkubectl apply -f ~/status-page.yaml',
         explain: [
-          ['sed "s/team01/$TEAM/g" examples/status-page.yaml > ~/status-page.yaml', 'copy the example to your home folder, with your team in it.'],
+          ['sed "s/team01/$TEAM/g" examples/status-page.yaml > ~/status-page.yaml', 'copy the example to your home folder, with your team name in it.'],
           ['kubectl apply -f ~/status-page.yaml', 'try to deploy it to your dev namespace.'],
         ],
         see: 'Refused by one rule only, pelab-trusted-registry: the image comes from Docker Hub. Its tag and labels are fine.',
@@ -431,18 +431,18 @@ module.exports = {
         where: 'Workspace terminal, then the editor',
         why: 'An exception is a request in writing: who asks, why, and until when. It is a file in Git, so it is reviewed like any change.',
         do: [
-          'Paste the box. It makes a branch, copies the template under your team\'s name, fills in your team and your user name, sets the end date to one week from today, and shows the file.',
+          'Paste the box. It makes a branch, copies the template under your team name, fills in your team name and your user name, sets the end date to one week from today, and shows the file.',
           'Open the file in the editor (Explorer → policies → exceptions → teamNN-status-page.yaml) and rewrite the reason, under pelab.io/reason, in your own words: why the golden path cannot be used, in one or two sentences. Keep the same indentation. Save.',
         ],
         run: 'git switch -c $TEAM-status-page\ncp examples/exception-template.yaml exceptions/$TEAM-status-page.yaml\nsed -i "s/team01/$TEAM/g; s/student01/$ME/" exceptions/$TEAM-status-page.yaml\nsed -i "s/pelab.io\\/expires: .*/pelab.io\\/expires: \\"$(date -d \'+7 days\' +%F)\\"/" exceptions/$TEAM-status-page.yaml\ncat exceptions/$TEAM-status-page.yaml',
         explain: [
           ['git switch -c $TEAM-status-page', 'a branch for the request.'],
-          ['cp examples/exception-template.yaml exceptions/$TEAM-status-page.yaml', 'copy the template into the exceptions folder, named after your team.'],
-          ['sed -i "s/team01/$TEAM/g; s/student01/$ME/" ...', 'put your team and your user name in it.'],
+          ['cp examples/exception-template.yaml exceptions/$TEAM-status-page.yaml', 'copy the template into the exceptions folder, named after your team name.'],
+          ['sed -i "s/team01/$TEAM/g; s/student01/$ME/" ...', 'put your team name and your user name in it.'],
           ['sed -i "s/pelab.io\\/expires: .*/pelab.io\\/expires: \\"$(date -d \'+7 days\' +%F)\\"/" ...', 'set the end date (pelab.io/expires) to one week from today. $(date -d \'+7 days\' +%F) is replaced by that date, for example 2026-11-09.'],
           ['cat exceptions/$TEAM-status-page.yaml', 'show the request.'],
         ],
-        see: 'Your request: your team in its name and namespace, your user name, a reason and an end date a week ahead:',
+        see: 'Your request: your team name in its name and namespace, your user name, a reason and an end date a week ahead:',
         out: 'metadata:\n  name: team03-status-page            # CHANGE: <team>-<what>, lowercase\n  namespace: pelab-exceptions       # exceptions only count in this namespace\n  annotations:\n    pelab.io/requested-by: student12  # CHANGE: your user name\n    pelab.io/reason: >-               # CHANGE: why the golden path cannot be used, in one or two sentences\n      We need a status page for the demo this week and there is no\n      golden-path image for it yet.\n    pelab.io/expires: "2026-11-09"\n...\n          namespaces: [team03-dev]    # CHANGE: your team\'s namespace\n          names: [status-page*]       # CHANGE: the workload\'s name (pods add a suffix)',
         read: [
           'The # CHANGE comments mark what a request must fill in; the commands filled in all of them except the reason, which is yours to write.',

@@ -8,7 +8,7 @@
 | [safety-net.md](safety-net.md) | If Argo CD gives trouble: one command to let the platform deploy instead, what to tell delegates, how to switch back |
 | [github-option.md](github-option.md) | Hosting the course's Git on github.com instead of Gitea: when it is worth it, accounts and 2FA, what to set up, what changes in the lab, costs |
 | day1-notes.md to day6-notes.md | One guide per day: what to prepare, the day hour by hour with slide numbers, every action only you take (with the commands), what to watch for, the end of the day, then the slide-by-slide notes and quiz answers |
-| [lab-check-off.md](lab-check-off.md) | Every lab of the week, with a box per team |
+| [lab-check-off.md](lab-check-off.md) | Every lab of the week, with a box per delegate |
 | [capstone-rubric.md](capstone-rubric.md) | The panel's rubric, the evidence-pack checklist and the presentation outline |
 
 The decks are in `../slides/`. The delegates' handbook is the Gitea repository

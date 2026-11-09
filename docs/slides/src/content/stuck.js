@@ -86,8 +86,8 @@ module.exports = {
     'Your test change did not break anything: check you changed an expected value (for example 200 to 201), not the code under test.',
   ],
   'Lab 3: watch the guardrails refuse a bad deployment': [
-    'Error from server (Forbidden) without a policy name: check the namespace is your team\'s dev namespace (team01-dev).',
-    'Accepted too early? Check you changed team01 to your team: the rules only apply in team namespaces.',
+    'Error from server (Forbidden) without a policy name: check the namespace is your dev namespace (team01-dev).',
+    'Accepted too early? Check you changed team01 to your team name: the rules only apply in team namespaces.',
   ],
   'Lab 4: test a policy like code, with the Kyverno CLI': [
     'Everything shows as skipped: you left out --values-file tests/values.yaml, so the command line does not know team01-dev is a team namespace.',
@@ -102,10 +102,10 @@ module.exports = {
   ],
   'Lab 2: read the dashboard': [
     'Grafana asks for a login: delegate, with its password from cat /etc/pelab/logins.md (the same as Argo CD). It is read-only: you can look at everything and change nothing.',
-    'Empty panels: pick your team and app at the top of the dashboard, and look at the last 15 minutes.',
+    'Empty panels: pick your team name (teamNN) and app at the top of the dashboard, and look at the last 15 minutes.',
   ],
   'Lab 3: load-test staging and watch the dashboard': [
-    'Use your team\'s staging address, never prod.',
+    'Use your staging address, never prod.',
     'Many failed checks: your staging may have 0 replicas. Check Lab 1 was merged and synced.',
   ],
   'Lab 4: break it, and watch the platform recover': [

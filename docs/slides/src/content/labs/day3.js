@@ -196,7 +196,7 @@ module.exports = {
   },
 
   'Lab 2: request staging and prod from the template': {
-    goal: 'Get your team\'s staging and prod environments the platform way: fill in the environment template, open a pull request, read the plan, and let the platform team approve and apply it.',
+    goal: 'Get your own staging and prod environments the platform way: fill in the environment template, open a pull request, read the plan, and let the platform team approve and apply it.',
     learn: [
       'How a team asks for infrastructure on a platform: a small file in a pull request, not a ticket.',
       'How to read a plan in a pull request, the way a reviewer does.',
@@ -206,7 +206,7 @@ module.exports = {
       ['Environment', 'A fenced area of the cluster for one stage of your service: dev, staging or prod. In Kubernetes it is a namespace, for example team03-staging.'],
       ['Template (module)', 'Infrastructure code written once by the platform team. You fill in a few values; it builds the same, safe environment for every team.'],
       ['Budget (quota)', 'How much CPU and memory an environment may use in total.'],
-      ['platform/environments', 'The repository in Gitea where every team\'s environment request lives, one file per team.'],
+      ['platform/environments', 'The repository in Gitea where every environment request lives, one file per team name (teamNN.tf).'],
       ['platform/apply', 'The status the platform writes on a commit after it has applied it: what it added, changed or destroyed.'],
     ],
     start: [
@@ -227,7 +227,7 @@ module.exports = {
           ['cd ~', 'go to your home folder.'],
           ['git clone https://gitea.$DOMAIN/platform/environments', 'copy the repository from Gitea into a new folder called environments. $DOMAIN is filled in for you with the lab\'s address.'],
           ['cd environments', 'go into that folder.'],
-          ['git switch -c $TEAM-environments', 'make a new branch and switch to it. $TEAM is filled in with your team, so the branch is called, for example, team03-environments.'],
+          ['git switch -c $TEAM-environments', 'make a new branch and switch to it. $TEAM is filled in with your team name, so the branch is called, for example, team03-environments.'],
           ['ls', 'list what the repository contains.'],
         ],
         see: 'Git says it switched to your new branch, then four entries:',
@@ -236,7 +236,7 @@ module.exports = {
           'main.tf: settings shared by every request, for example that OpenTofu keeps its state inside the cluster.',
           'modules: the environment template, written and owned by the platform team. You use it; you never change it.',
           'team00.tf.example: an example request, ready to copy.',
-          'Each team\'s request will be one more file here, teamNN.tf.',
+          'Each delegate\'s request will be one more file here, teamNN.tf.',
         ],
         ifnot: [
           ['fatal: destination path \'environments\' already exists', 'you cloned it before. Run cd ~/environments && git switch main && git pull, then git switch -c $TEAM-environments.'],
@@ -246,30 +246,30 @@ module.exports = {
       {
         title: 'Fill in the template: six lines',
         where: 'Workspace terminal',
-        why: 'You do not write infrastructure code from scratch. You copy the example under your team\'s name and put your team in it; the template does the rest, the same way for every team.',
+        why: 'You do not write infrastructure code from scratch. You copy the example under your team name and put your team name in it; the template does the rest, the same way for everyone.',
         do: [
           'Paste the box and press Enter. The first two lines make your file; the last two show it.',
-          'Read your file with the team: check that your team name appears twice.',
+          'Read your file: check that your team name appears twice.',
         ],
         run: 'cp team00.tf.example $TEAM.tf\nsed -i "s/team00/$TEAM/g" $TEAM.tf\ncat $TEAM.tf\ngit status',
         explain: [
-          ['cp team00.tf.example $TEAM.tf', 'copy the example to a new file named after your team, for example team03.tf.'],
-          ['sed -i "s/team00/$TEAM/g" $TEAM.tf', 'in your new file, replace every team00 with your team. g means "every time on the line", not just the first.'],
+          ['cp team00.tf.example $TEAM.tf', 'copy the example to a new file named after your team name, for example team03.tf.'],
+          ['sed -i "s/team00/$TEAM/g" $TEAM.tf', 'in your new file, replace every team00 with your team name. g means "every time on the line", not just the first.'],
           ['cat $TEAM.tf', 'show the file.'],
           ['git status', 'show what is new or changed in your copy of the repository.'],
         ],
         change: {
           file: 'teamNN.tf',
-          how: 'the copy of the example, with your team in both places.',
+          how: 'the copy of the example, with your team name in both places.',
           before: 'module "team00" {\n  source       = "./modules/team-environment"\n  team         = "team00"\n  environments = ["staging", "prod"]\n  size         = "small"\n}',
           after: 'module "team03" {\n  source       = "./modules/team-environment"\n  team         = "team03"\n  environments = ["staging", "prod"]\n  size         = "small"\n}',
         },
         see: 'Your request, and one new file in git status:',
         out: '# Your team\'s request: a copy of this file named after your team (team01.tf for\n# example), with your team\'s name in both places below. The plan in the pull\n# request shows what will be created before anything changes.\n\nmodule "team03" {\n  source       = "./modules/team-environment"\n  team         = "team03"\n  environments = ["staging", "prod"]\n  size         = "small"\n}\nOn branch team03-environments\nUntracked files:\n  (use "git add <file>..." to include in what will be committed)\n\tteam03.tf',
         read: [
-          'module "team03": one request, named after your team.',
+          'module "team03": one request, named after your team name.',
           'source: which template to use, the environment template in modules.',
-          'team: whose environments these are. It must be your team: the template checks it.',
+          'team: whose environments these are. It must be your team name: the template checks it.',
           'environments = ["staging", "prod"]: which environments you want. dev already exists.',
           'size = "small": the budget of each environment, 1 CPU and 2 GB of memory to reserve (medium is double). Choosing the size is where cost control (FinOps) starts, and it is on record.',
           'git status lists your file under "Untracked files": it is new, and not yet saved in Git.',
@@ -286,10 +286,10 @@ module.exports = {
         do: [
           'Paste the box and press Enter: it saves your file in a commit and sends your branch to Gitea.',
           'In what git push prints, find the line remote:   https://gitea.<lab domain>/platform/environments/pulls/new/teamNN-environments. Hold Ctrl (on a Mac Cmd) and click it: Gitea opens in a new browser tab, signed in as you. (Or in Gitea: platform/environments → Pull Requests → New Pull Request, and choose your branch on the right.)',
-          'The page shows your change and a form under it. The title is already filled in with your commit message; in the box below it, write one line on why your team needs the environments. Click Create Pull Request.',
+          'The page shows your change and a form under it. The title is already filled in with your commit message; in the box below it, write one line on why you need the environments. Click Create Pull Request.',
           'Wait about a minute. Near the bottom of the pull request, a check called plan / plan (pull_request) appears: first a yellow dot (running), then a green tick.',
           'Click Details next to it. The run opens. On the left, click the job plan; on the right, click the step called Plan to unfold its output.',
-          'Scroll to the end of the Plan step and read the summary line. Then scroll up and read the list with your team.',
+          'Scroll to the end of the Plan step and read the summary line. Then scroll up and read the list.',
           'The same plan is also posted as a comment on the pull request, by the pipeline: reviewers read it there, without opening the run.',
         ],
         run: 'git add $TEAM.tf\ngit commit -m "Request staging and prod for $TEAM"\ngit push -u origin $TEAM-environments',
@@ -301,7 +301,7 @@ module.exports = {
         see: 'In the Plan step, a list of creations and this summary line:',
         out: 'Plan: 16 to add, 0 to change, 0 to destroy.',
         read: [
-          '16 things, 8 for each environment: the namespace (the fenced area), its budget (team-quota), its container defaults (team-defaults), four network rules (who may talk to it) and your team\'s access.',
+          '16 things, 8 for each environment: the namespace (the fenced area), its budget (team-quota), its container defaults (team-defaults), four network rules (who may talk to it) and your access.',
           'Every line starts with +: only creations. Nothing of anyone else is changed or destroyed. That is the first thing a reviewer checks.',
           'The pipeline only reads: its credentials can look at the cluster but change nothing. Nothing exists yet.',
           'A second check, pipeline, also turns green: it is the check that main requires before anyone may merge.',
@@ -317,7 +317,7 @@ module.exports = {
         why: 'Only the platform team may approve environment changes. That is segregation of duties: the people who ask are not the people who allow. Your own approval, or the reviewer\'s, does not count here.',
         do: [
           'Now you play the platform team: open a private window (Ctrl+Shift+N; on a Mac Cmd+Shift+N; in Firefox Ctrl+Shift+P), go to https://gitea.<lab domain>, click Sign In and sign in as platform-approver with its password from cat /etc/pelab/logins.md.',
-          'In that window, open the pull request (platform/environments → Pull Requests → yours). Click Files Changed: there must be exactly one new file, teamNN.tf, with your team in both places.',
+          'In that window, open the pull request (platform/environments → Pull Requests → yours). Click Files Changed: there must be exactly one new file, teamNN.tf, with your team name in both places.',
           'Check the plan (as in step 3): 16 to add, 0 to change, 0 to destroy.',
           'Click Review (top right of Files Changed), then Approve. Close the private window.',
           'Back in your own window, signed in as yourself, reload the pull request. When it shows one approval and "All checks were successful", click the merge button (Create merge commit) and confirm.',
@@ -339,11 +339,11 @@ module.exports = {
         why: 'Check with your own eyes that the code made what the plan promised.',
         run: 'kubectl get namespaces | grep $TEAM\nkubectl -n $TEAM-staging get resourcequota,limitrange\nkubectl -n $TEAM-staging describe resourcequota team-quota',
         explain: [
-          ['kubectl get namespaces | grep $TEAM', 'list every namespace in the cluster, and keep (grep) only the lines with your team.'],
+          ['kubectl get namespaces | grep $TEAM', 'list every namespace in the cluster, and keep (grep) only the lines with your team name.'],
           ['kubectl -n $TEAM-staging get resourcequota,limitrange', 'in your staging namespace (-n), show the budget (resourcequota) and the container defaults (limitrange).'],
           ['kubectl -n $TEAM-staging describe resourcequota team-quota', 'show the budget in detail: what is used and what is allowed, line by line.'],
         ],
-        see: 'Three namespaces for your team, then the budget with nothing used yet:',
+        see: 'Your three namespaces, then the budget with nothing used yet:',
         out: 'team03-dev       Active   2d\nteam03-prod      Active   2m\nteam03-staging   Active   2m\n...\nName:                   team-quota\nNamespace:              team03-staging\nResource                Used  Hard\n--------                ----  ----\nlimits.cpu              0     2\nlimits.memory           0     4Gi\npersistentvolumeclaims  0     5\npods                    0     20\nrequests.cpu            0     1\nrequests.memory         0     2Gi\n...',
         read: [
           'Hard is the budget, Used is what runs now: nothing yet.',
@@ -361,14 +361,14 @@ module.exports = {
         do: [
           'Open https://argocd.<lab domain> in a new browser tab.',
           'Sign in as delegate, with its password from cat /etc/pelab/logins.md (not your studentNN password).',
-          'In the search box at the top of the application list, type your team, for example team03.',
+          'In the search box at the top of the application list, type your team name, for example team03.',
           { text: 'Click teamNN-hello-staging, then go back and click teamNN-hello-prod.', shot: { src: 'argocd-staging.png', caption: 'An application\'s page in Argo CD: its health (Healthy), its sync state (Synced to the newest commit on main, with its author and message), and the tree of what it runs. This one is already released (Day 6); today yours runs with 0 copies. In your lab the repository is https://gitea.<lab domain>/teamNN/hello.git, and the names, ids and times are your own.' } },
         ],
         see: 'Both are Synced, and no longer Retrying. hello runs with 0 copies (pods): nothing is released to staging or prod until Day 6.',
         tip: 'If the safety net is on: kubectl -n $TEAM-staging get deployments shows hello with 0/0, and the latest hello commit in Gitea shows safety-net/staging "Deployed to teamNN-staging: not-released-yet, 0 replicas".',
       },
     ],
-    done: 'Your team has teamNN-staging and teamNN-prod, created by an approved pull request, and the plan is your design record.',
+    done: 'You have teamNN-staging and teamNN-prod, created by an approved pull request, and the plan is your design record.',
   },
 
   'Lab 3: drift, and destroy and recreate': {
@@ -384,7 +384,7 @@ module.exports = {
       ['Update in place', 'A change that edits something without replacing it, shown with ~ in a plan.'],
     ],
     start: [
-      'Lab 2 is done: your team has staging (kubectl get namespaces | grep $TEAM shows it).',
+      'Lab 2 is done: you have staging (kubectl get namespaces | grep $TEAM shows it).',
       'Keep your copy of platform/environments: cd ~/environments.',
       'The instructor will tell you when to start steps 1 and 3: they pause and restart the platform\'s automatic repairs on every VM at once.',
     ],

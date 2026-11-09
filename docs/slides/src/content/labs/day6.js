@@ -95,7 +95,7 @@ module.exports = {
         why: 'The proof: staging runs your tag, and reports its own name and settings.',
         browser: {
           where: 'Browser',
-          do: ['Open https://hello-teamNN-staging.<lab domain>/ in a new tab (your team instead of teamNN).'],
+          do: ['Open https://hello-teamNN-staging.<lab domain>/ in a new tab (your team name instead of teamNN).'],
           see: 'STAGING in big yellow letters, staging\'s own greeting ("Hello from staging"), and the version: your tag.',
           shot: { src: 'hello-staging.png', caption: 'hello in staging: the same image as dev, with staging\'s settings: STAGING in yellow. The greeting and version in your lab are your own (staging says "Hello from staging").' },
           read: ['Keep the dev tab open next to it: same service, different environment, different colour.'],
@@ -127,7 +127,7 @@ module.exports = {
         },
         see: 'prod answers with "environment": "prod" and your tag, and runs two pods. Three environments, three answers, one image.',
         read: [
-          'kubectl in prod works, but only for reading: your team may look at prod, not change it by hand. Changes go through Git.',
+          'kubectl in prod works, but only for reading: you may look at prod, not change it by hand. Changes go through Git.',
         ],
         look: {
           do: [
@@ -167,7 +167,7 @@ module.exports = {
           'Open https://grafana.<lab domain> in a new tab. On the sign-in page, type delegate in Email or username, its password from cat /etc/pelab/logins.md in Password (the same read-only login as Argo CD), and click Log in.',
           'Open the menu on the left (if it is closed, click the ☰ icon at the top left) and click Dashboards.',
           'The list shows folders. Click the folder PE Lab to open it, then click Golden path services.',
-          'At the top left of the dashboard there are two lists. Team: choose your team, teamNN. Service: choose hello.',
+          'At the top left of the dashboard there are two lists. Team: choose your team name, teamNN. Service: choose hello.',
           'At the top right, leave the time range (Last 1 hour) and the refresh (30s) as they are: the dashboard updates itself every 30 seconds. The round arrow button refreshes it now.',
         ],
         see: 'Five panels: What runs where (version = commit SHA), Healthy pods, Requests per second, Failed requests (share of 4xx and 5xx), and Logs. What runs where lists dev, staging and prod, each with its tag.',
@@ -207,7 +207,7 @@ module.exports = {
       },
       {
         title: 'Write a service-level report',
-        where: 'Your team notes',
+        where: 'Your notes',
         why: 'A report turns what you saw into something a service owner can act on.',
         do: [
           'Write three lines: the promise (99% of requests succeed), today\'s measured success rate (100% minus the failed share on the dashboard), and the one alert that exists (it fires when hello has no healthy copy).',
@@ -240,13 +240,13 @@ module.exports = {
         why: 'A load test is code too: ten lines that say how many users, for how long, and what counts as success.',
         run: 'mkdir -p ~/day6 && cd ~/day6\ncat > load.js <<EOF\nimport http from \'k6/http\';\nimport { check, sleep } from \'k6\';\n\nexport const options = { vus: 20, duration: \'2m\' };\n\nexport default function () {\n  const r = http.get(\'https://hello-$TEAM-staging.$DOMAIN/\');\n  check(r, { \'status is 200\': (res) => res.status === 200 });\n  sleep(0.5);\n}\nEOF\ncat load.js',
         explain: [
-          ['cat > load.js <<EOF ... EOF', 'write the lines into load.js. Because EOF has no quotes here, $TEAM and $DOMAIN are filled in with your team and the lab domain.'],
+          ['cat > load.js <<EOF ... EOF', 'write the lines into load.js. Because EOF has no quotes here, $TEAM and $DOMAIN are filled in with your team name and the lab domain.'],
           ['options = { vus: 20, duration: \'2m\' }', '20 virtual users, for two minutes.'],
           ['http.get(...)', 'each user calls staging...'],
           ['check(r, { \'status is 200\': ... })', '...checks the answer is 200...'],
           ['sleep(0.5)', '...and waits half a second: so about 40 calls a second in all.'],
         ],
-        see: 'The script, with your team and the lab domain in the address:',
+        see: 'The script, with your team name and the lab domain in the address:',
         out: '  const r = http.get(\'https://hello-team03-staging.<lab domain>/\');',
       },
       {
@@ -300,7 +300,7 @@ module.exports = {
       },
       {
         title: 'Turn the numbers into a decision',
-        where: 'Your team notes',
+        where: 'Your notes',
         why: 'Numbers are only useful if they lead to a decision.',
         do: [
           'Write down p95 and the success rate at 20 and at 100 users.',
@@ -598,7 +598,7 @@ module.exports = {
         why: 'dev follows main: a merged change appears there by itself.',
         do: [
           'Wait a few minutes: the pipeline on main builds the new image (Actions tab, green tick), then Argo CD puts it in dev.',
-          'Open https://hello-teamNN-dev.<lab domain>/ in a new tab (your team instead of teamNN).',
+          'Open https://hello-teamNN-dev.<lab domain>/ in a new tab (your team name instead of teamNN).',
         ],
         see: 'DEV glowing red, falling confetti, a bouncing trophy, a rainbow Congratulations, your name on a glowing badge, "you are done with Platform Engineering!" and five cards with what you did this week.',
       },

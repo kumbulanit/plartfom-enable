@@ -26,7 +26,7 @@ module.exports = [
     type: 'agenda', section: 'Opening',
     title: "Today's plan",
     bridge: 'Yesterday you ran hello by hand and counted the steps. Today every change goes through Git and a reviewed pull request, and goes live in dev by itself.',
-    notes: 'Link back to yesterday\'s list of manual steps: today removes the first of them. The morning starts with the theory of Git and a practice lab where nothing can break; then the team workflow in four labs, and the charter in the afternoon.',
+    notes: 'Link back to yesterday\'s list of manual steps: today removes the first of them. The morning starts with the theory of Git and a practice lab where nothing can break; then the pull-request workflow in four labs, and the charter in the afternoon.',
   },
   {
     type: 'section', section: 'Git basics',
@@ -260,8 +260,8 @@ module.exports = [
     ],
     lab: [
       'Pushing straight to main is refused.',
-      'A pull request needs one approval from your team before Merge turns green.',
-      'CODEOWNERS sends every review to your team\'s developers group.',
+      'A pull request needs one approval (here, from the reviewer login) before Merge turns green.',
+      'CODEOWNERS sends every review to the developers group of your team name: you and the reviewer login.',
       'The pipeline also runs on every pull request; Day 5 explains what it checks.',
     ],
     oneLiner: 'Protected main means every change to production has a second pair of eyes and a permanent record.',
@@ -292,7 +292,7 @@ module.exports = [
     lab: [
       'Title: what changed. Description: why, in two lines.',
       'A second person reviews; you cannot approve your own change. Here you play them, as reviewer.',
-      'Merge needs one approval from your team and a green pipeline. Until the check called pipeline is green, Gitea says "Some checks are pending" (or "failed") and does not merge.',
+      'Merge needs one approval (the reviewer\'s) and a green pipeline. Until the check called pipeline is green, Gitea says "Some checks are pending" (or "failed") and does not merge.',
       'Squash merge keeps the history tidy: one commit per change.',
     ],
     oneLiner: 'A pull request turns a change into a reviewed, recorded decision.',
@@ -337,7 +337,7 @@ module.exports = [
       { do: 'Undo it: git reset --hard origin/main', expect: 'main is back to what Gitea has.' },
       { do: 'Make a new branch and pull request, then try to approve it yourself.', expect: 'Gitea does not count your own approval; Merge stays unavailable.' },
       { do: 'Approve it as reviewer, then push one more commit to the same branch.', expect: 'The approval is dismissed as stale; a fresh review is needed.' },
-      { do: 'Write down the three messages you saw. They are evidence that the controls work.', expect: 'Three lines in your team notes for the Day 6 evidence pack.' },
+      { do: 'Write down the three messages you saw. They are evidence that the controls work.', expect: 'Three lines in your notes for the Day 6 evidence pack.' },
     ],
     notes: 'This is the brief\'s "compromised inputs are blocked" at the simplest level. Delegates who see the refusals trust the control more than those who only hear about it. Then make the honest point: they have a reviewer login so they can play the second person, and signing in as reviewer gets an approval through. The tool checks accounts, not people; that is why at work accounts are personal, protected by two-factor sign-in, and never shared.',
   },
@@ -437,7 +437,7 @@ module.exports = [
       'Resolve a merge conflict without fear',
       'Describe the platform as a product with a charter',
     ],
-    tomorrow: 'Infrastructure as Code. You will create and destroy infrastructure with a few lines of OpenTofu, then request your team\'s staging and prod environments from the environment template, by pull request.',
+    tomorrow: 'Infrastructure as Code. You will create and destroy infrastructure with a few lines of OpenTofu, then request your own staging and prod environments from the environment template, by pull request.',
     notes: 'Today\'s pieces: Repository and GitOps. Tomorrow adds Environments.',
   },
 ];

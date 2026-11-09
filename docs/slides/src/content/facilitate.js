@@ -15,7 +15,7 @@ module.exports = {
     before: [
       CHECKS,
       'Every delegate has built their own VM (prelab-setup/BUILD-YOUR-VM.md): PLAY RECAP said failed=0. Know which VM is whose: one line per delegate in inventory/all-vms.yml on your machine (pelab01, pelab02...), and export ANSIBLE_INVENTORY=inventory/all-vms.yml in your terminal. On every VM the delegate is student01 in team01, and their logins are in /etc/pelab/logins.md on the VM. Keep one VM aside as a spare, and one as your demo VM.',
-      'For Lab 1, per team: an A3 sheet, yellow and pink sticky notes, markers. For the room: a long empty wall (or a row of flipcharts) for step 4, and the platform cards from the slide "Your shared steps, done once by the platform", printed one row per card.',
+      'For Lab 1, per delegate: an A3 sheet, yellow and pink sticky notes, a marker. For the room: a long empty wall (or a row of flipcharts) for step 4, and the platform cards from the slide "Your shared steps, done once by the platform", printed one row per card.',
       'Seat the room at tables of four or five for the two Day 1 games (the icebreaker and Lab 1). These table groups are only for the games: every lab on a computer is done alone, on the delegate\'s own VM.',
       'Open your demo VM\'s portal, Gitea and Argo CD on the presenter screen: Gitea as student01 (you show the delegate\'s view), Argo CD as delegate. The passwords are in /etc/pelab/logins.md on the demo VM.',
     ],

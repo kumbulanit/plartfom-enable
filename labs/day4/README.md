@@ -10,12 +10,12 @@ By the end of the day you can:
 
 ### Today's plan
 
-Yesterday your team got staging and prod from a template. Today you package hello in a container by hand, then let the packaging template create a whole new service.
+Yesterday you got staging and prod from a template. Today you package hello in a container by hand, then let the packaging template create a whole new service.
 
 | Topic | Labs |
 | --- | --- |
 | Containers | [Lab 1: build and run the hello image](#lab-1-build-and-run-the-hello-image)<br>[Lab 2: one image, three environments](#lab-2-one-image-three-environments) |
-| The packaging template | [Lab 3: create a new service from the template](#lab-3-create-a-new-service-from-the-template) (per team)<br>[Lab 4: a first change to the new service](#lab-4-a-first-change-to-the-new-service)<br>[Lab 5: add a pipeline from a template](#lab-5-add-a-pipeline-from-a-template) |
+| The packaging template | [Lab 3: create a new service from the template](#lab-3-create-a-new-service-from-the-template) (on your own)<br>[Lab 4: a first change to the new service](#lab-4-a-first-change-to-the-new-service)<br>[Lab 5: add a pipeline from a template](#lab-5-add-a-pipeline-from-a-template) |
 
 ## Containers
 
@@ -77,6 +77,63 @@ ENTRYPOINT ["python", "-m", "app.main"]
 - USER 10001: run as an ordinary user, never as root. A guardrail on Day 5 checks this.
 - ENTRYPOINT: the command the container runs when it starts.
 
+### Containers and virtual machines
+
+**A virtual machine**
+
+- A whole operating system for each application: gigabytes
+- Its own kernel; starts in minutes
+- Patched and looked after like a server
+- Strong isolation, heavy to copy and move
+
+**A container**
+
+- Only the application and its libraries: megabytes
+- Shares the host's kernel; starts in a second
+- Never patched in place: build a new image and replace it
+- Light to copy: the same image runs everywhere
+
+### How a container is kept apart: namespaces, cgroups and layers
+
+Namespaces give a container its own view of the machine: its own processes, network, files and host name. It cannot see the other containers or the host.
+
+Cgroups limit what it may use: how much CPU and memory. On Kubernetes these are the requests and limits in every deployment, so one service cannot starve the others.
+
+Layers: an image is a stack of read-only layers, one for each Dockerfile step. A running container adds one thin writable layer on top. Many containers share the same layers, which is why they start fast and take little space.
+
+> **In one sentence:** A container is an ordinary process, fenced off by namespaces, limited by cgroups, running on shared read-only layers.
+
+**In the lab**
+
+- docker top hello: the processes in the container, only the app.
+- docker history hello:1: the layers, one per Dockerfile step.
+- A rebuild reuses unchanged layers (CACHED): put the steps that rarely change first.
+- The template sets CPU and memory limits for every service.
+
+### What you can do with containers
+
+- **Package once:** Build the application and everything it needs into one image, with a version. The same image goes from your workspace to prod.
+- **Run it anywhere, with other settings:** Start the same image as dev, staging or prod: only the settings (environment variables) change, never the image.
+- **Run many side by side:** Several services, or several versions of one, on the same machine without getting in each other's way.
+- **Limit and protect:** Cap CPU and memory, run as an ordinary user, scan the image for known weaknesses before it runs.
+- **Replace instead of repair:** Never fix a running container by hand: start the new image. To roll back, run the old tag again; nothing is rebuilt.
+
+### How: the Docker commands you need
+
+| Command | What it does | When |
+| --- | --- | --- |
+| docker build -t &lt;name>:&lt;tag> . | Build an image from the Dockerfile in this folder | After a change |
+| docker images | List the images on this machine | After a build |
+| docker run -d -p 8081:8081 &lt;image> | Start a container in the background, with a port | To run the app |
+| docker run -e NAME=value ... | Give the container a setting (an environment variable) | Same image, another environment |
+| docker ps (-a) | List running containers (-a: stopped ones too) | Any time |
+| docker logs &lt;name> | Show what the application printed | When something looks wrong |
+| docker exec &lt;name> &lt;command> | Run one command inside a running container | To look inside |
+| docker stop &lt;name>, docker rm &lt;name> | Stop a container, then remove it | When you are done |
+| docker push &lt;registry>/&lt;name>:&lt;tag> | Upload the image to a registry such as Harbor | The pipeline does it |
+| docker pull &lt;registry>/&lt;name>:&lt;tag> | Download an image from a registry | To run someone else's image |
+| docker image prune | Delete images that no container uses | When the disk fills up |
+
 ## Lab 1: Docker by hand
 
 ### Lab 1: build and run the hello image
@@ -126,7 +183,7 @@ ENTRYPOINT ["python", "-m", "app.main"]
 
 **What each line does:**
 
-- `git switch main && git pull`: build from the latest main, with your team's merged changes.
+- `git switch main && git pull`: build from the latest main, with your merged changes.
 - `docker build`: build an image by following the Dockerfile in this folder.
 - `--build-arg BASE_IMAGE=harbor.$DOMAIN/dockerhub/library/python:3.12-slim`: which image to start from: a small Python 3.12, fetched through the lab's Harbor (dockerhub is Harbor's copy of Docker Hub). The Dockerfile's first line uses this setting.
 - `-t hello:1`: name (tag) the result hello, version 1.
@@ -531,13 +588,21 @@ Tags are immutable: a tag names one image forever. The pipeline uses the commit 
 - deploy/dev, deploy/staging and deploy/prod each add only the settings that differ: namespace, APP_ENV, GREETING, address, image tag, replicas.
 - Promotion on Day 6 is changing the tag in deploy/staging, nothing else.
 
+### What makes a good container image
+
+- **Small:** Start from a slim official base image. Less to download, and fewer weaknesses for the scan to find.
+- **Not root:** USER 10001: if someone breaks in, they get as little as possible. On Day 5 the pipeline refuses an image that runs as root.
+- **Nothing secret inside:** No passwords or keys in the image: anyone who can pull it can read them. Settings and secrets come in when it starts.
+- **A fixed tag:** Tag it with the commit id, never "latest": the same tag must always mean exactly the same image.
+- **One job, easy to watch:** One process, logs to the screen (standard output), and a health check the platform can call, like /healthz.
+
 ## The packaging template
 
 *What a new service gets for free, and how the platform team built it. Then you create a new service from it (Lab 3), make its first change (Lab 4), and add a pipeline from a template (Lab 5).*
 
 ### What every new service gets from the template
 
-- **A working service and its tests:** The hello app skeleton, five unit tests, and a project file for lint and tests. It runs on the first day.
+- **A working service and its tests:** The hello app skeleton, six unit tests, and a project file for lint and tests. It runs on the first day.
 - **A Dockerfile that passes the checks:** Small base image, non-root user, only the code inside. The Dockerfile check in the pipeline is already green.
 - **The pipeline:** Lint, tests, secret scan, Dockerfile check, build, image scan, push. The same for every service, so every service meets the same standard.
 - **Deployment for dev, staging and prod:** The Kubernetes definition with probes, resource limits and security settings, plus one overlay per environment. Dev goes live on the first merge.
@@ -577,7 +642,7 @@ The brief wants governed APIs: an owner, a contract, versioning, monitoring. The
 
 *A new service from the template: its first pipeline, Harbor and Argo CD take it to dev without anyone being asked.*
 
-*per team*
+*on your own*
 
 **What you do:** Use the golden path: create a brand-new service called rates from the template, and watch it build, deploy and appear in the portal without asking anyone.
 
@@ -655,7 +720,7 @@ The brief wants governed APIs: an owner, a contract, versioning, monitoring. The
 
 1. In Gitea, click + (top right, next to your picture) → New Repository.
 
-2. Owner: open the list and choose your team, teamNN (not your own name).
+2. Owner: open the list and choose your team name, teamNN (not your user name).
 
 3. Repository Name: rates (in small letters).
 
@@ -665,9 +730,9 @@ The brief wants governed APIs: an owner, a contract, versioning, monitoring. The
 
 6. Click Create Repository at the bottom.
 
-   ![The New Repository form, filled in: owner team01 (your team), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.](../images/gitea-41-new-repo-from-template.png)
+   ![The New Repository form, filled in: owner team01 (your team name), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.](../images/gitea-41-new-repo-from-template.png)
 
-   *The New Repository form, filled in: owner team01 (your team), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.*
+   *The New Repository form, filled in: owner team01 (your team name), name rates, template golden-path, and Git Content and Branch Protection ticked. Then Create Repository.*
 
 **You should see:** teamNN/rates with the folders app, deploy and tests and the files Dockerfile, README.md and catalog-info.yaml.
 
@@ -679,7 +744,7 @@ The brief wants governed APIs: an owner, a contract, versioning, monitoring. The
 
 **If you see something else:**
 
-- *Your team is not in the Owner list*: you are not signed in as yourself, or not in the team. Check the picture at the top right; if it is right, tell the instructor.
+- *teamNN is not in the Owner list*: you are not signed in as yourself. Check the picture at the top right; if it is right, tell the instructor.
 - *The repository has only a README*: Git Content was not ticked. Ask the instructor to delete it, and create it again.
 
 #### Step 3. Run its pipeline for the first time
@@ -721,7 +786,7 @@ The brief wants governed APIs: an owner, a contract, versioning, monitoring. The
 **Do this:**
 
 1. Open https://harbor.<lab domain> in a new tab. On the sign-in page, type your studentNN in Username and your own password in Password (the same as Gitea), and click LOG IN.
-2. You land on Projects: a table with one line per project. In the Project Name column, click your team, teamNN.
+2. You land on Projects: a table with one line per project. In the Project Name column, click your team name, teamNN.
 3. The project opens on its Repositories tab: one line per image name. Click teamNN/rates.
 4. You now see the artifacts list: one line per image built. Read the line from left to right: Artifacts (the image's fingerprint, sha256:...), Tags (the commit id), Size, Vulnerabilities (a coloured bar; move the mouse over it to see how many weaknesses of each severity) and Push Time.
 
@@ -741,7 +806,7 @@ The brief wants governed APIs: an owner, a contract, versioning, monitoring. The
 **Do this:**
 
 1. Open https://argocd.<lab domain> and sign in as delegate, with its password from cat /etc/pelab/logins.md.
-2. Type your team in the search box at the top.
+2. Type your team name in the search box at the top.
 3. Wait up to a minute: Argo CD looks for new repositories every minute.
 
 **You should see:** teamNN-rates-dev appears, then shows Synced and Healthy.
@@ -756,7 +821,7 @@ The brief wants governed APIs: an owner, a contract, versioning, monitoring. The
 
 **Do this:**
 
-1. Open https://rates-teamNN-dev.<lab domain>/ in a new tab (your team instead of teamNN).
+1. Open https://rates-teamNN-dev.<lab domain>/ in a new tab (your team name instead of teamNN).
 
 **You should see:** The same kind of page as hello: DEV in big red letters, the greeting "Hello from the PE Lab golden path", and under it "rates · version" with the commit id. Same template, so the same page, with the new service's name.
 
@@ -800,7 +865,7 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 1. Open https://backstage.<lab domain> in a new tab. A page asks how to sign in: on the Guest card, click Enter. No password is needed.
 2. In the menu on the left (Home, Catalog, APIs, Docs, Create...), click Create.... The page lists templates.
 3. At the top right of that page, click Register Existing Component.
-4. A form with one box, Select URL (the repository URL), opens. Paste this address in it, with your team: https://gitea.<lab domain>/teamNN/rates/src/branch/main/catalog-info.yaml
+4. A form with one box, Select URL (the repository URL), opens. Paste this address in it, with your team name: https://gitea.<lab domain>/teamNN/rates/src/branch/main/catalog-info.yaml
 5. Click Analyze. Backstage reads the file and shows what it will add: one component, rates.
 6. Click Import, wait a few seconds, then click View Component.
 7. Read the component's page: the About card (owner teamNN, the description) and the links to its environments, pipeline, Argo CD, Harbor and Grafana. Click Catalog on the left: rates is now listed next to hello.
@@ -813,7 +878,7 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 
 **If you see something else:**
 
-- *Analyze reports an error*: check the address: your team, rates, and catalog-info.yaml at the end. Open it in a new tab first: it should show the file.
+- *Analyze reports an error*: check the address: your team name, rates, and catalog-info.yaml at the end. Open it in a new tab first: it should show the file.
 
 #### Step 8. Two services, one pipeline
 
@@ -1134,7 +1199,7 @@ curl -s https://rates-$TEAM-dev.$DOMAIN/
 
 **Do this:**
 
-1. Open your team's rates repository: https://gitea.<lab domain>/teamNN/rates.
+1. Open your rates repository: https://gitea.<lab domain>/teamNN/rates.
 
 2. Above the file list, click Add File, then New File.
 

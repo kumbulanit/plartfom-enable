@@ -14,39 +14,38 @@ const { TERMINAL } = require('./common');
 
 module.exports = {
   'Icebreaker: two truths and a lie': {
-    goal: 'Get to know your own team: share two true facts and one false one about your work, and the one tool you wish existed.',
+    goal: 'Get to know the people in the room: share two true facts and one false one about your work, and the one tool you wish existed.',
     story: [
-      'Before any technology, meet the people you will work with all week. Each of you tells your team three short things about your work, two true and one false, and the team guesses which is false. It is a gentle way to learn names, roles and a bit about each other.',
+      'Before any technology, meet the people you will spend the week with. Each of you tells the room three short things about your work, two true and one false, and the room guesses which is false. It is a gentle way to learn names, roles and a bit about each other.',
       'Then each person names one tool they wish existed at work. Those wishes matter: most of them are about not waiting, and not waiting is exactly what a platform gives teams. You will come back to them in Lab 1 and on Day 2.',
     ],
-    end: 'A team that knows each other, a team name, and a list of wishes for the platform.',
+    end: 'People who know each other a little, and a board of wishes for the platform.',
     learn: [
-      'The names and roles of your teammates.',
-      'What your team wishes it had at work: the start of thinking about a platform as a product.',
+      'The names and roles of the people around you.',
+      'What people wish they had at work: the start of thinking about a platform as a product.',
     ],
     words: [
-      ['Wish list', 'The tools you wish existed. On Day 2 it becomes what your team\'s platform must make easy.'],
+      ['Wish list', 'The tools you wish existed. On Day 2 it becomes what your platform must make easy.'],
     ],
     start: [
-      'Sit with your team: 4 or 5 people.',
-      'A note or a sheet, a pen and your table card.',
+      'A note, a sticky note and a pen.',
     ],
     steps: [
       { title: 'Write two truths and one lie', where: 'On your own', plain: 'Write three short things about your work: two true, one false.', why: 'Short, personal facts are easier to remember than a job title, and guessing makes everyone listen.', do: ['On your note, write three short statements about your work.', 'Make two true and one false. For example: "I have worked at SARB for 12 years", "I have never used Excel", "My first job was in a bank in London".'], see: 'Three statements on your note; only you know which is false.', check: 'You have three statements ready.' },
-      { title: 'Take turns and guess', where: 'Your team', plain: 'Introduce yourself and read your three statements; the team guesses the false one.', why: 'Everyone speaks once, and you all learn names and roles.', do: ['Take turns: say your name and your role in FMD, then read your three statements.', 'The team agrees on a guess. Then reveal which one was false.'], see: 'Everyone has had a turn, with a few surprises.', check: 'You know every teammate\'s name and role.' },
-      { title: 'One tool you wish existed', where: 'Your team', plain: 'Each person says one tool they wish they had at work.', why: 'The wishes show what a platform should do for real people. Most are about removing a wait or a ticket.', do: ['Each person names one tool they wish existed at work, for example "a button that gives me a test environment" or "a report that builds itself".', 'One person writes all the wishes on a sheet.'], see: 'One wish per person on the sheet.', check: 'Every teammate\'s wish is written down.' },
-      { title: 'Choose a team name', where: 'Your team', plain: 'Agree a name for your team for the week.', why: 'A name makes the team yours; you will use it all week.', do: ['Agree a team name, inspired by your wishes if you like.', 'Write it on your table card.'], see: 'A team name on the table card.', check: 'Your table card shows your team name.' },
-      { title: 'Share with the room', where: 'In front of the room', plain: 'Tell the room your team name and your favourite wish.', why: 'Hearing every team\'s wishes shows which ones the whole of FMD shares: those are where a common platform pays off.', do: ['One person reads your team name and your favourite wish.', 'The instructor writes the wishes on the board.'], see: 'Every team\'s wish on the board.', check: 'Your team\'s wish is on the board. Keep your sheet: you need it in Lab 1 and on Day 2.' },
+      { title: 'Take turns and guess', where: 'The whole room', plain: 'Introduce yourself and read your three statements; the room guesses the false one.', why: 'Everyone speaks once, and you all learn names and roles.', do: ['In turn, around the room: say your name and your role in FMD, then read your three statements.', 'The room calls out a guess. Then reveal which one was false.'], see: 'Everyone has had a turn, with a few surprises.', check: 'You know the names and roles of the people around you.' },
+      { title: 'One tool you wish existed', where: 'On your own', plain: 'Write one tool you wish you had at work.', why: 'The wishes show what a platform should do for real people. Most are about removing a wait or a ticket.', do: ['On a sticky note, write one tool you wish existed at work, for example "a button that gives me a test environment" or "a report that builds itself".'], see: 'One wish on your sticky note.', check: 'Your wish is written down.' },
+      { title: 'Read your wish to the room', where: 'In front of the room', plain: 'Read your wish out, and put it on the board next to any wish like it.', why: 'Hearing everyone\'s wishes shows which ones the whole of FMD shares: those are where a common platform pays off.', do: ['In turn, read your wish out.', 'Stick it on the board, next to any wish like it.'], see: 'Every wish on the board, in groups.', check: 'Your wish is on the board.' },
+      { title: 'Which wishes do many people share?', where: 'The board', plain: 'Look at the biggest groups of wishes.', why: 'A wish many people share is a job the platform should do once, for everyone.', do: ['The instructor reads out the biggest groups.', 'Note your own wish: you need it in Lab 1 and on Day 2.'], see: 'Two or three big groups, usually about waiting: for an environment, a sign-off, an answer.', check: 'You can name the wish most people share.' },
     ],
-    done: 'Your team has a name, knows each other, and has a written list of wishes.',
+    done: 'You know the people around you, and the room has a board of wishes for the platform.',
   },
 
   'Lab 1: map how a change reaches production today': {
-    goal: 'As a team, map your road from a request to a live change, mark where it waits, compare it with the other teams\' roads, and see that the shared steps are what a platform builds once.',
+    goal: 'Map your own road from a request to a live change, mark where it waits, compare it with the other delegates\' roads, and see that the shared steps are what a platform builds once.',
     learn: [
       'How to see delivery as a chain of steps, with waits and hand-offs between them.',
       'That most of the time a change takes is waiting, not working.',
-      'That different teams build almost the same road, each on its own: the case for a platform.',
+      'That different units build almost the same road, each on its own: the case for a platform.',
     ],
     words: [
       ['Change', 'Anything that has to reach users: a new report column, a fix to a model, a new script, a configuration setting.'],
@@ -56,14 +55,14 @@ module.exports = {
       ['Value stream map', 'The name for the drawing you make in step 1: the steps a change goes through, with the waits marked.'],
     ],
     start: [
-      'Your team around one table, with an A3 sheet, yellow and pink sticky notes, and markers. No computer needed.',
-      'Choose a timekeeper: the instructor tells you how long each of the four steps takes.',
-      'Every team maps the same job: a small change to a report or a script, from "someone asks for it" to "it is live".',
+      'Your own A3 sheet, yellow and pink sticky notes, and a marker. No computer needed.',
+      'The instructor keeps the time: each of the four steps has its own.',
+      'Everyone maps the same job: a small change to a report or a script, from "someone asks for it" to "it is live", the way it happens in your unit today.',
     ],
     steps: [
       {
         title: 'List your road, and mark the waits',
-        where: 'Your team, on the A3 sheet',
+        where: 'On your own, on the A3 sheet',
         why: 'You cannot improve a road you have not drawn. Writing every step makes the hidden ones visible: the e-mails, the queues, the sign-off nobody remembers.',
         do: [
           'Write one step per yellow sticky note and put them left to right: who asks, who writes it, who tests it, who approves it, who puts it live, who tells the users.',
@@ -76,49 +75,47 @@ module.exports = {
       },
       {
         title: 'Walk round and tick what you recognise',
-        where: 'The other teams\' boards',
-        why: 'Seeing another team\'s road is the fastest way to notice that yours is not unique.',
+        where: 'Other delegates\' sheets',
+        why: 'Seeing someone else\'s road is the fastest way to notice that yours is not unique.',
         do: [
-          'Your team chooses one walker. Everyone else stays at your board to explain it to visitors.',
-          'The walker takes a pen and visits every other team\'s board in turn.',
-          'On each board, tick ✓ every step your team does too, and star ★ anything your team never does but maybe should.',
+          'Leave your sheet on your table, take a pen, and visit at least four other sheets.',
+          'On each sheet, tick ✓ every step you do too, and star ★ anything you never do but maybe should.',
         ],
-        see: 'Ticks and stars on every board, including yours, from the other teams\' walkers.',
-        check: 'Your walker has visited every other board.',
+        see: 'Ticks and stars on every sheet, including yours, from the other delegates.',
+        check: 'You have visited at least four other sheets.',
       },
       {
         title: 'Same or different?',
-        where: 'Your team, back at your board',
+        where: 'Back at your own sheet',
         why: 'A difference is only real if it is a different job. Most turn out to be the same job with another name, tool or person.',
         do: [
-          'The walker tells the team what they saw on the other boards.',
-          'Sort your notes into two groups: ticked by other teams (the same), and no ticks (only ours).',
-          'For each "only ours" note, ask: is it really a different job, or the same job done another way?',
-          'Look at the stars on your board: a step another team has and you do not. Is it a check you are missing?',
+          'Sort your notes into two groups: ticked by others (the same), and no ticks (only yours).',
+          'For each "only yours" note, ask: is it really a different job, or the same job done another way?',
+          'Look at the stars on your sheet: a step someone else has and you do not. Is it a check you are missing?',
         ],
-        see: 'Two groups of notes. Usually the "same" group is much bigger than the "only ours" group.',
+        see: 'Two groups of notes. Usually the "same" group is much bigger than the "only yours" group.',
         check: 'Every note is in one of the two groups, and you have talked about each star.',
       },
       {
         title: 'One road: the platform',
         where: 'The wall, with the whole room',
-        why: 'When every team\'s shared steps sit in one place, you can see what each team built for itself, and what could be built once for everyone.',
+        why: 'When everyone\'s shared steps sit in one place, you can see what each unit built for itself, and what could be built once for everyone.',
         do: [
-          'Each team brings its ticked notes to the wall. The same step from different teams goes into the same column.',
-          'Above each column, write how many teams had that step.',
+          'Bring your ticked notes to the wall. The same step from different people goes into the same column.',
+          'Above each column, write how many people had that step.',
           'The instructor places a card over each column: what the platform does instead (the table on the slide).',
-          'Together, count what disappears: set-up done once per team, waiting, and checks that only some teams remembered.',
+          'Together, count what disappears: set-up done again in every unit, waiting, and checks that only some people remembered.',
         ],
-        see: 'One long road on the wall, made of columns that most teams share, each with a platform card over it.',
+        see: 'One long road on the wall, made of columns that most people share, each with a platform card over it.',
         read: [
-          'Every team built and keeps its own copy of almost the same road. A platform builds the shared steps once, with the checks inside, and every team uses them by self-service: that is platform engineering.',
+          'Every unit built and keeps its own copy of almost the same road. A platform builds the shared steps once, with the checks inside, and every team uses them by self-service: that is platform engineering.',
           'The pink waits are what the platform removes first. On Day 6 you come back to this wall and cross off every note the platform now does.',
         ],
-        check: 'The shared steps are on one wall, each with its platform card, and you can say in one sentence what a platform would change for your team.',
-        tip: 'Take a photo of your team\'s board and of the wall: both go into your Day 6 evidence pack.',
+        check: 'The shared steps are on one wall, each with its platform card, and you can say in one sentence what a platform would change for your unit.',
+        tip: 'Take a photo of your sheet and of the wall: both go into your Day 6 evidence pack.',
       },
     ],
-    done: 'Your road is mapped with its waits, compared with every other team\'s, and the shared steps are on one wall with what the platform does instead.',
+    done: 'Your road is mapped with its waits, compared with the other delegates\', and the shared steps are on one wall with what the platform does instead.',
   },
 
   'Lab 2: Linux warm-up in your workspace': {
@@ -172,7 +169,7 @@ module.exports = {
           say: 'Your workspace also knows who you are. Paste this:',
           run: 'echo "I am $ME, in $TEAM, on $DOMAIN"',
           explain: [
-            ['echo "I am $ME, in $TEAM, on $DOMAIN"', 'print a sentence. $ME, $TEAM and $DOMAIN are filled in by the workspace with your user name, your team and the lab domain.'],
+            ['echo "I am $ME, in $TEAM, on $DOMAIN"', 'print a sentence. $ME, $TEAM and $DOMAIN are filled in by the workspace with your user name, your team name and the lab domain.'],
           ],
           see: 'Your own user name and team (here student01 in team01):',
           out: 'I am student01, in team01, on <lab domain>',
@@ -289,7 +286,7 @@ module.exports = {
   },
 
   'Lab 3: run hello by hand, and count the steps': {
-    goal: 'Get your team\'s service, hello, and run it by hand on your workspace in two settings. Count every manual step: on the next days the platform takes them over.',
+    goal: 'Get your service, hello, and run it by hand on your workspace in two settings. Count every manual step: on the next days the platform takes them over.',
     learn: [
       'How to copy a team\'s code from Gitea with git.',
       'How a web service runs, answers, reports its health and writes its log.',
@@ -311,9 +308,9 @@ module.exports = {
     ],
     steps: [
       {
-        title: 'Tell Git who you are, then copy your team\'s repository',
+        title: 'Tell Git who you are, then copy your repository',
         where: 'Workspace terminal',
-        why: 'Git records who made every change, so you tell it your name once. Then you copy your team\'s service from Gitea to your workspace.',
+        why: 'Git records who made every change, so you tell it your name once. Then you copy your service from Gitea to your workspace.',
         do: [
           { text: 'Paste this one line on its own and press Enter. It asks "Your full name:": type your name (for example Thandi Nkosi) and press Enter. Git puts this name on every change you save.', cmd: 'read -p "Your full name: " NAME && git config --global user.name "$NAME" && git config --global user.name' },
           'Git answers with the name it saved. Now paste the box below and press Enter.',
@@ -326,7 +323,7 @@ module.exports = {
           ['git config --global user.email "$ME@$DOMAIN"', 'tell Git your e-mail address in the lab, for example student01@<lab domain>.'],
           ['git config --global credential.helper "cache --timeout=36000"', 'make Git remember your password for 10 hours (36,000 seconds), so you type it once a day.'],
           ['cd ~', 'go to your home folder.'],
-          ['git clone https://gitea.$DOMAIN/$TEAM/hello', 'copy your team\'s repository hello, with its whole history, into a new folder called hello.'],
+          ['git clone https://gitea.$DOMAIN/$TEAM/hello', 'copy your repository hello, with its whole history, into a new folder called hello.'],
           ['cd hello', 'go into it.'],
           ['ls', 'list what is inside.'],
         ],

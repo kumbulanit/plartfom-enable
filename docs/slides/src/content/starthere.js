@@ -108,7 +108,7 @@ Every step has the same parts, always in this order:
 
 **Your screen will differ a little** from the boxes: your user name, team, dates, numbers and ids (such as 6514a43) are your own. What should match is the shape: the same kind of lines, the same words.
 
-**$ME, $TEAM and $DOMAIN** in a command are filled in by your workspace with your user name, your team and the lab address. Never type over them; paste them as they are.
+**$ME, $TEAM and $DOMAIN** in a command are filled in by your workspace with your user name, your team name and the lab address. On this platform every delegate is a team of one: your team name (team01, team02, ...) owns your repositories and environments. Never type over them; paste them as they are.
 
 **studentNN and teamNN** in the text (not in a command) mean your own: for example student07 and team03. Replace them when you type an address into the browser.
 

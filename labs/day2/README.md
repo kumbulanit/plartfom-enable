@@ -375,7 +375,7 @@ git status
 
 **What each line does:**
 
-- `echo "Hello from $TEAM" > greeting.txt`: create the file greeting.txt with one line in it. $TEAM becomes your team, team01.
+- `echo "Hello from $TEAM" > greeting.txt`: create the file greeting.txt with one line in it. $TEAM becomes your team name, team01.
 - `git status`: Git sees a new file it does not follow yet.
 
 **You should see:** The new file is untracked: Git sees it, but does not record it:
@@ -806,8 +806,8 @@ Protection is enforced by the tool, not by a rule in a document. A push to main 
 **In the lab**
 
 - Pushing straight to main is refused.
-- A pull request needs one approval from your team before Merge turns green.
-- CODEOWNERS sends every review to your team's developers group.
+- A pull request needs one approval (here, from the reviewer login) before Merge turns green.
+- CODEOWNERS sends every review to the developers group of your team name: you and the reviewer login.
 - The pipeline also runs on every pull request; Day 5 explains what it checks.
 
 ## Lab 2: your first change
@@ -822,7 +822,7 @@ Three ideas from Lab 1 carry the whole lab. A \*\*branch\*\* is your own private
 
 Here you change one sentence of the website, the greeting, and take it through all three.
 
-**What you do:** Change the greeting of your team's service on a branch of your own, check it, save it as a commit and send it to Gitea.
+**What you do:** Change the greeting of your service on a branch of your own, check it, save it as a commit and send it to Gitea.
 
 **At the end you will have:** Your own branch in Gitea with one saved change: a new greeting, checked on your workspace first.
 
@@ -852,7 +852,7 @@ Here you change one sentence of the website, the greeting, and take it through a
 
 #### Step 1. Go to main and get the latest version
 
-> **In plain words:** Go into your copy of the code, switch to the main line, and fetch whatever your team added since yesterday.
+> **In plain words:** Go into your copy of the code, switch to the main line, and fetch whatever was added since yesterday.
 
 *Where: Workspace terminal*
 
@@ -963,7 +963,7 @@ git branch
 
 4. Save with Ctrl+S (on a Mac Cmd+S). The dot next to the file name at the top disappears when it is saved.
 
-5. Editor not working for you? Instead of the four instructions above, paste this in the terminal: it makes the same change (a greeting with your team and your name) and shows the new line.
+5. Editor not working for you? Instead of the four instructions above, paste this in the terminal: it makes the same change (a greeting with your team name and your name) and shows the new line.
 
    ```bash
    sed -i "s/^GREETING = .*/GREETING = os.environ.get(\"GREETING\", \"Hello from $TEAM, by $ME\")/" app/main.py
@@ -1115,7 +1115,7 @@ e448d09 (origin/main, origin/HEAD, main) Initial commit
 
 #### Step 6. Send your branch to Gitea
 
-> **In plain words:** Upload your branch to Gitea, so your team can see it and review it.
+> **In plain words:** Upload your branch to Gitea, so the reviewer can see it and review it.
 
 *Where: Workspace terminal*
 
@@ -1175,7 +1175,7 @@ Merging is the decision to put the change on the main line. From then on the pla
 
 - Title: what changed. Description: why, in two lines.
 - A second person reviews; you cannot approve your own change. Here you play them, as reviewer.
-- Merge needs one approval from your team and a green pipeline. Until the check called pipeline is green, Gitea says "Some checks are pending" (or "failed") and does not merge.
+- Merge needs one approval (the reviewer's) and a green pipeline. Until the check called pipeline is green, Gitea says "Some checks are pending" (or "failed") and does not merge.
 - Squash merge keeps the history tidy: one commit per change.
 
 ### Lab 3: review, approve, merge, and watch it go live
@@ -1465,7 +1465,7 @@ curl -s https://hello-$TEAM-dev.$DOMAIN/
 
 **What each line does:**
 
-- `curl -s https://hello-$TEAM-dev.$DOMAIN/`: call your team's service in dev, at its dev address. A program (like curl) gets the facts as data (JSON); a browser gets the coloured page.
+- `curl -s https://hello-$TEAM-dev.$DOMAIN/`: call your service in dev, at its dev address. A program (like curl) gets the facts as data (JSON); a browser gets the coloured page.
 
 **You should see:** "environment": "dev" and your new greeting:
 
@@ -2368,7 +2368,7 @@ You can now:
 - Resolve a merge conflict without fear
 - Describe the platform as a product with a charter
 
-**Tomorrow:** Infrastructure as Code. You will create and destroy infrastructure with a few lines of OpenTofu, then request your team's staging and prod environments from the environment template, by pull request.
+**Tomorrow:** Infrastructure as Code. You will create and destroy infrastructure with a few lines of OpenTofu, then request your own staging and prod environments from the environment template, by pull request.
 
 ---
 

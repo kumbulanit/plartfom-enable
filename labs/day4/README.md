@@ -158,6 +158,7 @@ ENTRYPOINT ["python", "-m", "app.main"]
 
 - *failed to resolve source metadata ... harbor*: the workspace cannot reach Harbor. Check that you pasted the whole line; if it still fails, tell the instructor.
 - *Cannot connect to the Docker daemon*: Docker is not running in your workspace: sudo systemctl start docker, then build again.
+- *failed to mount ... overlay ... invalid argument (at WORKDIR /srv)*: your workspace's disk cannot stack image layers. Switch Docker to the vfs store, then build again: echo '{"log-driver": "json-file", "log-opts": {"max-size": "10m", "max-file": "3"}, "features": {"containerd-snapshotter": false}, "storage-driver": "vfs"}' | sudo tee /etc/docker/daemon.json && sudo systemctl restart docker. New labs are set up this way already when they need it.
 
 #### Step 2. Find it in the list of images
 

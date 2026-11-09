@@ -5,6 +5,9 @@
 const { TERMINAL, OPEN_LINK, PRIVATE_WINDOW } = require('./common');
 
 const BASE = 'harbor.$DOMAIN/dockerhub/library/python:3.12-slim';
+// When a workspace's disk cannot take Docker's overlay mounts: the vfs store, as the lab
+// setup does (prelab-setup/roles/lxd/tasks/docker-store.yml), then the build again.
+const STORE_FIX = 'echo \'{"log-driver": "json-file", "log-opts": {"max-size": "10m", "max-file": "3"}, "features": {"containerd-snapshotter": false}, "storage-driver": "vfs"}\' | sudo tee /etc/docker/daemon.json\nsudo systemctl restart docker\ncd ~/hello\ndocker build --build-arg BASE_IMAGE=' + BASE + ' -t hello:1 .';
 
 module.exports = {
   'Lab 1: build and run the hello image': {
@@ -29,7 +32,12 @@ module.exports = {
     steps: [
       {
         title: 'Build the image',
-        simple: { do: ['Paste the box. It builds an image called hello:1 from your code (the Dockerfile says how). The first time takes about a minute.'] },
+        simple: {
+          do: [
+            'Paste the box. It builds an image called hello:1 from your code (the Dockerfile says how). The first time takes about a minute.',
+            { text: 'Only if the build fails with "failed to mount ... overlay ... invalid argument": paste this once. It switches Docker in your workspace to a simpler way of storing images (a little slower, works everywhere), then builds again.', cmd: STORE_FIX },
+          ],
+        },
         where: 'Workspace terminal',
         why: 'Packaging the service once, as an image, means it runs exactly the same everywhere: in your workspace, in dev, staging and prod.',
         do: [
@@ -53,6 +61,7 @@ module.exports = {
         ifnot: [
           ['failed to resolve source metadata ... harbor', 'the workspace cannot reach Harbor. Check that you pasted the whole line; if it still fails, tell the instructor.'],
           ['Cannot connect to the Docker daemon', 'Docker is not running in your workspace: sudo systemctl start docker, then build again.'],
+          ['failed to mount ... overlay ... invalid argument (at WORKDIR /srv)', 'your workspace\'s disk cannot stack image layers. Switch Docker to the vfs store, then build again: ' + STORE_FIX.split('\n').slice(0, 2).join(' && ') + '. New labs are set up this way already when they need it.'],
         ],
       },
       {

@@ -101,44 +101,12 @@
   changed_when: false
   failed_when: runners_boot.stdout | trim not in ['running', 'degraded']
 
-# Docker stacks image layers with overlay mounts. On some hosts the runner's disk cannot
-# take them (a dir pool on a lab host that is itself a container), and every build fails
-# with "failed to mount ... overlay ... invalid argument". Build a tiny image to find out;
-# if it fails, switch the runner's Docker to the vfs store: slower, works everywhere.
-- name: Check Docker can build images in each runner, and switch to the vfs store if not
-  ansible.builtin.command:
-    argv:
-      - lxc
-      - exec
-      - "{{ item }}"
-      - --
-      - bash
-      - -c
-      - |
-        probe() {
-          d=$(mktemp -d)
-          echo x > "$d/f"
-          printf 'FROM scratch\nCOPY f /f\nWORKDIR /srv\nCOPY f /srv/f\n' > "$d/Dockerfile"
-          docker build -q -t pelab-storage-probe "$d" >/dev/null 2>&1; r=$?
-          rm -rf "$d"; docker image rm -f pelab-storage-probe >/dev/null 2>&1
-          return $r
-        }
-        for i in $(seq 30); do docker info >/dev/null 2>&1 && break; sleep 2; done
-        docker info >/dev/null 2>&1 || { echo "Docker is not running in the runner" >&2; exit 1; }
-        if probe; then echo "Docker builds images"; exit 0; fi
-        cat > /etc/docker/daemon.json <<'EOF'
-        {
-          "log-driver": "json-file",
-          "log-opts": {"max-size": "10m", "max-file": "3"},
-          "features": {"containerd-snapshotter": false},
-          "storage-driver": "vfs"
-        }
-        EOF
-        systemctl restart docker
-        if probe; then echo "Switched Docker to the vfs store"; else echo "Docker still cannot build images" >&2; exit 1; fi
-  loop: "{{ pelab_runner_names }}"
-  register: runners_docker_store
-  changed_when: "'Switched' in runners_docker_store.stdout"
+- name: Check Docker can build images in each runner (lxd/tasks/docker-store.yml)
+  ansible.builtin.import_role:
+    name: lxd
+    tasks_from: docker-store
+  vars:
+    lxd_docker_store_containers: "{{ pelab_runner_names }}"
 
 - name: Register runners with Gitea
   ansible.builtin.import_tasks: register.yml

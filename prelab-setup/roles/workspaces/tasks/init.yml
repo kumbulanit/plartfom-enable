@@ -7,6 +7,14 @@
   changed_when: false
   failed_when: workspaces_boot.stdout | trim not in ['running', 'degraded']
 
+# Before the clean snapshot, so a workspace restored from it keeps a Docker that builds.
+- name: Check Docker can build images in each workspace (lxd/tasks/docker-store.yml)
+  ansible.builtin.import_role:
+    name: lxd
+    tasks_from: docker-store
+  vars:
+    lxd_docker_store_containers: "{{ pelab_workspace_names }}"
+
 - name: Create the delegate account and start code-server
   ansible.builtin.command:
     argv: [lxc, exec, "{{ item }}", --, /usr/local/sbin/pelab-workspace-init, "{{ item }}", "{{ pelab_workspace_uid }}"]

@@ -36,6 +36,21 @@ Package hello into a container image yourself, run it, look inside it, and remov
 
    ![What you should see in the terminal](../images/terminal/day4-lab1-1-101-build-the-image.svg)
 
+2. Only if the build fails with "failed to mount ... overlay ... invalid argument": paste this once. It switches Docker in your workspace to a simpler way of storing images (a little slower, works everywhere), then builds again.
+
+   📋 **Copy and paste this into the terminal:**
+
+   ```bash
+   echo '{"log-driver": "json-file", "log-opts": {"max-size": "10m", "max-file": "3"}, "features": {"containerd-snapshotter": false}, "storage-driver": "vfs"}' | sudo tee /etc/docker/daemon.json
+   sudo systemctl restart docker
+   cd ~/hello
+   docker build --build-arg BASE_IMAGE=harbor.$DOMAIN/dockerhub/library/python:3.12-slim -t hello:1 .
+   ```
+
+   👀 **Example only, do not copy.** What it looks like (what it prints depends on your lab):
+
+   ![What to type in the terminal](../images/terminal/day4-lab1-1-2-build-the-image.svg)
+
 ### 2. Find it in the list of images
 
 **Where:** Workspace terminal

@@ -8,6 +8,8 @@ that works in any service made from the golden path, without changes.
 | [workflows/first-pipeline.yaml](workflows/first-pipeline.yaml) | The smallest useful pipeline: gets the code, lists it, runs the tests. A first pipeline to read and copy | On every pull request, and when you click Run Workflow |
 | [workflows/smoke-test.yaml](workflows/smoke-test.yaml) | Checks that a running environment of your service answers: its page, its health check, and the environment it reports | When you click Run Workflow (choose dev, staging or prod) |
 | [workflows/nightly-scan.yaml](workflows/nightly-scan.yaml) | Scans the image of your latest commit on main again for known weaknesses (CVEs) | Every night at 02:00, and when you click Run Workflow |
+| [workflows/security-checks.yaml](workflows/security-checks.yaml) | DevSecOps on every change: SAST with the security team's rules (semgrep), and a scan of the libraries the service lists for known weaknesses (CVEs, trivy). Red on a dangerous line, or on a HIGH or CRITICAL CVE that has a fix | On every pull request, and when you click Run Workflow |
+| [workflows/dast.yaml](workflows/dast.yaml) | DAST: attacks a running environment of your service from the outside (path traversal, cross-site scripting, unexpected methods), and reports the protective headers it is missing | When you click Run Workflow (choose dev, staging or prod) |
 
 ## Use one
 

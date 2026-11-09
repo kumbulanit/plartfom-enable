@@ -527,7 +527,7 @@ Give rates a second pipeline, a smoke test, by copying a template the platform t
 
 4. You can also find it in the portal: open https://backstage.<lab domain>, click Catalog, and look for Pipeline templates. Its links lead back here.
 
-**You should see:** Two templates: smoke-test.yaml (is the service answering?) and nightly-scan.yaml (scan the image again every night).
+**You should see:** One line per template, among them smoke-test.yaml (is the service answering?), the one you use in this lab, and nightly-scan.yaml (scan the image again every night).
 
 ### 2. Read the smoke test, and copy it
 

@@ -9,6 +9,54 @@ How to read this page:
 - ✏️ **Do this in the editor, not in the terminal.** A line to change by hand in a file, in the editor. Do not paste it into the terminal.
 - Everything else (open, click, read) you do yourself, in the browser or the editor: nothing to copy.
 
+## Start of the day: bring your lab up to date
+
+Do this first, once, on your VM: the machine you built the lab on, not the workspace. It takes about five minutes.
+
+### 1. Get the newest course files
+
+**Where:** Your VM's terminal (not the workspace)
+
+1. Paste the box. It gets the newest version of the course project.
+
+   📋 **Copy and paste this into the terminal:**
+
+   ```bash
+   cd ~/plartfom-enable
+   git pull
+   ```
+
+   👀 **Example only, do not copy.** What it looks like (what it prints depends on your lab):
+
+   ![What to type in the terminal](../images/terminal/day5-start-of-the-day-bri-1-1-get-the-newest-course-files.svg)
+
+### 2. Run the setup again for today's pipelines
+
+**Where:** Your VM's terminal (not the workspace)
+
+1. Paste the box. It runs two parts of the setup again: the runners, so every pipeline can build its image, and the platform, with the two new pipeline templates for the end of today. Wait for the last line: it says failed=0.
+
+   📋 **Copy and paste this into the terminal:**
+
+   ```bash
+   cd ~/plartfom-enable/prelab-setup
+   ansible-playbook site.yml --tags runners,golden_path
+   ```
+
+   👀 **Example only, do not copy.** What it looks like (what it prints depends on your lab):
+
+   ![What to type in the terminal](../images/terminal/day5-start-of-the-day-bri-2-1-run-the-setup-again-for-today-s-pipeline.svg)
+
+2. It stops with "sudo: a password is required"? Paste the box again with -K at the end, and type your VM password when it asks.
+
+### 3. Check the new templates
+
+**Where:** Browser: Gitea
+
+1. Open https://gitea.<lab domain>/platform/pipeline-templates and click workflows.
+
+**You should see:** Five templates, among them security-checks.yaml and dast.yaml.
+
 ## CI/CD and guardrails: where the pipelines are today
 
 - hello and rates: ci.yaml runs on every pull request and on main: lint, tests, secret scan, build, scan, push. Labs 1 and 2.
@@ -645,3 +693,149 @@ The same copy-a-template loop as the smoke test on Day 4, this time with Git in 
    ![A green nightly scan: trivy's report summary, 0 vulnerabilities in the operating system (debian) and in the Python packages. In the lab the image name starts with harbor.<lab domain>.](../images/gitea-28-nightly-scan-result.png)
 
    *A green nightly scan: trivy's report summary, 0 vulnerabilities in the operating system (debian) and in the Python packages. In the lab the image name starts with harbor.<lab domain>.*
+
+## DevSecOps: security checks in the pipeline (SAST, CVEs, DAST)
+
+- Extra, if you have time (about 30 minutes): the same copy-a-template loop as the nightly scan above, with two more templates.
+- DevSecOps: the security checks run in the pipeline, on every change, not by hand at the end. A dangerous change is stopped at its pull request, before anyone merges it.
+- SAST (static testing) reads the code without running it and points at dangerous lines (semgrep, with the security team's rules). The CVE scan checks the libraries against the public list of known weaknesses (trivy). DAST (dynamic testing) attacks the running service from the outside, as a stranger would.
+- Two templates in platform/pipeline-templates: security-checks.yaml (SAST and the CVE scan, on every pull request) and dast.yaml (DAST against dev, staging or prod, when you click Run Workflow).
+
+### 1. Get the templates
+
+**Where:** Workspace terminal
+
+1. Paste the box. The list has two new templates: dast.yaml and security-checks.yaml. (Not there? Do the first section of today, Start of the day, then this box again.)
+
+   📋 **Copy and paste this into the terminal:**
+
+   ```bash
+   cd ~
+   git clone https://gitea.$DOMAIN/platform/pipeline-templates 2>/dev/null || git -C pipeline-templates pull
+   ls ~/pipeline-templates/workflows
+   ```
+
+   👀 **Example only, do not copy.** What it looks like (what it prints depends on your lab):
+
+   ![What to type in the terminal](../images/terminal/day5-devsecops-security-c-1-1-get-the-templates.svg)
+
+2. Paste the box. The top of security-checks.yaml says what it checks and when.
+
+   📋 **Copy and paste this into the terminal:**
+
+   ```bash
+   head -14 ~/pipeline-templates/workflows/security-checks.yaml
+   ```
+
+   👀 **Example only, do not copy.** What it looks like:
+
+   ![What you should see in the terminal](../images/terminal/day5-devsecops-security-c-1-2-get-the-templates.svg)
+
+### 2. Add both to rates, on a new branch
+
+**Where:** Workspace terminal
+
+1. Paste the box. The two files, unchanged, go into a new branch of your rates (from Day 4), which is pushed to Gitea.
+
+   📋 **Copy and paste this into the terminal:**
+
+   ```bash
+   cd ~/rates
+   git switch main && git pull
+   git switch -c security-checks-$ME
+   cp ~/pipeline-templates/workflows/security-checks.yaml ~/pipeline-templates/workflows/dast.yaml .gitea/workflows/
+   git add .gitea/workflows
+   git commit -m "Add the security checks and DAST from the platform templates"
+   git push -u origin security-checks-$ME
+   ```
+
+   👀 **Example only, do not copy.** What it looks like (what it prints depends on your lab):
+
+   ![What to type in the terminal](../images/terminal/day5-devsecops-security-c-2-1-add-both-to-rates-on-a-new-branch.svg)
+
+### 3. Open the pull request: two pipelines, both green
+
+**Where:** Browser: Gitea
+
+1. Ctrl+click the /pulls/new/ address git push printed, then Create Pull Request. Do not merge it yet.
+
+2. Wait a few minutes. Two pipelines run on the pull request: golden-path and security-checks. Both go green: rates has no dangerous line and no library with a known CVE.
+
+### 4. Sneak in a dangerous change
+
+**Where:** Workspace terminal
+
+1. Paste the box. On the same branch: a calculator that uses eval (anyone could run code with it), and a list of libraries with PyYAML 5.3.1, which has a CRITICAL CVE. Both look harmless: lint and tests still pass.
+
+   📋 **Copy and paste this into the terminal:**
+
+   ```bash
+   cd ~/rates
+   cat >> app/main.py <<'EOF'
+
+
+   def calculate(text: str) -> object:
+       """Work out a sum a user typed, such as 2 + 3."""
+       return eval(text)
+   EOF
+   printf 'PyYAML==5.3.1\n' > requirements.txt
+   git add app/main.py requirements.txt
+   git commit -m "Add a calculator and a YAML library"
+   git push
+   ```
+
+   👀 **Example only, do not copy.** What it looks like (what it prints depends on your lab):
+
+   ![What to type in the terminal](../images/terminal/day5-devsecops-security-c-4-1-sneak-in-a-dangerous-change.svg)
+
+### 5. Watch the pipeline stop it
+
+**Where:** Browser: Gitea
+
+1. Reload the pull request. After a few minutes: golden-path is green (lint, tests and build all pass), security-checks is red.
+
+2. Click Details next to security-checks, then open its steps.
+
+3. SAST (semgrep): eval-runs-any-code, on the line return eval(text) in app/main.py.
+
+4. CVE scan of the libraries (trivy): CVE-2020-14343, CRITICAL, in PyYAML 5.3.1, fixed in 5.4.
+
+5. Nobody had to remember to check: the pipeline did, at the pull request, before the merge. The reviewer does not approve a red pull request.
+
+**You should see:** security-checks red, with both findings: the eval line and the CVE.
+
+### 6. Fix it, and go green
+
+**Where:** Workspace terminal, then Gitea
+
+1. Paste the box. It puts app/main.py back as it is on main, and moves PyYAML to 6.0.3, a version without the CVE.
+
+   📋 **Copy and paste this into the terminal:**
+
+   ```bash
+   cd ~/rates
+   git checkout main -- app/main.py
+   sed -i 's/PyYAML==5.3.1/PyYAML==6.0.3/' requirements.txt
+   git commit -am "Remove eval, and move PyYAML to 6.0.3, which fixes CVE-2020-14343"
+   git push
+   ```
+
+   👀 **Example only, do not copy.** What it looks like (what it prints depends on your lab):
+
+   ![What to type in the terminal](../images/terminal/day5-devsecops-security-c-6-1-fix-it-and-go-green.svg)
+
+2. Reload the pull request after a few minutes: security-checks is green again. The reviewer approves (private window, as on Day 2) and you merge.
+
+### 7. Attack dev with DAST
+
+**Where:** Browser: Gitea
+
+1. In your rates, click Actions, then dast on the left, then Run Workflow. Leave dev and click Run Workflow.
+
+2. Reload after a few seconds, open the run and click each step.
+
+3. What it tells every visitor: the Server line (FOUND) and four MISSING headers. It reports them and stays green: the platform can add those headers once, at the ingress (Traefik), for every service.
+
+4. Path traversal, Cross-site scripting and Unexpected methods: ok on every line. None of the attacks worked.
+
+**You should see:** dast green: three attacks, each one ok, and a report of what the service tells every visitor.

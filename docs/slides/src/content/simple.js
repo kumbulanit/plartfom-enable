@@ -7,6 +7,26 @@
 const FIRST_PIPELINE = require('fs').readFileSync(require('path').resolve(__dirname, '../../../../labs/day4/pipeline-templates/workflows/first-pipeline.yaml'), 'utf8');
 const GET_TEMPLATES = 'cd ~\ngit clone https://gitea.$DOMAIN/platform/pipeline-templates 2>/dev/null || git -C pipeline-templates pull\nls ~/pipeline-templates/workflows';
 
+// Day 5, DevSecOps: the security checks run by pipelines, from two templates in
+// platform/pipeline-templates. Their steps were tested on 10 November 2026 against a
+// service made from the golden path (semgrep 1.176, trivy 0.74), clean, with the
+// change below (both checks red), and fixed (both green).
+const SECURITY_CHECKS = require('fs').readFileSync(require('path').resolve(__dirname, '../../../../labs/day4/pipeline-templates/workflows/security-checks.yaml'), 'utf8');
+const SEC_ADD = 'cd ~/rates\ngit switch main && git pull\ngit switch -c security-checks-$ME\ncp ~/pipeline-templates/workflows/security-checks.yaml ~/pipeline-templates/workflows/dast.yaml .gitea/workflows/\ngit add .gitea/workflows\ngit commit -m "Add the security checks and DAST from the platform templates"\ngit push -u origin security-checks-$ME';
+const SEC_DANGER = String.raw`cd ~/rates
+cat >> app/main.py <<'EOF'
+
+
+def calculate(text: str) -> object:
+    """Work out a sum a user typed, such as 2 + 3."""
+    return eval(text)
+EOF
+printf 'PyYAML==5.3.1\n' > requirements.txt
+git add app/main.py requirements.txt
+git commit -m "Add a calculator and a YAML library"
+git push`;
+const SEC_FIX = 'cd ~/rates\ngit checkout main -- app/main.py\nsed -i \'s/PyYAML==5.3.1/PyYAML==6.0.3/\' requirements.txt\ngit commit -am "Remove eval, and move PyYAML to 6.0.3, which fixes CVE-2020-14343"\ngit push';
+
 module.exports = {
   2: [
     {
@@ -48,7 +68,7 @@ module.exports = {
       title: 'Pipelines: your first pipeline, from a template',
       say: 'A pipeline is a list of steps that a runner does for you on every change. The platform team keeps ready-made ones in platform/pipeline-templates: copy one into hello with the same Git loop, and watch it run on your pull request.',
       steps: [
-        { title: 'Get the templates', do: [{ text: 'Copy the templates repository into your workspace and list the templates.', cmd: GET_TEMPLATES, out: 'first-pipeline.yaml\nnightly-scan.yaml\nsmoke-test.yaml', shot: { src: 'gitea-20-pipeline-templates-list.png', caption: 'The same templates in Gitea: platform/pipeline-templates, folder workflows. One file each, owned by the platform team.' } }] },
+        { title: 'Get the templates', do: [{ text: 'Copy the templates repository into your workspace and list the templates.', cmd: GET_TEMPLATES, out: 'dast.yaml\nfirst-pipeline.yaml\nnightly-scan.yaml\nsecurity-checks.yaml\nsmoke-test.yaml', shot: { src: 'gitea-20-pipeline-templates-list.png', caption: 'The same templates in Gitea: platform/pipeline-templates, folder workflows. One file each, owned by the platform team.' } }] },
         {
           title: 'Only if first-pipeline.yaml is not in the list: add it in Gitea',
           do: [
@@ -150,6 +170,31 @@ module.exports = {
   ],
   5: [
     {
+      title: 'Start of the day: bring your lab up to date',
+      say: 'Do this first, once, on your VM: the machine you built the lab on, not the workspace. It takes about five minutes.',
+      steps: [
+        {
+          title: 'Get the newest course files',
+          where: 'Your VM\'s terminal (not the workspace)',
+          do: [{ text: 'Paste the box. It gets the newest version of the course project.', cmd: 'cd ~/plartfom-enable\ngit pull', where: 'Your VM\'s terminal' }],
+        },
+        {
+          title: 'Run the setup again for today\'s pipelines',
+          where: 'Your VM\'s terminal (not the workspace)',
+          do: [
+            { text: 'Paste the box. It runs two parts of the setup again: the runners, so every pipeline can build its image, and the platform, with the two new pipeline templates for the end of today. Wait for the last line: it says failed=0.', cmd: 'cd ~/plartfom-enable/prelab-setup\nansible-playbook site.yml --tags runners,golden_path', where: 'Your VM\'s terminal' },
+            'It stops with "sudo: a password is required"? Paste the box again with -K at the end, and type your VM password when it asks.',
+          ],
+        },
+        {
+          title: 'Check the new templates',
+          where: 'Browser: Gitea',
+          do: ['Open https://gitea.<lab domain>/platform/pipeline-templates and click workflows.'],
+          see: 'Five templates, among them security-checks.yaml and dast.yaml.',
+        },
+      ],
+    },
+    {
       title: 'CI/CD and guardrails: where the pipelines are today',
       say: [
         'hello and rates: ci.yaml runs on every pull request and on main: lint, tests, secret scan, build, scan, push. Labs 1 and 2.',
@@ -178,6 +223,75 @@ module.exports = {
             { text: 'In your rates (teamNN/rates), click Actions, then nightly-scan, then Run Workflow, and Run Workflow again in the box.', shot: { src: 'gitea-27-run-nightly-scan.png', caption: 'nightly-scan in the list on the left, and the Run Workflow box: use the workflow from main.' } },
             { text: 'Open the run, then the Scan it (trivy) step. Green: no fixable HIGH or CRITICAL weaknesses. Red: the step lists them.', shot: { src: 'gitea-28-nightly-scan-result.png', caption: 'A green nightly scan: trivy\'s report summary, 0 vulnerabilities in the operating system (debian) and in the Python packages. In the lab the image name starts with harbor.<lab domain>.' } },
           ],
+        },
+      ],
+    },
+    {
+      after: true,
+      title: 'DevSecOps: security checks in the pipeline (SAST, CVEs, DAST)',
+      say: [
+        'Extra, if you have time (about 30 minutes): the same copy-a-template loop as the nightly scan above, with two more templates.',
+        'DevSecOps: the security checks run in the pipeline, on every change, not by hand at the end. A dangerous change is stopped at its pull request, before anyone merges it.',
+        'SAST (static testing) reads the code without running it and points at dangerous lines (semgrep, with the security team\'s rules). The CVE scan checks the libraries against the public list of known weaknesses (trivy). DAST (dynamic testing) attacks the running service from the outside, as a stranger would.',
+        'Two templates in platform/pipeline-templates: security-checks.yaml (SAST and the CVE scan, on every pull request) and dast.yaml (DAST against dev, staging or prod, when you click Run Workflow).',
+      ],
+      steps: [
+        {
+          title: 'Get the templates',
+          where: 'Workspace terminal',
+          do: [
+            { text: 'Paste the box. The list has two new templates: dast.yaml and security-checks.yaml. (Not there? Do the first section of today, Start of the day, then this box again.)', cmd: GET_TEMPLATES },
+            { text: 'Paste the box. The top of security-checks.yaml says what it checks and when.', cmd: 'head -14 ~/pipeline-templates/workflows/security-checks.yaml', out: SECURITY_CHECKS.split('\n').slice(0, 14).join('\n') },
+          ],
+        },
+        {
+          title: 'Add both to rates, on a new branch',
+          where: 'Workspace terminal',
+          do: [{ text: 'Paste the box. The two files, unchanged, go into a new branch of your rates (from Day 4), which is pushed to Gitea.', cmd: SEC_ADD }],
+        },
+        {
+          title: 'Open the pull request: two pipelines, both green',
+          where: 'Browser: Gitea',
+          do: [
+            'Ctrl+click the /pulls/new/ address git push printed, then Create Pull Request. Do not merge it yet.',
+            'Wait a few minutes. Two pipelines run on the pull request: golden-path and security-checks. Both go green: rates has no dangerous line and no library with a known CVE.',
+          ],
+        },
+        {
+          title: 'Sneak in a dangerous change',
+          where: 'Workspace terminal',
+          do: [{ text: 'Paste the box. On the same branch: a calculator that uses eval (anyone could run code with it), and a list of libraries with PyYAML 5.3.1, which has a CRITICAL CVE. Both look harmless: lint and tests still pass.', cmd: SEC_DANGER }],
+        },
+        {
+          title: 'Watch the pipeline stop it',
+          where: 'Browser: Gitea',
+          do: [
+            'Reload the pull request. After a few minutes: golden-path is green (lint, tests and build all pass), security-checks is red.',
+            'Click Details next to security-checks, then open its steps.',
+            'SAST (semgrep): eval-runs-any-code, on the line return eval(text) in app/main.py.',
+            'CVE scan of the libraries (trivy): CVE-2020-14343, CRITICAL, in PyYAML 5.3.1, fixed in 5.4.',
+            'Nobody had to remember to check: the pipeline did, at the pull request, before the merge. The reviewer does not approve a red pull request.',
+          ],
+          see: 'security-checks red, with both findings: the eval line and the CVE.',
+        },
+        {
+          title: 'Fix it, and go green',
+          where: 'Workspace terminal, then Gitea',
+          do: [
+            { text: 'Paste the box. It puts app/main.py back as it is on main, and moves PyYAML to 6.0.3, a version without the CVE.', cmd: SEC_FIX },
+            'Reload the pull request after a few minutes: security-checks is green again. The reviewer approves (private window, as on Day 2) and you merge.',
+          ],
+        },
+        {
+          title: 'Attack dev with DAST',
+          where: 'Browser: Gitea',
+          do: [
+            'In your rates, click Actions, then dast on the left, then Run Workflow. Leave dev and click Run Workflow.',
+            'Reload after a few seconds, open the run and click each step.',
+            'What it tells every visitor: the Server line (FOUND) and four MISSING headers. It reports them and stays green: the platform can add those headers once, at the ingress (Traefik), for every service.',
+            'Path traversal, Cross-site scripting and Unexpected methods: ok on every line. None of the attacks worked.',
+          ],
+          see: 'dast green: three attacks, each one ok, and a report of what the service tells every visitor.',
         },
       ],
     },

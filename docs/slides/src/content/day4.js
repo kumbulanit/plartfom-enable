@@ -287,7 +287,7 @@ ENTRYPOINT ["python", "-m", "app.main"]`,
     type: 'steps', section: 'Lab 5: a pipeline from a template', time: '25 min',
     title: 'Lab 5: add a pipeline from a template',
     steps: [
-      { do: `Gitea: open platform/pipeline-templates and read the README. Write down the time.`, expect: 'Two templates: smoke-test.yaml and nightly-scan.yaml, what each does and when it runs.' },
+      { do: `Gitea: open platform/pipeline-templates and read the README. Write down the time.`, expect: 'One line per template, what it does and when it runs: smoke-test.yaml is the one for this lab.' },
       { do: 'Open workflows/smoke-test.yaml, read it, and click Copy content.', expect: 'Four checks; the address is worked out from the repository, so nothing to fill in.' },
       { do: 'teamNN/rates: Add File → New File, name .gitea/workflows/smoke-test.yaml, paste. New branch add-smoke-test, Propose file change.', expect: 'Comparing changes: one file added.' },
       { do: 'New Pull Request, Create Pull Request; approve as reviewer in a private window; merge when green.', expect: 'The smoke test on main.' },

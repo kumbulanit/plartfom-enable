@@ -582,7 +582,7 @@ module.exports = {
           { text: 'Read the README under the file list: a table with one line per template (what it does, when it runs), then "Use one" in four steps.', shot: { src: 'gitea-15-pipeline-templates.png', caption: 'platform/pipeline-templates: the folder workflows holds the templates, and the README lists them: smoke-test.yaml and nightly-scan.yaml, what each does and when it runs. In your lab the address starts with https://gitea.<lab domain>.' } },
           'You can also find it in the portal: open https://backstage.<lab domain>, click Catalog, and look for Pipeline templates. Its links lead back here.',
         ],
-        see: 'Two templates: smoke-test.yaml (is the service answering?) and nightly-scan.yaml (scan the image again every night).',
+        see: 'One line per template, among them smoke-test.yaml (is the service answering?), the one you use in this lab, and nightly-scan.yaml (scan the image again every night).',
         ifnot: [['Gitea shows "404 Not Found"', 'check the address: platform, then pipeline-templates. Make sure you are signed in (your picture at the top right).']],
       },
       {

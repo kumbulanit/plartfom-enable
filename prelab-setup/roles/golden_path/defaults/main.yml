@@ -36,11 +36,13 @@ golden_path_platform_repos:
     follow_labs: true
   # Small pipelines a team copies into a service as it is (Day 4 Lab 5).
   - name: "{{ golden_path_pipeline_templates_repo }}"
-    description: "Pipeline templates: small ready-made pipelines (smoke test, nightly scan) to copy into a service"
+    description: "Pipeline templates: small ready-made pipelines (smoke test, nightly scan, security checks, DAST) to copy into a service"
     source: day4/pipeline-templates
     marker: workflows/smoke-test.yaml
-    # A later run adds templates added to labs/ since (first-pipeline.yaml).
+    # A later run adds templates added to labs/ since (first-pipeline.yaml, security-checks.yaml,
+    # dast.yaml), and brings the README's list of templates up to date.
     top_up: true
+    follow_labs: true
   - name: "{{ golden_path_catalog_repo }}"
     description: What the developer portal (Backstage) shows; Backstage reads all.yaml
     source: day4/catalog

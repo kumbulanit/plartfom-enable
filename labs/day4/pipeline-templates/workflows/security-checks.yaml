@@ -1,0 +1,71 @@
+# Pipeline template: security checks (DevSecOps). Owned by the platform team,
+# with the rules of the security team.
+#
+# Use it: copy this file, unchanged, into your service's repository as
+#   .gitea/workflows/security-checks.yaml
+#
+# It runs on every pull request, so a dangerous change is stopped before anyone
+# merges it, and from the Actions tab (security-checks → Run Workflow).
+#   SAST (semgrep)  reads the code without running it and fails on a line that
+#                   matches one of the security team's rules (below).
+#   CVE scan        checks the libraries the service lists (requirements.txt, ...)
+#   (trivy)         against the public list of known weaknesses, and fails on a
+#                   HIGH or CRITICAL one that already has a fix.
+# Both checks always run, so one red run shows everything that needs fixing.
+name: security-checks
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  security-checks:
+    runs-on: pelab-host
+    steps:
+      - name: Get the code
+        run: |
+          git init -q .
+          git -c http.extraHeader="Authorization: token ${{ gitea.token }}" \
+            fetch -q --depth 1 "${{ gitea.server_url }}/${{ gitea.repository }}.git" "${{ gitea.ref }}"
+          git checkout -q FETCH_HEAD
+          git log -1 --format='Checking %h: %s (by %an)'
+
+      - name: SAST (semgrep)
+        run: |
+          # The rules go next to the code (not committed), so the findings name them plainly.
+          RULES=.security-rules.yaml
+          cat > "$RULES" <<'EOF'
+          rules:
+            - id: eval-runs-any-code
+              languages: [python]
+              severity: ERROR
+              message: eval() runs any text as code, so a user could run anything (CWE-95, code injection).
+              pattern: eval(...)
+            - id: shell-true
+              languages: [python]
+              severity: ERROR
+              message: shell=True lets a user add commands of their own (CWE-78, command injection).
+              pattern: subprocess.$FUNC(..., shell=True, ...)
+            - id: unsafe-yaml-load
+              languages: [python]
+              severity: ERROR
+              message: yaml.load can build any Python object from the text; use yaml.safe_load (CWE-502).
+              patterns:
+                - pattern: yaml.load(...)
+                - pattern-not: yaml.load(..., Loader=yaml.SafeLoader, ...)
+            - id: password-in-code
+              languages: [python]
+              severity: WARNING
+              message: A password in the code ends up in Git, for everyone to read (CWE-798).
+              pattern-regex: (?i)password\s*=\s*["'][^"']+["']
+            - id: weak-hash
+              languages: [python]
+              severity: WARNING
+              message: MD5 is broken, use hashlib.sha256 (CWE-328, weak hash).
+              pattern: hashlib.md5(...)
+          EOF
+          semgrep scan --config "$RULES" --metrics=off --disable-version-check --error .
+
+      - name: CVE scan of the libraries (trivy)
+        if: always()
+        run: trivy fs --no-progress --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 .

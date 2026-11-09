@@ -1,0 +1,79 @@
+# Pipeline template: DAST, dynamic security testing. Owned by the platform team.
+#
+# Use it: copy this file, unchanged, into your service's repository as
+#   .gitea/workflows/dast.yaml
+# then run it from your repository's Actions tab: dast → Run Workflow, after a
+# release to the environment you choose.
+#
+# It attacks a running environment of your service from the outside, as a
+# stranger would, and fails if an attack works:
+#   path traversal          asks for a system file through the address
+#   cross-site scripting    sends a script and checks it never comes back in a page
+#   unexpected methods      DELETE, PUT and POST must not be accepted
+# It also reports, without failing, what the service tells every visitor: the
+# Server line and the four headers that protect the people using a site. The
+# platform can add those once, for every service, at the ingress.
+# Like the smoke test, it works out your service's address by itself.
+name: dast
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which environment to attack
+        type: choice
+        options: [dev, staging, prod]
+        default: dev
+
+jobs:
+  dast:
+    runs-on: pelab-host
+    env:
+      ENVIRONMENT: ${{ inputs.environment || 'dev' }}
+    steps:
+      - name: Work out the address
+        run: |
+          DOMAIN="${{ vars.REGISTRY }}"; DOMAIN="${DOMAIN#harbor.}"
+          REPO="${{ gitea.repository }}"; NAME="${REPO#*/}"; TEAM="${REPO%%/*}"
+          URL="https://${NAME,,}-${TEAM,,}-${ENVIRONMENT}.${DOMAIN}"
+          echo "URL=$URL" >> "$GITHUB_ENV"
+          echo "Attacking $URL"
+          curl -fsS --retry 3 --retry-delay 5 --retry-all-errors -o /dev/null "$URL/healthz"
+
+      - name: What it tells every visitor (report only)
+        run: |
+          headers="$(curl -fsS -D - -o /dev/null "$URL/" | tr -d '\r')"
+          grep -i '^server:' <<< "$headers" | sed 's/^/FOUND    /' || true
+          for h in Content-Security-Policy X-Content-Type-Options X-Frame-Options Strict-Transport-Security; do
+            if grep -qi "^$h:" <<< "$headers"; then echo "ok       $h"; else echo "MISSING  $h"; fi
+          done
+
+      # Each attack judges the answer, not curl: an attack that gets no answer at all
+      # (000) has not worked either.
+      - name: Path traversal
+        run: |
+          for path in /../../etc/passwd /..%2f..%2fetc%2fpasswd /%2e%2e/%2e%2e/etc/passwd; do
+            : > body.txt
+            code="$(curl -s --max-time 10 --path-as-is -o body.txt -w '%{http_code}' "$URL$path" || true)"
+            if grep -q 'root:' body.txt; then echo "FAILED   $path gave a system file"; exit 1; fi
+            echo "ok       $path: $code, no system file"
+          done
+
+      - name: Cross-site scripting
+        run: |
+          for path in '/<script>alert(1)</script>' '/?q=<script>alert(1)</script>'; do
+            : > body.txt
+            type="$(curl -s --max-time 10 -H 'Accept: text/html' -o body.txt -w '%{content_type}' "$URL$path" || true)"
+            if [[ "$type" == text/html* ]] && grep -qF '<script>alert(1)</script>' body.txt; then
+              echo "FAILED   $path: the script came back in a page"; exit 1
+            fi
+            echo "ok       $path: ${type:-no answer}, no script in a page"
+          done
+
+      - name: Unexpected methods
+        run: |
+          for method in DELETE PUT POST; do
+            code="$(curl -s --max-time 10 -X "$method" -d x=1 -o /dev/null -w '%{http_code}' "$URL/" || true)"
+            if [[ "$code" == 2* ]]; then echo "FAILED   $method was accepted ($code)"; exit 1; fi
+            echo "ok       $method: $code, refused"
+          done

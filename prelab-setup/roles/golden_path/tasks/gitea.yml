@@ -58,7 +58,7 @@
   when: golden_path_bot_token_saved.stat.exists
   no_log: true
 
-- name: Decide whether {{ golden_path_bot_user }} needs a new token
+- name: Decide whether a new token is needed for {{ golden_path_bot_user }}
   ansible.builtin.set_fact:
     golden_path_bot_token_renew: >-
       {{ not golden_path_bot_token_saved.stat.exists or golden_path_bot_token_check.status in [401, 403] }}
@@ -430,8 +430,8 @@
   changed_when: true
 
 # The pipelines in the platform repositories belong to the platform, so a later run
-# brings each one in line with labs/ (golden_path_pipeline_paths). main is protected
-# in some of them: the admin may push to main only for these commits.
+# brings each one in line with labs/ (golden_path_pipeline_paths), and the handbook too
+# (below). main is protected in some of them: the admin may push to main only for these commits.
 - name: Collect the pipeline files of the platform repositories seeded before
   ansible.builtin.set_fact:
     golden_path_pipeline_files: >-
@@ -453,16 +453,29 @@
 
 - name: Work out which pipeline files differ from labs/
   ansible.builtin.set_fact:
-    golden_path_pipeline_changed: "{{ golden_path_pipeline_changed | default([]) + [item.item | combine({'sha': item.json.sha})] }}"
+    golden_path_files_changed: "{{ golden_path_files_changed | default([]) + [item.item | combine({'sha': item.json.sha})] }}"
   loop: "{{ golden_path_pipeline_current.results | selectattr('status', 'equalto', 200) | list }}"
   loop_control:
     label: "{{ item.item.repo }}/{{ item.item.path }}"
   when: item.json.content | b64decode != item.item.content | b64decode
 
-- name: Update the pipeline files that changed
-  when: golden_path_pipeline_changed | default([]) | length > 0
+# The repositories marked follow_labs (the template, the handbook) follow labs/ in full:
+# every file that changed there is replaced too (pipeline files by the step above). Compared by git's own fingerprint of each
+# file, against the tree listed above, so nothing has to be read back from Gitea.
+- name: Work out which files of the repositories kept up to date differ from labs/
+  ansible.builtin.set_fact:
+    golden_path_files_changed: >-
+      {{ golden_path_files_changed | default([])
+         + (golden_path_repo_files[item.item.item.name] | rejectattr('path', 'match', golden_path_pipeline_paths)
+            | golden_path_changed_files(item.json.tree) | map('combine', {'repo': item.item.item.name}) | list) }}
+  loop: "{{ golden_path_platform_tree.results | selectattr('item.item.follow_labs', 'defined') | selectattr('item.item.follow_labs') | list }}"
+  loop_control:
+    label: "{{ item.item.item.name }}"
+
+- name: Update the files that changed
+  when: golden_path_files_changed | default([]) | length > 0
   vars:
-    golden_path_pipeline_repos: "{{ golden_path_pipeline_changed | map(attribute='repo') | unique | list }}"
+    golden_path_pipeline_repos: "{{ golden_path_files_changed | map(attribute='repo') | unique | list }}"
   block:
     - name: Read the protection on main of the repositories to update
       ansible.builtin.uri:
@@ -481,7 +494,7 @@
       loop_control:
         label: "{{ item.item }}"
 
-    - name: Commit the new version of each pipeline file
+    - name: Commit the new version of each changed file
       ansible.builtin.uri:
         url: "{{ golden_path_gitea_api }}/repos/{{ golden_path_platform_org }}/{{ item.repo }}/contents/{{ item.path }}"
         method: PUT
@@ -491,7 +504,7 @@
           content: "{{ item.content }}"
           sha: "{{ item.sha }}"
         status_code: [200]
-      loop: "{{ golden_path_pipeline_changed }}"
+      loop: "{{ golden_path_files_changed }}"
       loop_control:
         label: "{{ item.repo }}/{{ item.path }}"
       changed_when: true

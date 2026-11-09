@@ -36,7 +36,11 @@ Package hello into a container image yourself, run it, look inside it, and remov
 
    ![What you should see in the terminal](../images/terminal/day4-lab1-1-101-build-the-image.svg)
 
-2. Only if the build fails with "failed to mount ... overlay ... invalid argument": paste this once. It switches Docker in your workspace to a simpler way of storing images (a little slower, works everywhere), then builds again.
+2. Only if the build stops at WORKDIR /srv with "failed to mount ... overlay ... invalid argument", like the picture: paste the box once. It switches Docker in your workspace to a simpler way of storing images (a little slower, works everywhere), then builds again.
+
+   ❗ **If you see this error** (an example, do not copy):
+
+   ![The error this step fixes](../images/terminal/day4-lab1-1-2-build-the-image-error.svg)
 
    📋 **Copy and paste this into the terminal:**
 

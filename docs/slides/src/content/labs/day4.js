@@ -7,6 +7,8 @@ const { TERMINAL, OPEN_LINK, PRIVATE_WINDOW } = require('./common');
 const BASE = 'harbor.$DOMAIN/dockerhub/library/python:3.12-slim';
 // When a workspace's disk cannot take Docker's overlay mounts: the vfs store, as the lab
 // setup does (prelab-setup/roles/lxd/tasks/docker-store.yml), then the build again.
+// The error it fixes, as a delegate saw it (shortened).
+const STORE_ERROR = '[+] Building 6.8s (6/7)                                              docker:default\n => [1/3] FROM harbor.<lab domain>/dockerhub/library/python:3.12-slim@sha256:5e2bdb1b0d54...\n...\n => ERROR [2/3] WORKDIR /srv                                                         0.0s\n------\n > [2/3] WORKDIR /srv:\n------\nDockerfile:12\n  12 | >>> WORKDIR /srv\n--------------------\nERROR: failed to build: failed to solve: failed to compute cache key: failed to mount /var/lib/containerd/tmpmounts/containerd-mount2139173640: mount source: "overlay", target: "/var/lib/containerd/tmpmounts/containerd-mount2139173640", fstype: overlay, flags: 0, data: "workdir=...,userxattr,index=off", err: invalid argument';
 const STORE_FIX = 'echo \'{"log-driver": "json-file", "log-opts": {"max-size": "10m", "max-file": "3"}, "features": {"containerd-snapshotter": false}, "storage-driver": "vfs"}\' | sudo tee /etc/docker/daemon.json\nsudo systemctl restart docker\ncd ~/hello\ndocker build --build-arg BASE_IMAGE=' + BASE + ' -t hello:1 .';
 
 module.exports = {
@@ -35,7 +37,11 @@ module.exports = {
         simple: {
           do: [
             'Paste the box. It builds an image called hello:1 from your code (the Dockerfile says how). The first time takes about a minute.',
-            { text: 'Only if the build fails with "failed to mount ... overlay ... invalid argument": paste this once. It switches Docker in your workspace to a simpler way of storing images (a little slower, works everywhere), then builds again.', cmd: STORE_FIX },
+            {
+              text: 'Only if the build stops at WORKDIR /srv with "failed to mount ... overlay ... invalid argument", like the picture: paste the box once. It switches Docker in your workspace to a simpler way of storing images (a little slower, works everywhere), then builds again.',
+              seen: { cmd: 'docker build --build-arg BASE_IMAGE=' + BASE + ' -t hello:1 .', out: STORE_ERROR },
+              cmd: STORE_FIX,
+            },
           ],
         },
         where: 'Workspace terminal',

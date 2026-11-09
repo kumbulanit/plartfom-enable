@@ -527,6 +527,14 @@ function simpleStep(step, i, prefix, clear = false) {
     const text = typeof d === 'string' ? d : d.text;
     const cmd = typeof d === 'string' ? null : d.cmd;
     let s = `${k + 1}. ${md(text)}`;
+    // seen: {cmd, out}: the error this item is for, as a picture, before its fix.
+    if (typeof d !== 'string' && d.seen) {
+      const pic = terminalShot(shotName(k).replace(/[.]svg$/, '-error.svg'), d.seen.cmd, d.seen.out, d.where)
+        .replace(/^[*][^\n]*[*]/, '❗ **If you see this error** (an example, do not copy):')
+        .replace('What you should see in the terminal', 'The error this step fixes');
+      s += '\n\n' + pad(pic);
+      pictures++;
+    }
     if (cmd) {
       s += '\n\n' + pad(copy + '\n\n' + fence(cmd, 'bash'));
       cmd.split('\n').forEach((l) => shown.add(l));

@@ -30,6 +30,10 @@ golden_path_platform_repos:
     source: day1/golden-path
     template: true
     marker: catalog-info.yaml
+    # A later run brings the template in line with labs/: new services start from the
+    # current version. Services made from it before keep theirs.
+    top_up: true
+    follow_labs: true
   # Small pipelines a team copies into a service as it is (Day 4 Lab 5).
   - name: "{{ golden_path_pipeline_templates_repo }}"
     description: "Pipeline templates: small ready-made pipelines (smoke test, nightly scan) to copy into a service"
@@ -63,6 +67,8 @@ golden_path_platform_repos:
     marker: day1/README.md
     replace_domain: true
     top_up: true
+    # A later run also replaces every page and picture that changed in labs/ since.
+    follow_labs: true
 # Base64 of a binary file (a screenshot), for the repository seeding above.
 golden_path_b64_script: "import base64,sys; print(base64.b64encode(open(sys.argv[1],'rb').read()).decode())"
 # Local caches never go into the template repository.
